@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "baseUrl": "src",
+      "paths": {
+        "@/*": ["*"],
+        "@/components/*": ["components/*"],
+        "@/lib/*": ["lib/*"]
+      },
+      "jsx": "preserve",
+      "allowJs": true,
+      "checkJs": false,
+      "strict": false
+    }
+  }
+  
