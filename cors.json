@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["https://3000-idx-admin-panel-1739326470245.cluster-iesosxm5fzdewqvhlwn5qivgry.cloudworkstations.dev"],
+    "method": ["GET", "POST", "PUT", "DELETE"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type", "Authorization"]
+  }
+]

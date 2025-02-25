@@ -18,6 +18,13 @@ export async function POST(req) {
 
       console.log("✅ Datos de la suscripción:", preapproval);
 
+     /*  if (preapproval.status === "authorized") {
+        await updateUserPlan(preapproval.external_reference, preapproval.id);
+      } */
+      if (!preapproval || !preapproval.external_reference || !preapproval.id) {
+        return new Response("Datos inválidos en preapproval", { status: 400 });
+      }
+      
       if (preapproval.status === "authorized") {
         await updateUserPlan(preapproval.external_reference, preapproval.id);
       }

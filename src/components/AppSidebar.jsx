@@ -14,9 +14,12 @@ import {
   SquareTerminal,
 } from "lucide-react";
 
+import UploadInfo from "@/components/UploadInfo";
+
+
 
 import { NavMain } from "@/components/NavMain";
-import { NavProjects } from "@/components/NavProjects";
+import  NavProjects from "@/components/NavProjects";
 import { NavUser } from "@/components/NavUser";
 import {
   Sidebar,
@@ -38,7 +41,7 @@ const data = {
   ],
 };
 
-export function AppSidebar({ setShowUpgrade }) {
+export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
   const { user } = useUser();
   const isProUser = user?.plan === "pro";
 
@@ -58,10 +61,15 @@ export function AppSidebar({ setShowUpgrade }) {
             Upgrade to Pro
           </button>
         ) : (
-          <NavProjects projects={[
-            { name: "Sales & Marketing", url: "#", icon: PieChart },
-            { name: "Travel", url: "#", icon: Map },
-          ]} />
+<NavProjects
+          setActiveComponent={setActiveComponent}
+          projects={[
+            { name: "Subir Productos", icon: PieChart, component: "UploadInfo" },
+            { name: "Tu cuenta", icon: Map, component: null },
+            { name: "Editar tu Info", icon: Map, component: null }
+          ]}
+          
+        />
         )}
       </SidebarContent>
       <SidebarFooter>

@@ -11,6 +11,11 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Definir la función aquí
+  const updateUserPlan = (newPlan) => {
+    setUser((prev) => ({ ...prev, plan: newPlan }));
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
@@ -24,14 +29,14 @@ export const AuthProvider = ({ children }) => {
 
       const userData = userDoc.exists()
         ? userDoc.data()
-        : { plan: "free" }; // Si no existe, lo asignamos como "free"
+        : { plan: "free" };
 
       setUser({
         uid: firebaseUser.uid,
         name: firebaseUser.displayName || "Usuario",
         email: firebaseUser.email,
         avatar: firebaseUser.photoURL || "",
-        plan: userData.plan, // 🔥 Aquí agregamos el plan desde Firestore
+        plan: userData.plan,
       });
 
       setLoading(false);
@@ -41,7 +46,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, updateUserPlan }}>
       {children}
     </AuthContext.Provider>
   );

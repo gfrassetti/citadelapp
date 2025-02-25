@@ -1,18 +1,38 @@
 "use client";
+import React from "react";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "../../components/AppSidebar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  signOut,
+  setPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
 import { auth } from "../../lib/db/db.js";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useUser } from "@/context/AuthContext";
+import UploadInfo from "@/components/UploadInfo";
+
 
 export default function Dashboard() {
   const router = useRouter();
+  const { user: authUser, loading: authLoading, updateUserPlan } = useUser();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeComponent, setActiveComponent] = useState(null); // 🔥 Hook de estado agregado en orden correcto
+
+  // ✅ Hook siempre fuera de condiciones
+  const ref = useRef(null);
 
   useEffect(() => {
     setPersistence(auth, browserSessionPersistence).then(() => {
@@ -20,7 +40,7 @@ export default function Dashboard() {
         if (!firebaseUser) {
           router.push("/login");
         } else {
-          setUser({ ...firebaseUser, plan: "free" });
+          setUser({ ...firebaseUser });
           setLoading(false);
         }
       });
@@ -28,6 +48,11 @@ export default function Dashboard() {
       return () => unsubscribe();
     });
   }, [router]);
+
+// 🔄 Sincroniza el plan del usuario desde Firestore
+// Esta consulta asegura que el estado global del plan esté actualizado con la base de datos.
+// Se ejecuta automáticamente al cargar el componente y se puede forzar con refetch().
+// Es útil para reflejar cambios hechos fuera del flujo actual, como actualizaciones desde otro dispositivo.
 
   const { data: userData, refetch } = useQuery({
     queryKey: ["userPlan", user?.uid],
@@ -48,10 +73,16 @@ export default function Dashboard() {
     },
     enabled: !!user,
     onSuccess: (data) => {
-      console.log("✅ Plan actualizado en UI:", data.plan);
-      setUser((prev) => ({ ...prev, plan: data.plan }));
+      updateUserPlan(data.plan); // ✅ Actualiza el plan en el contexto global
     },
   });
+
+  useEffect(() => {
+    if (user?.uid) {
+      refetch(); // Fuerza a obtener el plan actualizado
+    }
+  }, [user?.uid]);
+  
 
   const handleUpgrade = useMutation({
     mutationFn: async () => {
@@ -82,7 +113,7 @@ export default function Dashboard() {
     },
   });
 
-  if (loading) return <p>Cargando...</p>;
+  if (loading || !authUser?.plan) return <p>Cargando...</p>;
 
   return (
     <>
@@ -92,33 +123,39 @@ export default function Dashboard() {
           <button onClick={() => signOut(auth).then(() => router.push("/login"))}>
             Cerrar sesión
           </button>
+          <h3 className="font-bold text-black">Plan:<span className="text-blue-400 font-bold">{authUser.plan}</span></h3>
           <h4>Bienvenido, {user.displayName || user.email}</h4>
         </div>
       </header>
       <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            {user?.plan === "free" ? (
-              <Card className="max-w-lg mx-auto p-6 text-center">
-                <CardHeader>
-                  <CardTitle>Upgrade to Pro</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>Accede a todas las funciones premium.</p>
-                </CardContent>
-                <CardFooter>
-                  <Button onClick={() => handleUpgrade.mutate()} className="w-full bg-blue-600">
-                    Upgrade Now
-                  </Button>
-                </CardFooter>
-              </Card>
-            ) : (
-              <p>Bienvenido a tu cuenta PRO</p>
-            )}
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
+  <AppSidebar setActiveComponent={setActiveComponent} />
+  <SidebarInset>
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+    {activeComponent === "UploadInfo" && <UploadInfo />}
+    {!activeComponent && (
+    <>
+      {authUser?.plan === "free" ? (
+        <Card className="max-w-lg mx-auto p-6 text-center">
+          <CardHeader>
+            <CardTitle>Upgrade to Pro</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Accede a todas las funciones premium.</p>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={() => handleUpgrade.mutate()} className="w-full bg-blue-600">
+              Upgrade Now
+            </Button>
+          </CardFooter>
+        </Card>
+      ) : (
+        <p>Bienvenido a tu cuenta PRO</p>
+      )}
+    </>
+  )}
+    </div>
+  </SidebarInset>
+</SidebarProvider>
     </>
   );
 }

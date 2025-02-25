@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,10 +15,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app); // Exportar storage aquí
 export const googleProvider = new GoogleAuthProvider();
 
 // Configurar persistencia de sesión
 setPersistence(auth, browserLocalPersistence)
   .then(() => console.log("✅ Persistencia configurada en localStorage"))
   .catch((error) => console.error("❌ Error en persistencia:", error));
-
