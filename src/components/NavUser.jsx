@@ -32,6 +32,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
+
+
 export function NavUser({ user }) {
   const { isMobile } = useSidebar();
 
@@ -75,10 +77,7 @@ export function NavUser({ user }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
+            { user.plan === "free" ? <DropdownMenuItem><Sparkles />Upgrade to Pro</DropdownMenuItem> : null }
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>

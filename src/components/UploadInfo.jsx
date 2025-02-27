@@ -1,17 +1,19 @@
 "use client";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { auth } from "@/lib/db/db";
-import {uploadCompanyData} from "@/lib/db/handleUpload";
+import { uploadCompanyData } from "@/lib/db/handleUploadInfo";
 import {
-  Form, FormField, FormItem, FormLabel, FormControl, FormMessage
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
 export default function UploadInfo() {
-  const [uploading, setUploading] = useState(false);
-
   const form = useForm({
     defaultValues: {
       companyName: "",
@@ -22,13 +24,18 @@ export default function UploadInfo() {
       postalCode: "",
     },
   });
+  const [uploading, setUploading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const onSubmit = async (data) => {
     setUploading(true);
     try {
       await uploadCompanyData(data);
+      setSuccessMessage("¡Subida exitosa!");
+      form.reset();
+      setTimeout(() => setSuccessMessage(""), 1000);
     } catch (error) {
-      console.error("Error en la subida:", error);
+      console.error("Error al subir datos:", error);
     } finally {
       setUploading(false);
     }
@@ -103,6 +110,11 @@ export default function UploadInfo() {
             {uploading ? "Subiendo..." : "Enviar Información"}
           </Button>
         </form>
+        {successMessage && (
+        <div className="mt-4 p-2 bg-green-100 text-green-800 rounded">
+          {successMessage}
+        </div>
+      )}
       </Form>
     </div>
   );

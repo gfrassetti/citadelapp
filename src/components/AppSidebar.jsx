@@ -64,9 +64,10 @@ export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
 <NavProjects
           setActiveComponent={setActiveComponent}
           projects={[
-            { name: "Subir Productos", icon: PieChart, component: "UploadInfo" },
-            { name: "Tu cuenta", icon: Map, component: null },
-            { name: "Editar tu Info", icon: Map, component: null }
+            { name: "Sube Tu Informacion", icon: PieChart, component: "UploadInfo" },
+            { name: "Sube tus Productos", icon: Map, component: null },
+            { name: "Edita tus productos", icon: Map, component: null },
+            { name: "Edita tu Informacion", icon: Map, component: null }
           ]}
           
         />

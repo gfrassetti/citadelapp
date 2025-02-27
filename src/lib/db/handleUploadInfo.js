@@ -1,12 +1,14 @@
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+// handleUpload.js
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { addDoc, collection } from "firebase/firestore";
-import { db } from "@/lib/db/db";
+import { db, storage } from "@/lib/db/db"; // Importa storage desde db.js
 
 export async function uploadCompanyData(data) {
   try {
     let imageUrl = "";
     let folder = "company-logo"; // Carpeta por defecto
 
+    // Elige la carpeta según el tipo de imagen
     if (data.image) {
       if (data.imageType === "avatar") {
         folder = "avatars";
@@ -14,14 +16,17 @@ export async function uploadCompanyData(data) {
         folder = "company-products";
       }
 
-      const storage = getStorage();
+      // Crea referencia en Storage
       const uniqueFileName = `${Date.now()}-${data.image.name}`;
       const storageRef = ref(storage, `${folder}/${uniqueFileName}`);
 
+      // Sube el archivo
       await uploadBytes(storageRef, data.image);
+      // Obtén la URL pública
       imageUrl = await getDownloadURL(storageRef);
     }
 
+    // Guarda los datos en Firestore
     await addDoc(collection(db, "empresas"), {
       companyName: data.companyName,
       address: data.address,
