@@ -6,9 +6,12 @@ export default function HomeSearch() {
   const [term, setTerm] = useState("");
   const [results, setResults] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState("all");
+  const [searched, setSearched] = useState(false);
 
   useEffect(() => {
-    fetchResults();
+    if (searched) {
+      fetchResults();
+    }
   }, [selectedFilter]);
 
   const fetchResults = async () => {
@@ -16,10 +19,19 @@ export default function HomeSearch() {
     const res = await fetch(`/api/search?${queryParam}`);
     const data = await res.json();
     setResults(data.results || []);
+    setSearched(true);
   };
 
   const handleSearch = () => {
+    setSearched(true);
     fetchResults();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearch();
+    }
   };
 
   return (
@@ -39,7 +51,7 @@ export default function HomeSearch() {
                 name="filter" 
                 value="all" 
                 checked={selectedFilter === "all"} 
-                onChange={() => setSelectedFilter("all")} 
+                onChange={() => { setSelectedFilter("all"); setSearched(true); }} 
               />
               Todas
             </label>
@@ -49,7 +61,7 @@ export default function HomeSearch() {
                 name="filter" 
                 value="empresa" 
                 checked={selectedFilter === "empresa"} 
-                onChange={() => setSelectedFilter("empresa")} 
+                onChange={() => { setSelectedFilter("empresa"); setSearched(true); }} 
               />
               Empresa
             </label>
@@ -59,7 +71,7 @@ export default function HomeSearch() {
                 name="filter" 
                 value="producto" 
                 checked={selectedFilter === "producto"} 
-                onChange={() => setSelectedFilter("producto")} 
+                onChange={() => { setSelectedFilter("producto"); setSearched(true); }} 
               />
               Producto o servicio
             </label>
@@ -75,6 +87,7 @@ export default function HomeSearch() {
               placeholder="Buscar empresa o producto"
               value={term}
               onChange={(e) => setTerm(e.target.value)}
+              onKeyDown={handleKeyDown} // Detectar "Enter"
             />
             <button 
               onClick={handleSearch} 
@@ -86,34 +99,38 @@ export default function HomeSearch() {
 
           {/* Resultados */}
           <div className="space-y-4">
-            {results.length > 0 ? (
-              results.map((item, index) => (
-                <div key={index} className="border p-4 rounded shadow">
-                  {item.type === "empresa" ? (
-                    <>
-                      <h3 className="font-bold">{item.companyName}</h3>
-                      <p>{item.address}</p>
-                      <p>Tel: {item.phone || "No disponible"}</p>
-                      <p>WhatsApp: {item.whatsapp || "No disponible"}</p>
-                      <p>Email: {item.email || "No disponible"}</p>
-                      {item.website && (
-                        <p>
-                          Website: <a href={`https://${item.website}`} className="text-blue-500 underline">{item.website}</a>
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <h3 className="font-bold">{item.productName}</h3>
-                      {item.imageUrl && <img src={item.imageUrl} alt={item.productName} className="h-32 object-contain my-2" />}
-                      <p>{item.description}</p>
-                      <p className="font-semibold">Precio: ${item.price}</p>
-                    </>
-                  )}
-                </div>
-              ))
+            {searched ? (
+              results.length > 0 ? (
+                results.map((item, index) => (
+                  <div key={index} className="border p-4 rounded shadow">
+                    {item.type === "empresa" ? (
+                      <>
+                        <h3 className="font-bold">{item.companyName}</h3>
+                        <p>{item.address}</p>
+                        <p>Tel: {item.phone || "No disponible"}</p>
+                        <p>WhatsApp: {item.whatsapp || "No disponible"}</p>
+                        <p>Email: {item.email || "No disponible"}</p>
+                        {item.website && (
+                          <p>
+                            Website: <a href={`https://${item.website}`} className="text-blue-500 underline">{item.website}</a>
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="font-bold">{item.productName}</h3>
+                        {item.imageUrl && <img src={item.imageUrl} alt={item.productName} className="h-32 object-contain my-2" />}
+                        <p>{item.description}</p>
+                        <p className="font-semibold">Precio: ${item.price}</p>
+                      </>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-gray-600">No se encontraron resultados.</p>
+              )
             ) : (
-              <p className="text-center text-gray-600">No se encontraron resultados.</p>
+              <p className="text-center text-gray-600">Realiza una búsqueda para ver resultados.</p>
             )}
           </div>
         </div>

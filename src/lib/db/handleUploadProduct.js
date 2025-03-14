@@ -15,14 +15,15 @@ export async function uploadProductData(data, empresaId) {
       imageUrl = await getDownloadURL(storageRef);
     }
 
-    const empresaRef = doc(db, "empresas", empresaId);
-    const productsRef = collection(empresaRef, "products");
+    // Ahora guardamos el producto en la colección principal "products"
+    const productsRef = collection(db, "products");
 
     await addDoc(productsRef, {
       productName: data.productName,
       description: data.description,
       price: data.price,
       imageUrl,
+      empresaId, // Referencia a la empresa a la que pertenece el producto
       createdAt: serverTimestamp(),
       tags: data.tags || [],
     });

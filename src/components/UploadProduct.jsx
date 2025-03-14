@@ -36,7 +36,11 @@ export default function UploadProduct({ empresaId }) {
     try {
       const formattedData = {
         ...data,
-        tags: data.tags ? data.tags.split(",").map(tag => tag.trim()) : [], // Convierte en array
+        tags: typeof data.tags === "string" 
+          ? data.tags.split(",").map(tag => tag.trim()) 
+          : Array.isArray(data.tags) 
+            ? data.tags 
+            : [], // Si no es string ni array, se asigna un array vacío
       };
       await uploadProductData(formattedData, empresaId);
       setSuccessMessage("¡Producto subido exitosamente!");
