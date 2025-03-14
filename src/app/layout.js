@@ -9,6 +9,8 @@ import AuthHeader from "@/components/AuthHeader";
 import { usePathname } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
+import { UserDataProvider } from "@/context/UserDataContext";
+
 
 
 
@@ -38,17 +40,19 @@ export default function RootLayout({ children }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-    <html lang="en">
-      <body className="antialiased flex flex-col justify-center items-center w-full">
-        <ThemeProvider>
-          <AuthProvider>
-            {header}
-            {children}
-            {footer}
-          </AuthProvider>
-        </ThemeProvider>
-      </body>
-    </html>
+      <html lang="en">
+        <body className="antialiased flex flex-col justify-center items-center w-full">
+          <ThemeProvider>
+            <AuthProvider>
+              <UserDataProvider>
+                {header}
+                {children}
+                {footer}
+              </UserDataProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </body>
+      </html>
     </QueryClientProvider>
   );
 }

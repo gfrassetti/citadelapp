@@ -27,7 +27,6 @@ export default function Header() {
       >
       <Image src="/assets/logo.png" alt="Logo de Mi App" width={80} height={80} className="mb-2" />
       <span className="text-2xl font-bold text-gray-800"></span>
-      <Input type="search" id="search" placeholder="Buscar" className="border border-solid border-white mx-4 w-auto sm:w-72" />
       <div className="hidden items-center gap-4 px-6 w-auto sm:flex">
       <Link href="/login" className={clsx("hover:text-[#c646a2] transition-colors" , theme === "dark" ? "text-[#06f388]" : "text-[#292554]")}>Ingresa</Link>
       <Link href="/register" className={clsx("hover:text-[#c646a2] transition-colors" , theme === "dark" ? "text-[#06f388]" : "text-[#292554]")}>Si sos Mayorista, Crea tu cuenta</Link>

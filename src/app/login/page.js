@@ -45,14 +45,17 @@ export default function LoginForm() {
 
   /* Auth */
   const onSubmit = async (data) => {
+    setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
       console.log("✅ Usuario logueado:", userCredential.user);
-      router.push("/dashboard"); // 🔹 Redirigir al dashboard tras login exitoso
+      router.push("/dashboard");
     } catch (error) {
-      setError("Credenciales inválidas. Intenta nuevamente.")
+      setError("Credenciales inválidas. Intenta nuevamente.");
+      setLoading(false); // ⬅️ Agrega esta línea aquí
     }
   };
+  
 
   /* Password Reset */
   const handleResetPassword = async (data) => {
@@ -94,6 +97,8 @@ export default function LoginForm() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       console.log("✅ Usuario con Google:", result.user);
+      // Redirige manualmente al dashboard
+      router.push("/dashboard");
     } catch (error) {
       console.error("❌ Error con Google:", error.message);
     }

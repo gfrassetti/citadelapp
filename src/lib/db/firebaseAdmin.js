@@ -25,3 +25,5 @@ export async function updateUserPlan(userId, preapprovalId) {
     console.error("❌ Error al actualizar el usuario en Firestore:", error);
   }
 }
+
+export { db, admin };

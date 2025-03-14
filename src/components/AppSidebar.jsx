@@ -2,21 +2,14 @@
 
 import * as React from "react";
 import {
-  AudioWaveform,
   BookOpen,
   Bot,
-  Command,
   Frame,
-  GalleryVerticalEnd,
   Map,
   PieChart,
   Settings2,
   SquareTerminal,
 } from "lucide-react";
-
-import UploadInfo from "@/components/UploadInfo";
-
-
 
 import { NavMain } from "@/components/NavMain";
 import  NavProjects from "@/components/NavProjects";
@@ -61,11 +54,11 @@ export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
             Upgrade to Pro
           </button>
         ) : (
-<NavProjects
+        <NavProjects
           setActiveComponent={setActiveComponent}
           projects={[
             { name: "Sube Tu Informacion", icon: PieChart, component: "UploadInfo" },
-            { name: "Sube tus Productos", icon: Map, component: null },
+            { name: "Sube tus Productos", icon: Map, component: "UploadProduct" },
             { name: "Edita tus productos", icon: Map, component: null },
             { name: "Edita tu Informacion", icon: Map, component: null }
           ]}
@@ -75,9 +68,14 @@ export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
       </SidebarContent>
       <SidebarFooter>
         {user ? (
-          <NavUser 
+          <NavUser
+            setActiveComponent={setActiveComponent} 
+            projects={[
+              { name: "Account" , component: "Profile" },
+              { name: "My Suscription" , component: "SuscriptionInfo" },
+            ]}
             user={{ 
-              name: user.name || user.displayName || "Usuario",  // 🔥 Ahora muestra correctamente el nombre real
+              name: user.name || user.displayName || "Usuario", 
               email: user.email || "", 
               avatar: user.photoURL || data.user.avatar 
             }} 

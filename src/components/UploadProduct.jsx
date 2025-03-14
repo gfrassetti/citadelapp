@@ -1,19 +1,19 @@
 "use client";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { uploadProductData } from "@/lib/db/handleUploadInfo";
+import { uploadProductData } from "@/lib/db/handleUploadProduct";
 import {
   Form,
   FormField,
   FormItem,
   FormLabel,
   FormControl,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export default function UploadProducts({ empresaId }) {
+export default function UploadProduct({ empresaId }) {
   const [uploading, setUploading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -23,6 +23,7 @@ export default function UploadProducts({ empresaId }) {
       description: "",
       price: "",
       image: null,
+      tags: "", // Nuevo campo para tags de búsqueda
     },
   });
 
@@ -33,7 +34,11 @@ export default function UploadProducts({ empresaId }) {
     }
     setUploading(true);
     try {
-      await uploadProductData(data, empresaId);
+      const formattedData = {
+        ...data,
+        tags: data.tags ? data.tags.split(",").map(tag => tag.trim()) : [], // Convierte en array
+      };
+      await uploadProductData(formattedData, empresaId);
       setSuccessMessage("¡Producto subido exitosamente!");
       form.reset();
       setTimeout(() => setSuccessMessage(""), 1000);
@@ -70,7 +75,7 @@ export default function UploadProducts({ empresaId }) {
               <FormItem>
                 <FormLabel>Descripción</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Ej: Modelo Core i7, 16GB RAM" />
+                  <Input {...field} placeholder="Ej: Core i7, 16GB RAM" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -90,6 +95,24 @@ export default function UploadProducts({ empresaId }) {
               </FormItem>
             )}
           />
+
+        <FormField
+          name="tags"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Palabras clave (separadas por comas)</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Ej: acero, cables, bobinas"
+                  onChange={(e) => field.onChange(e.target.value.split(","))}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
           <FormField
             name="image"
