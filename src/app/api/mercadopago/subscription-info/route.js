@@ -1,6 +1,13 @@
+// app/api/mercadopago/subscription-info/route.js
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db/firebaseAdmin";
+import { db, updateUserPlan } from "@/lib/db/firebaseAdmin";
+import { MercadoPagoConfig, PreApproval } from "mercadopago";
 
+const client = new MercadoPagoConfig({
+  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
+});
+
+// 🔹 Endpoint para el FRONTEND (consulta)
 export async function GET(request) {
   try {
     const userEmail = request.headers.get("x-user-email");
@@ -38,7 +45,7 @@ export async function GET(request) {
       const errorData = await mpResponse.json();
       return NextResponse.json({ error: errorData }, { status: mpResponse.status });
     }
-     
+
     const subscriptionData = await mpResponse.json();
 
     return NextResponse.json(
@@ -54,3 +61,28 @@ export async function GET(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+// 🔹 Endpoint para MERCADOPAGO (webhook)
+export async function POST(req) {
+  try {
+    const body = await req.json();
+
+    if (body.type === "subscription_preapproval") {
+      console.log("📩 Recibiendo notificación de suscripción...");
+
+      const preApproval = new PreApproval(client);
+      const subData = await preApproval.get({ id: body.data.id });
+
+      if (subData.status === "authorized") {
+        await updateUserPlan(subData.external_reference, subData.id);
+        console.log("✅ Plan actualizado a PRO");
+      }
+    }
+
+    return new Response(null, { status: 200 });
+  } catch (error) {
+    console.error("❌ Error en el webhook:", error);
+    return new Response(null, { status: 500 });
+  }
+}
+
