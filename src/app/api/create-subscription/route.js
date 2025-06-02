@@ -41,11 +41,18 @@ const api = {
               transaction_amount: 15.00,
               currency_id: "ARS",
               start_date: startDate.toISOString(),
+              payment_methods_allowed: {
+                payment_types: [
+                  { id: "credit_card" },
+                  { id: "debit_card" },
+                  { id: "account_money" }
+                ]
+              }
             },
             payer_email: "test_user_895208562@testuser.com", //email
-            back_url: "https://3000-idx-admin-panel-1739326470245.cluster-iesosxm5fzdewqvhlwn5qivgry.cloudworkstations.dev/dashboard", //cambiar
+            back_url: "https://admin-panel-psi-two.vercel.app/dashboard", //cambiar
             external_reference: uid,
-            status: "pending",
+            status: "authorized",
           },
         });
 

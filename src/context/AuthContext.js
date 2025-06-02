@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/db/db";
-import { getFirestore, doc, getDoc, onSnapshot } from "firebase/firestore";
+import { getFirestore, doc, onSnapshot, updateDoc } from "firebase/firestore";
 
 const db = getFirestore();
 const AuthContext = createContext({ user: null, loading: true });
@@ -11,8 +11,40 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const updateUserPlan = (newPlan) => {
-    setUser((prev) => ({ ...prev, plan: newPlan }));
+  const updateUserPlan = async (newPlan) => {
+    if (user) {
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, { plan: newPlan });
+      setUser((prev) => ({ ...prev, plan: newPlan }));
+    }
+  };
+
+  const checkSubscriptionStatus = async (userEmail, userId) => {
+    try {
+      const response = await fetch("/api/mercadopago/subscription", {
+        headers: { "x-user-email": userEmail },
+      });
+
+      if (!response.ok) throw new Error("Error al obtener la suscripción");
+
+      const data = await response.json();
+      const subscription = data.subscription;
+
+      if (!subscription) return;
+
+      const now = new Date();
+      const endDate = subscription.auto_recurring?.end_date
+        ? new Date(subscription.auto_recurring.end_date)
+        : null;
+
+      if (subscription.status === "cancelled" && endDate && now >= endDate) {
+        console.log("La suscripción ha expirado, cambiando el plan a Free.");
+        await updateDoc(doc(db, "users", userId), { plan: "free" });
+        setUser((prev) => ({ ...prev, plan: "free" }));
+      }
+    } catch (error) {
+      console.error("Error al verificar la suscripción:", error);
+    }
   };
 
   useEffect(() => {
@@ -23,26 +55,29 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      // Suscribirse al doc del usuario en Firestore
       const userRef = doc(db, "users", firebaseUser.uid);
-      const unsubSnapshot = onSnapshot(userRef, (snap) => {
+      const unsubSnapshot = onSnapshot(userRef, async (snap) => {
         if (snap.exists()) {
-          setUser({
+          const userData = {
             uid: firebaseUser.uid,
             email: firebaseUser.email,
-            // Mezclamos los campos de Firestore con los del user de Firebase
+            plan: snap.data().plan || "free",
             ...snap.data(),
-          });
+          };
+          setUser(userData);
+
+          // 🔥 Llamamos a la API de MercadoPago al iniciar sesión
+          await checkSubscriptionStatus(userData.email, userData.uid);
         } else {
           setUser({
             uid: firebaseUser.uid,
             email: firebaseUser.email,
+            plan: "free",
           });
         }
         setLoading(false);
       });
 
-      // Limpiar suscripción
       return () => unsubSnapshot();
     });
 
