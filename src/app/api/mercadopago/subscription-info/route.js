@@ -39,29 +39,11 @@ export async function GET(request) {
       return NextResponse.json({ error: errorData }, { status: mpResponse.status });
     }
 
-    const subscriptionData = await mpResponse.json();
-
-    // 🔹 Obtener la fecha actual y la fecha de próximo pago
-    const now = new Date();
-    const nextPaymentDate = subscriptionData.next_payment_date
-      ? new Date(subscriptionData.next_payment_date)
-      : null;
-    const isExpired = nextPaymentDate && now > nextPaymentDate;
-
-    // 🔹 Si la suscripción está vencida, actualizar Firestore
-    if (isExpired && userData.plan !== "free") {
-      console.log("⏳ Suscripción vencida. Actualizando Firestore...");
-      await db.collection("users").doc(userSnapshot.docs[0].id).update({
-        plan: "free",
-      });
-    }
-
     return NextResponse.json(
       {
         subscription: subscriptionData,
         paymentMethod: subscriptionData.payment_method_id || "unknown",
         lastFourDigits: subscriptionData.card?.last_four_digits || "****",
-        isExpired,
       },
       { status: 200 }
     );
