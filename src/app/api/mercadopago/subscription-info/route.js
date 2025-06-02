@@ -38,6 +38,8 @@ export async function GET(request) {
       const errorData = await mpResponse.json();
       return NextResponse.json({ error: errorData }, { status: mpResponse.status });
     }
+     
+    const subscriptionData = await mpResponse.json();
 
     return NextResponse.json(
       {
