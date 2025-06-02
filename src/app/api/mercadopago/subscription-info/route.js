@@ -48,6 +48,21 @@ export async function GET(request) {
 
     const subscriptionData = await mpResponse.json();
 
+    const now = new Date();
+    const nextPaymentDate = subscriptionData.next_payment_date
+      ? new Date(subscriptionData.next_payment_date)
+      : null;
+    const isExpired = nextPaymentDate && now > nextPaymentDate;
+
+    // 🔄 Si la suscripción está vencida, actualizar Firestore
+    if (isExpired && userData.plan !== "free") {
+      console.log("⏳ Suscripción vencida. Actualizando Firestore...");
+      await db.collection("users").doc(userSnapshot.docs[0].id).update({
+        plan: "free",
+      });
+    }
+
+
     return NextResponse.json(
       {
         subscription: subscriptionData,
