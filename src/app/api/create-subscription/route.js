@@ -43,7 +43,7 @@ const api = {
               start_date: startDate.toISOString(),
             },
             payer_email: "test_user_895208562@testuser.com", //email
-            back_url: "admin-panel-kder7oimm-guido-fs-projects.vercel.app/dashboard", //cambiar
+            back_url: "https://admin-panel-psi-two.vercel.app/dashboard", //cambiar
             external_reference: uid,
           },
         });
