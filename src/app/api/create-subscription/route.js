@@ -43,9 +43,8 @@ const api = {
               start_date: startDate.toISOString(),
             },
             payer_email: "test_user_895208562@testuser.com", //email
-            back_url: "https://3000-idx-admin-panel-1739326470245.cluster-iesosxm5fzdewqvhlwn5qivgry.cloudworkstations.dev/dashboard", //cambiar
+            back_url: "admin-panel-kder7oimm-guido-fs-projects.vercel.app/dashboard", //cambiar
             external_reference: uid,
-            status: "pending",
           },
         });
 
