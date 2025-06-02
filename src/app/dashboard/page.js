@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useUser } from "@/context/AuthContext";
 import UploadInfo from "@/components/UploadInfo";
 import UploadProduct from "@/components/UploadProduct";
@@ -29,15 +29,13 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/db/db";
 import SuscriptionInfo from "@/components/SuscriptionInfo";
 
-
-// Dashboard usa useQuery para obtener el plan del usuario:
 export default function Dashboard() {
   const router = useRouter();
   const { user: authUser, loading: authLoading, updateUserPlan } = useUser();
   const [user, setUser] = useState(null);
-  const [updatedUser, setUpdatedUser] = useState(null); // Nuevo estado para datos actualizados de Firestore
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeComponent, setActiveComponent] = useState(null); // Estado para seleccionar sección activa
+  const [activeComponent, setActiveComponent] = useState(null);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -54,44 +52,18 @@ export default function Dashboard() {
     });
   }, [router]);
 
-  // Suscripción en tiempo real a Firestore para obtener datos actualizados del usuario
   useEffect(() => {
     if (user?.uid) {
       const unsubscribe = onSnapshot(doc(db, "users", user.uid), (snap) => {
         if (snap.exists()) {
-          setUpdatedUser(snap.data());
+          const data = snap.data();
+          setUserData(data);
+          updateUserPlan(data.plan); // sincroniza el contexto con Firestore
         }
       });
       return () => unsubscribe();
     }
   }, [user]);
-
-  // useQuery para obtener el plan (o información relacionada) y actualizar estado global
-  const { data: planData, refetch } = useQuery({
-    queryKey: ["userPlan", user?.uid],
-    queryFn: async () => {
-      if (!user) throw new Error("Usuario no autenticado");
-      const token = await user.getIdToken();
-      const response = await fetch(`/api/get-user-plan?uid=${user.uid}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) {
-        console.error("❌ Error en la respuesta:", await response.text());
-        throw new Error("Error en la respuesta");
-      }
-      return response.json();
-    },
-    enabled: !!user,
-    onSuccess: (data) => {
-      updateUserPlan(data.plan); // Actualiza el plan en el contexto global
-    },
-  });
-
-  useEffect(() => {
-    if (user?.uid) {
-      refetch(); // Refresca datos del plan
-    }
-  }, [user?.uid]);
 
   const handleUpgrade = useMutation({
     mutationFn: async () => {
@@ -120,7 +92,7 @@ export default function Dashboard() {
     },
   });
 
-  if (loading || !authUser?.plan) return <p>Cargando...</p>;
+  if (loading || !authUser?.plan || !userData) return <p>Cargando...</p>;
 
   return (
     <>
@@ -132,7 +104,7 @@ export default function Dashboard() {
           </button>
           <div className="flex items-center">
             <h4 className="mr-2">
-              Bienvenido, {updatedUser?.name || user.displayName || user.email}
+              Bienvenido, {userData?.name || user.displayName || user.email}
             </h4>
             <Badge className="bg-gray-700 hover:bg-gray-600 ml-1 text-white" variant="secondary">
               {authUser?.plan}
@@ -145,11 +117,11 @@ export default function Dashboard() {
         <MySidebarInset>
           <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             {activeComponent === "UploadInfo" && <UploadInfo />}
-            {activeComponent === "UploadProduct" && updatedUser?.empresaId && (
-            <UploadProduct empresaId={updatedUser.empresaId} />
-          )}
-          {activeComponent === "Profile" && <Profile />}
-          {activeComponent === "SuscriptionInfo" && <SuscriptionInfo />}
+            {activeComponent === "UploadProduct" && userData?.empresaId && (
+              <UploadProduct empresaId={userData.empresaId} />
+            )}
+            {activeComponent === "Profile" && <Profile />}
+            {activeComponent === "SuscriptionInfo" && <SuscriptionInfo />}
             {!activeComponent && (
               <>
                 {authUser?.plan === "free" ? (
@@ -177,3 +149,4 @@ export default function Dashboard() {
     </>
   );
 }
+
