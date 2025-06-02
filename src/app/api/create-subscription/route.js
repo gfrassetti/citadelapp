@@ -11,7 +11,7 @@ const api = {
       try {
         console.log("📩 Recibiendo solicitud de suscripción...");
 
-        const { uid, email } = await req.json();
+        const { uid } = await req.json();
 
         if (!uid) {
           console.error("❌ Faltan datos requeridos");
@@ -41,27 +41,13 @@ const api = {
               transaction_amount: 15.00,
               currency_id: "ARS",
               start_date: startDate.toISOString(),
-              payment_methods_allowed: {
-                payment_types: [
-                  { id: "credit_card" },
-                  { id: "debit_card" },
-                  { id: "account_money" }
-                ]
-              }
             },
             payer_email: "test_user_895208562@testuser.com", //email
-            back_url: "https://admin-panel-psi-two.vercel.app/dashboard", //cambiar
+            back_url: "https://3000-idx-admin-panel-1739326470245.cluster-iesosxm5fzdewqvhlwn5qivgry.cloudworkstations.dev/dashboard", //cambiar
             external_reference: uid,
-            /* status: "authorized", */
+            status: "pending",
           },
         });
-
-        // 🔄 Actualizar Firestore con el nuevo ID de suscripción y el plan "pro"
-        await db.collection("users").doc(uid).update({
-          plan: "pro",
-          subscription: subscription.id,
-        });
-
 
         console.log("✅ Respuesta de MercadoPago:", subscription);
 
@@ -69,20 +55,14 @@ const api = {
 
       } catch (error) {
         console.error("❌ Error al crear la suscripción:", error);
-      
+
         if (error.response) {
-          try {
-            const errorBody = await error.response.json();
-            console.error("📌 Respuesta de MercadoPago:", errorBody);
-            return NextResponse.json({ error: errorBody }, { status: error.response.status || 500 });
-          } catch (parseError) {
-            console.error("⚠️ Error al parsear respuesta de MP:", parseError);
-          }
+          console.error("📌 Respuesta de MercadoPago:", error.response.data);
+          return NextResponse.json({ error: error.response.data }, { status: error.response.status || 500 });
         }
-      
+
         return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
       }
-      
     },
   },
 };
