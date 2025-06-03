@@ -28,6 +28,9 @@ import { SidebarInset as MySidebarInset } from "@/components/ui/sidebar";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/db/db";
 import SuscriptionInfo from "@/components/SuscriptionInfo";
+import EditInfo from "@/components/EditInfo";
+import EditProduct from "@/components/EditProduct";
+
 
 export default function Dashboard() {
   const router = useRouter();
@@ -139,6 +142,8 @@ export default function Dashboard() {
               {activeComponent === "UploadProduct" && userData?.empresaId && (
                 <UploadProduct empresaId={userData.empresaId} />
               )}
+              {activeComponent === "EditInfo" && <EditInfo />}
+              {activeComponent === "EditProduct" && <EditProduct />}
               {activeComponent === "Profile" && <Profile />}
               {activeComponent === "SuscriptionInfo" && <SuscriptionInfo />}
               {!activeComponent && (

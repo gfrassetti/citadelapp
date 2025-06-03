@@ -11,6 +11,7 @@ import {
 import { NavMain } from "@/components/NavMain";
 import  NavProjects from "@/components/NavProjects";
 import { NavUser } from "@/components/NavUser";
+
 import {
   Sidebar,
   SidebarContent,
@@ -67,10 +68,9 @@ export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
           projects={[
             { name: "Sube Tu Informacion", icon: PieChart, component: "UploadInfo" },
             { name: "Sube tus Productos", icon: Map, component: "UploadProduct" },
-            { name: "Edita tus productos", icon: Map, component: null },
-            { name: "Edita tu Informacion", icon: Map, component: null }
+            { name: "Edita tus productos", icon: Map, component: "EditProduct" },
+            { name: "Edita tu Informacion", icon: Map, component: "EditInfo" }
           ]}
-          
         />
         )}
       </SidebarContent>
