@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import {
   SidebarGroup,
@@ -11,13 +12,15 @@ export default function NavProjects({ projects, setActiveComponent }) {
     <SidebarGroup>
       <SidebarGroupLabel>Projects</SidebarGroupLabel>
       <SidebarMenu>
-        {projects.map((project, index) => (
-  <SidebarMenuButton key={index} onClick={() => setActiveComponent(project.component)}>
-    <project.icon />
-    <span>{project.name}</span>
-  </SidebarMenuButton>
-
-        ))}
+      {projects.map((project, index) => {
+        const Icon = project.icon;
+        return (
+          <SidebarMenuButton key={project.name} onClick={() => setActiveComponent(project.component)}>
+            {Icon && <Icon />}
+            <span>{project.name}</span>
+          </SidebarMenuButton>
+        );
+      })}
       </SidebarMenu>
     </SidebarGroup>
   );
