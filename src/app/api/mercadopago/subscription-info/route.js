@@ -89,9 +89,11 @@ export async function POST(req) {
       const subData = await preApproval.get({ id: body.data.id });
 
       if (subData.status === "authorized") {
+        console.log("✅ Pago autorizado. Actualizando Firestore...");
+      
+        // Esto reemplaza cualquier subscription anterior
         await updateUserPlan(subData.external_reference, subData.id);
-        console.log("✅ Plan actualizado a PRO");
-      }
+      }      
     }
 
     return new Response(null, { status: 200 });
