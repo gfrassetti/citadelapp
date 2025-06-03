@@ -7,8 +7,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { doc, updateDoc } from "firebase/firestore";
@@ -29,29 +27,39 @@ async function fetchSubscription(userEmail) {
   return response.json();
 }
 
-async function cancelSubscription({ subscriptionId, userId }) {
+async function updatePlanInFirestore(userId, newPlan) {
+  const userRef = doc(db, "users", userId);
+  await updateDoc(userRef, { plan: newPlan });
+}
+
+async function cancelSubscription(subscriptionId) {
   const response = await fetch(`/api/mercadopago/cancel-subscription`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ subscriptionId, userId }),
+    body: JSON.stringify({ subscriptionId }),
   });
   if (!response.ok) throw new Error("Error al cancelar la suscripción");
   return response.json();
 }
 
-async function updatePaymentMethod(subscriptionId, cardTokenId) {
-  const response = await fetch(`/api/mercadopago/update-payment-method`, {
+async function pauseSubscription(subscriptionId) {
+  const response = await fetch(`/api/mercadopago/pause-subscription`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ subscriptionId, cardTokenId }),
+    body: JSON.stringify({ subscriptionId }),
   });
-  if (!response.ok) throw new Error("Error al actualizar el método de pago");
+  if (!response.ok) throw new Error("Error al pausar la suscripción");
   return response.json();
 }
 
-async function updatePlanInFirestore(userId, newPlan) {
-  const userRef = doc(db, "users", userId);
-  await updateDoc(userRef, { plan: newPlan });
+async function reactivateSubscription(subscriptionId) {
+  const response = await fetch(`/api/mercadopago/reactivate-subscription`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ subscriptionId }),
+  });
+  if (!response.ok) throw new Error("Error al reactivar la suscripción");
+  return response.json();
 }
 
 export default function SubscriptionInfo() {
@@ -65,122 +73,71 @@ export default function SubscriptionInfo() {
     enabled: !!user.email,
   });
 
+  const subscription = data?.subscription;
+  const normalizedPaymentMethod = (data?.paymentMethod || "default").toLowerCase();
+  const lastFourDigits = data?.lastFourDigits || "****";
+
   const mutationCancel = useMutation({
     mutationFn: cancelSubscription,
-    onSuccess: () => {
-      queryClient.invalidateQueries(["mercadoPagoSubscription"]);
-    },
+    onSuccess: () => queryClient.invalidateQueries(["mercadoPagoSubscription"]),
   });
 
-  useEffect(() => {
-    if (!user || !data?.subscription) return;
-    const subscription = data.subscription;
-    if (data.isExpired && subscription.status !== "cancelled") {
-      updatePlanInFirestore(user.uid, "free").then(() => {
-        updateUserPlan("free");
-        queryClient.invalidateQueries(["mercadoPagoSubscription"]);
-      });
-    }
-  }, [user, data]);
+  const mutationPause = useMutation({
+    mutationFn: pauseSubscription,
+    onSuccess: () => queryClient.invalidateQueries(["mercadoPagoSubscription"]),
+  });
+
+  const mutationReactivate = useMutation({
+    mutationFn: reactivateSubscription,
+    onSuccess: () => queryClient.invalidateQueries(["mercadoPagoSubscription"]),
+  });
 
   if (isLoading) return <p>Cargando suscripción...</p>;
   if (isError) return <p>Error: {error.message}</p>;
-
-  const subscription = data?.subscription;
   if (!subscription) return <p>No hay suscripción activa.</p>;
-
-  const handleCancel = async () => {
-    setIsCancelling(true);
-    try {
-      await mutationCancel.mutateAsync({
-        subscriptionId: subscription.id,
-        userId: user.uid,
-      });
-    } catch (error) {
-      console.error("Error al cancelar la suscripción:", error);
-    }
-    setIsCancelling(false);
-  };
-
-  const normalizedPaymentMethod = (data?.paymentMethod || "default").toLowerCase();
-  const lastFourDigits = data?.lastFourDigits || "****";
 
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Detalles de Mi Suscripción</h2>
       <Table>
         <TableBody>
-          <TableRow>
-            <TableCell className="font-semibold">ID</TableCell>
-            <TableCell>{subscription.id}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-semibold">Estado</TableCell>
-            <TableCell>{subscription.status}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-semibold">Razón</TableCell>
-            <TableCell>{subscription.reason}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-semibold">Fecha Alta</TableCell>
-            <TableCell>{new Date(subscription.date_created).toLocaleDateString()}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-semibold">Próximo Pago</TableCell>
-            <TableCell>
-              {subscription.next_payment_date
-                ? new Date(subscription.next_payment_date).toLocaleDateString()
-                : "N/A"}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-semibold">Monto</TableCell>
-            <TableCell>
-              {subscription.auto_recurring?.transaction_amount}{" "}
-              {subscription.auto_recurring?.currency_id}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-semibold">Frecuencia</TableCell>
-            <TableCell>
-              {subscription.auto_recurring?.frequency}{" "}
-              {subscription.auto_recurring?.frequency_type}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-semibold">Vencimiento</TableCell>
-            <TableCell>
-              {subscription.auto_recurring?.end_date
-                ? new Date(subscription.auto_recurring.end_date).toLocaleDateString()
-                : "N/A"}
-            </TableCell>
-          </TableRow>
+          <TableRow><TableCell className="font-semibold">ID</TableCell><TableCell>{subscription.id}</TableCell></TableRow>
+          <TableRow><TableCell className="font-semibold">Estado</TableCell><TableCell>{subscription.status}</TableCell></TableRow>
+          <TableRow><TableCell className="font-semibold">Razón</TableCell><TableCell>{subscription.reason}</TableCell></TableRow>
+          <TableRow><TableCell className="font-semibold">Fecha Alta</TableCell><TableCell>{new Date(subscription.date_created).toLocaleDateString()}</TableCell></TableRow>
+          <TableRow><TableCell className="font-semibold">Próximo Pago</TableCell><TableCell>{subscription.next_payment_date ? new Date(subscription.next_payment_date).toLocaleDateString() : "N/A"}</TableCell></TableRow>
+          <TableRow><TableCell className="font-semibold">Monto</TableCell><TableCell>{subscription.auto_recurring?.transaction_amount} {subscription.auto_recurring?.currency_id}</TableCell></TableRow>
+          <TableRow><TableCell className="font-semibold">Frecuencia</TableCell><TableCell>{subscription.auto_recurring?.frequency} {subscription.auto_recurring?.frequency_type}</TableCell></TableRow>
+          <TableRow><TableCell className="font-semibold">Vencimiento</TableCell><TableCell>{subscription.auto_recurring?.end_date ? new Date(subscription.auto_recurring.end_date).toLocaleDateString() : "N/A"}</TableCell></TableRow>
           <TableRow>
             <TableCell className="font-semibold">Método de Pago</TableCell>
             <TableCell className="flex items-center">
-              <img
-                src={paymentIcons[normalizedPaymentMethod] || paymentIcons.default}
-                alt={normalizedPaymentMethod}
-                className="w-8 h-8 mr-2"
-              />
+              <img src={paymentIcons[normalizedPaymentMethod] || paymentIcons.default} alt={normalizedPaymentMethod} className="w-8 h-8 mr-2" />
               Terminada en {lastFourDigits}
             </TableCell>
           </TableRow>
         </TableBody>
       </Table>
 
-      <div className="mt-4">
-        {subscription.status !== "cancelled" ? (
-          <button
-            onClick={handleCancel}
-            className="bg-red-600 text-white px-4 py-2 rounded"
-            disabled={isCancelling}
-          >
-            {isCancelling ? "Cancelando..." : "Cancelar Suscripción"}
-          </button>
-        ) : (
-          <p className="text-gray-600">Esta suscripción ya está cancelada.</p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {subscription.status !== "cancelled" && (
+          <>
+            <button onClick={() => mutationCancel.mutate(subscription.id)} className="bg-red-600 text-white px-4 py-2 rounded" disabled={isCancelling}>
+              Cancelar Suscripción
+            </button>
+
+            {subscription.status === "authorized" && (
+              <button onClick={() => mutationPause.mutate(subscription.id)} className="bg-yellow-500 text-white px-4 py-2 rounded">
+                Pausar
+              </button>
+            )}
+
+            {subscription.status === "paused" && (
+              <button onClick={() => mutationReactivate.mutate(subscription.id)} className="bg-green-600 text-white px-4 py-2 rounded">
+                Reactivar
+              </button>
+            )}
+          </>
         )}
       </div>
 

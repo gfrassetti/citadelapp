@@ -57,7 +57,6 @@ export default function Dashboard() {
     }
   }, [user]);
   
-
   useEffect(() => {
     setPersistence(auth, browserSessionPersistence).then(() => {
       const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {

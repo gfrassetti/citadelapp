@@ -2,12 +2,9 @@
 
 import * as React from "react";
 import {
-  BookOpen,
-  Bot,
   Frame,
   Map,
   PieChart,
-  Settings2,
   SquareTerminal,
 } from "lucide-react";
 
@@ -27,9 +24,7 @@ import { useUser } from "@/context/AuthContext";
 const data = {
   user: { avatar: 'https://github.com/shadcn.png' },
   navMain: [
-    { title: "Dashboard", url: "#", icon: SquareTerminal, isActive: true, items: [{ title: "History", url: "#" }, { title: "Starred", url: "#" }, { title: "Settings", url: "#" }] },
-    { title: "Settings", url: "#", icon: Settings2, items: [{ title: "General", url: "#" }, { title: "Team", url: "#" }, { title: "Billing", url: "#" }, { title: "Limits", url: "#" }] },
-  ],
+    { title: "Dashboard", url: "#", icon: SquareTerminal, isActive: true, items: [{ title: "History", url: "#" }, { title: "Starred", url: "#" }, { title: "Settings", url: "#" }] }  ],
 };
 
 export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
