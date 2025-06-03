@@ -4,14 +4,14 @@ import React, { useEffect, useState } from "react";
 import { useUser } from "@/context/AuthContext";
 import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/db/db";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormField,
   FormItem,
   FormLabel,
   FormControl,
-  Input,
-  Button,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 

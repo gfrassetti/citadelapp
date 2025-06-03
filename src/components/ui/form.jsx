@@ -1,11 +1,10 @@
 "use client";
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
-import { Controller, FormProvider, useFormContext, useForm } from "react-hook-form";
+import { Controller, FormProvider, useFormContext } from "react-hook-form";
 
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
-
 
 const Form = FormProvider
 
@@ -26,8 +25,7 @@ const FormField = (
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext)
   const itemContext = React.useContext(FormItemContext)
-  const { formState } = useFormContext()
-  const {getFieldState} = useForm() // get the getFieldState function from the useForm hook
+  const { getFieldState, formState } = useFormContext()
 
   const fieldState = getFieldState(fieldContext.name, formState)
 
@@ -106,7 +104,7 @@ FormDescription.displayName = "FormDescription"
 
 const FormMessage = React.forwardRef(({ className, children, ...props }, ref) => {
   const { error, formMessageId } = useFormField()
-  const body = error ? String(error?.message) : children
+  const body = error ? String(error?.message ?? "") : children
 
   if (!body) {
     return null
