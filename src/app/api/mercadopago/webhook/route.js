@@ -8,23 +8,28 @@ const client = new MercadoPagoConfig({
 export async function POST(req) {
   try {
     const body = await req.json();
+    console.log("📩 Webhook recibido:", JSON.stringify(body));
 
-    if (body.type === "subscription_preapproval") {
-      const preapprovalId = body.data.id;
-      const subscription = await new PreApproval(client).get({ id: preapprovalId });
-
-      if (
-        subscription &&
-        subscription.status === "authorized" &&
-        subscription.external_reference
-      ) {
-        await updateUserPlan(subscription.external_reference, subscription.id);
-      }
+    const preapprovalId = body?.data?.id;
+    if (!preapprovalId) {
+      console.warn("⚠️ Webhook sin ID válido (simulación vacía o mal configurada)");
+      return new Response("Missing preapproval ID", { status: 400 });
     }
 
-    return new Response(null, { status: 200 });
+    const preapproval = await new PreApproval(client).get({ id: preapprovalId });
+    console.log("📄 Preapproval recuperado:", preapproval);
+
+    if (!preapproval?.external_reference) {
+      return new Response("Missing external_reference", { status: 400 });
+    }
+
+    await updateUserPlan(preapproval.external_reference, preapproval.id);
+    console.log("✅ Usuario actualizado a PRO");
+
+    return new Response("OK", { status: 200 });
   } catch (error) {
     console.error("❌ Error en el webhook:", error);
-    return new Response(null, { status: 500 });
+    return new Response("Webhook error", { status: 500 });
   }
 }
+
