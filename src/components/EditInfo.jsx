@@ -27,7 +27,7 @@ export default function EditInfo() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4">
         {["companyName", "address", "phone", "whatsapp", "email", "website", "cuit", "postalCode"].map((field) => (
-          <FormField key={field} name={field} control={form.control} render={({ field }) => (
+          <FormField key={field.name} name={field} control={form.control} render={({ field }) => (
             <FormItem>
               <FormLabel>{field}</FormLabel>
               <FormControl><Input {...field} /></FormControl>

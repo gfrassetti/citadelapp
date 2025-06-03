@@ -30,15 +30,14 @@ const data = {
       url: "#",
       icon: SquareTerminal,
       isActive: true,
-      onClick: () => setActiveComponent(null), // 👈 este cambio es clave
+      onClick: () => setActiveComponent(null),
       items: [
-        { title: "History", url: "#" },
-        { title: "Starred", url: "#" },
-        { title: "Settings", url: "#" }
-      ],
-    },
-  ],
+        { title: "Inicio", url: "#", onClick: () => setActiveComponent(null) },
+      ]
+    }
+  ]
 };
+
 
 export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
   const { user } = useUser();
