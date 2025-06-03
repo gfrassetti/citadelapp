@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { useUser } from "@/context/AuthContext";
 import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
@@ -63,15 +65,24 @@ export default function EditProduct() {
   return (
     <div className="p-4">
       {!selectedProduct ? (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
             <div
               key={product.id}
-              className="p-4 border cursor-pointer hover:bg-gray-100"
+              className="p-4 border rounded shadow cursor-pointer hover:bg-gray-100"
               onClick={() => onSelectProduct(product)}
             >
+              <img
+                src={product.imageUrl}
+                alt={product.productName}
+                className="w-full h-32 object-cover rounded mb-2"
+              />
               <p className="font-semibold">{product.productName}</p>
               <p className="text-sm">{product.description}</p>
+              <p className="text-sm">💲{product.price}</p>
+              <p className="text-xs text-gray-500">
+                {product.createdAt ? new Date(product.createdAt).toLocaleDateString() : ""}
+              </p>
             </div>
           ))}
         </div>
