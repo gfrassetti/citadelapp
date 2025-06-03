@@ -28,7 +28,7 @@ import { SidebarInset as MySidebarInset } from "@/components/ui/sidebar";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/db/db";
 import SuscriptionInfo from "@/components/SuscriptionInfo";
-const EditInfo = lazy(() => import("@/components/EditInfo"));
+import EditInfo from "@/components/EditInfo";
 import EditProduct from "@/components/EditProduct";
 
 
