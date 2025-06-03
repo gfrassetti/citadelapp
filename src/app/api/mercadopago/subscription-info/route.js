@@ -52,17 +52,25 @@ export async function GET(request) {
     const nextPaymentDate = subscriptionData.next_payment_date
       ? new Date(subscriptionData.next_payment_date)
       : null;
+    
     const isExpired = nextPaymentDate && now > nextPaymentDate;
-
-    // 🔄 Si la suscripción está vencida, actualizar Firestore
-    if (isExpired && userData.plan !== "free") {
-      console.log("⏳ Suscripción vencida. Actualizando Firestore...");
+    const status = subscriptionData.status;
+    
+    if (
+      (status === "cancelled") ||
+      (isExpired && (status !== "authorized" && status !== "paused"))
+    ) {
+      console.log("⏳ Suscripción inactiva o vencida. Actualizando Firestore a FREE...");
       await db.collection("users").doc(userSnapshot.docs[0].id).update({
         plan: "free",
       });
+    } else {
+      console.log("✅ Suscripción activa. Actualizando Firestore a PRO...");
+      await db.collection("users").doc(userSnapshot.docs[0].id).update({
+        plan: "pro",
+      });
     }
-
-
+    
     return NextResponse.json(
       {
         subscription: subscriptionData,
