@@ -134,36 +134,36 @@ export default function Dashboard() {
       <SidebarProvider>
         <AppSidebar setActiveComponent={setActiveComponent} />
         <MySidebarInset>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            {activeComponent === "UploadInfo" && <UploadInfo />}
-            {activeComponent === "UploadProduct" && userData?.empresaId && (
-              <UploadProduct empresaId={userData.empresaId} />
-            )}
-            {activeComponent === "Profile" && <Profile />}
-            {activeComponent === "SuscriptionInfo" && <SuscriptionInfo />}
-            {!activeComponent && (
-              <>
-                {authUser?.plan === "free" ? (
-                  <Card className="max-w-lg mx-auto p-6 text-center">
-                    <CardHeader>
-                      <CardTitle>Upgrade to Pro</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>Accede a todas las funciones premium.</p>
-                    </CardContent>
-                    <CardFooter>
-                      <Button onClick={() => handleUpgrade.mutate()} className="w-full bg-blue-600">
-                        Upgrade Now
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ) : (
-                  <p>Bienvenido a tu cuenta PRO</p>
-                )}
-              </>
-            )}
-          </div>
-        </MySidebarInset>
+            <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+              {activeComponent === "UploadInfo" && <UploadInfo />}
+              {activeComponent === "UploadProduct" && userData?.empresaId && (
+                <UploadProduct empresaId={userData.empresaId} />
+              )}
+              {activeComponent === "Profile" && <Profile />}
+              {activeComponent === "SuscriptionInfo" && <SuscriptionInfo />}
+              {!activeComponent && (
+                <>
+                  {authUser?.plan === "free" ? (
+                    <Card className="max-w-lg mx-auto p-6 text-center">
+                      <CardHeader>
+                        <CardTitle>Upgrade to Pro</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p>Accede a todas las funciones premium.</p>
+                      </CardContent>
+                      <CardFooter>
+                        <Button onClick={() => handleUpgrade.mutate()} className="w-full bg-blue-600">
+                          Upgrade Now
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  ) : (
+                    <p>Bienvenido a tu cuenta PRO</p>
+                  )}
+                </>
+              )}
+            </div>
+          </MySidebarInset>
       </SidebarProvider>
     </>
   );

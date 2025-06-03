@@ -24,7 +24,19 @@ import { useUser } from "@/context/AuthContext";
 const data = {
   user: { avatar: 'https://github.com/shadcn.png' },
   navMain: [
-    { title: "Dashboard", url: "#", icon: SquareTerminal, isActive: true, items: [{ title: "History", url: "#" }, { title: "Starred", url: "#" }, { title: "Settings", url: "#" }] }  ],
+    {
+      title: "Dashboard",
+      url: "#",
+      icon: SquareTerminal,
+      isActive: true,
+      onClick: () => setActiveComponent(null), // 👈 este cambio es clave
+      items: [
+        { title: "History", url: "#" },
+        { title: "Starred", url: "#" },
+        { title: "Settings", url: "#" }
+      ],
+    },
+  ],
 };
 
 export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
@@ -39,13 +51,16 @@ export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
 
         {/* 🔥 "Upgrade to Pro" ahora se muestra si el usuario es "free" */}
         {!isProUser ? (
-          <button 
-            className="w-full text-left flex items-center gap-2 text-gray-500 hover:text-black p-2"
-            onClick={() => setShowUpgrade(true)}
-          >
-            <Frame className="text-gray-400" />
-            Upgrade to Pro
-          </button>
+          <Button
+              onClick={() => {
+                setShowUpgrade(true);
+                setActiveComponent(null); // 👈 esto activa la vista por defecto
+              }}
+              className="w-full text-left flex items-center gap-2 text-gray-500 hover:text-black p-2"
+            >
+              <Frame className="text-gray-400" />
+              Upgrade to Pro
+         </Button>
         ) : (
         <NavProjects
           setActiveComponent={setActiveComponent}
