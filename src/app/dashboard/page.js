@@ -39,6 +39,26 @@ export default function Dashboard() {
   const ref = useRef(null);
 
   useEffect(() => {
+    const url = new URL(window.location.href);
+    const preapprovalId = url.searchParams.get("preapproval_id");
+  
+    if (preapprovalId && user?.uid) {
+      fetch("/api/mercadopago/verify-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ preapprovalId, uid: user.uid }),
+      })
+        .then((res) => {
+          if (res.ok) {
+            updateUserPlan("pro");
+          }
+        })
+        .catch((err) => console.error("❌ Error verificando preapproval:", err));
+    }
+  }, [user]);
+  
+
+  useEffect(() => {
     setPersistence(auth, browserSessionPersistence).then(() => {
       const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
         if (!firebaseUser) {
