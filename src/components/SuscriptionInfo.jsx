@@ -15,7 +15,6 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/db/db";
 import UpdatePaymentMethod from "./UpdatePaymentMethod";
 
-// Mapeo de logos para los métodos de pago
 const paymentIcons = {
   visa: "/assets/visa-4.svg",
   mastercard: "/assets/mastercard-4.svg",
@@ -26,25 +25,17 @@ async function fetchSubscription(userEmail) {
   const response = await fetch("/api/mercadopago/subscription-info", {
     headers: { "x-user-email": userEmail },
   });
-
-  if (!response.ok) {
-    throw new Error("Error al obtener la suscripción");
-  }
-
+  if (!response.ok) throw new Error("Error al obtener la suscripción");
   return response.json();
 }
 
-async function cancelSubscription(subscriptionId) {
+async function cancelSubscription({ subscriptionId, userId }) {
   const response = await fetch(`/api/mercadopago/cancel-subscription`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ subscriptionId }),
+    body: JSON.stringify({ subscriptionId, userId }),
   });
-
-  if (!response.ok) {
-    throw new Error("Error al cancelar la suscripción");
-  }
-
+  if (!response.ok) throw new Error("Error al cancelar la suscripción");
   return response.json();
 }
 
@@ -54,11 +45,7 @@ async function updatePaymentMethod(subscriptionId, cardTokenId) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ subscriptionId, cardTokenId }),
   });
-
-  if (!response.ok) {
-    throw new Error("Error al actualizar el método de pago");
-  }
-
+  if (!response.ok) throw new Error("Error al actualizar el método de pago");
   return response.json();
 }
 
@@ -87,20 +74,14 @@ export default function SubscriptionInfo() {
 
   useEffect(() => {
     if (!user || !data?.subscription) return;
-  
     const subscription = data.subscription;
-  
-    // 🔹 Si la suscripción ya expiró y aún no se ha cancelado en Firestore, actualizar el plan
     if (data.isExpired && subscription.status !== "cancelled") {
-      console.log("⏳ Suscripción vencida. Actualizando Firestore...");
-  
       updatePlanInFirestore(user.uid, "free").then(() => {
         updateUserPlan("free");
-        queryClient.invalidateQueries(["mercadoPagoSubscription"]); // 🔹 Forzar actualización de datos en el frontend
+        queryClient.invalidateQueries(["mercadoPagoSubscription"]);
       });
     }
   }, [user, data]);
-  
 
   if (isLoading) return <p>Cargando suscripción...</p>;
   if (isError) return <p>Error: {error.message}</p>;
@@ -111,14 +92,16 @@ export default function SubscriptionInfo() {
   const handleCancel = async () => {
     setIsCancelling(true);
     try {
-      await mutationCancel.mutateAsync(subscription.id);
+      await mutationCancel.mutateAsync({
+        subscriptionId: subscription.id,
+        userId: user.uid,
+      });
     } catch (error) {
       console.error("Error al cancelar la suscripción:", error);
     }
     setIsCancelling(false);
   };
 
-  // Normalizar el método de pago para que coincida con los keys de paymentIcons
   const normalizedPaymentMethod = (data?.paymentMethod || "default").toLowerCase();
   const lastFourDigits = data?.lastFourDigits || "****";
 
@@ -154,13 +137,15 @@ export default function SubscriptionInfo() {
           <TableRow>
             <TableCell className="font-semibold">Monto</TableCell>
             <TableCell>
-              {subscription.auto_recurring?.transaction_amount} {subscription.auto_recurring?.currency_id}
+              {subscription.auto_recurring?.transaction_amount}{" "}
+              {subscription.auto_recurring?.currency_id}
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell className="font-semibold">Frecuencia</TableCell>
             <TableCell>
-              {subscription.auto_recurring?.frequency} {subscription.auto_recurring?.frequency_type}
+              {subscription.auto_recurring?.frequency}{" "}
+              {subscription.auto_recurring?.frequency_type}
             </TableCell>
           </TableRow>
           <TableRow>
@@ -174,10 +159,10 @@ export default function SubscriptionInfo() {
           <TableRow>
             <TableCell className="font-semibold">Método de Pago</TableCell>
             <TableCell className="flex items-center">
-            <img 
-                src={paymentIcons[normalizedPaymentMethod] || paymentIcons.default} 
-                alt={normalizedPaymentMethod} 
-                className="w-8 h-8 mr-2" 
+              <img
+                src={paymentIcons[normalizedPaymentMethod] || paymentIcons.default}
+                alt={normalizedPaymentMethod}
+                className="w-8 h-8 mr-2"
               />
               Terminada en {lastFourDigits}
             </TableCell>
