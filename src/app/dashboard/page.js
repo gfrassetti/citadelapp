@@ -118,7 +118,16 @@ export default function Dashboard() {
       console.error("❌ Error en la suscripción:", error);
     },
   });
-
+  
+  const componentLabels = {
+    UploadInfo: "Subir información",
+    UploadProduct: "Subir producto",
+    EditInfo: "Editar tu información",
+    EditProduct: "Editar producto",
+    Profile: "Perfil",
+    SuscriptionInfo: "Mi suscripción",
+  };
+  
   if (loading || !authUser?.plan || !userData) return <p>Cargando...</p>;
 
   return (
@@ -158,7 +167,9 @@ export default function Dashboard() {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                      <span className="capitalize text-black cursor-pointer">{activeComponent}</span>
+                    <span className="capitalize text-white">
+                      {componentLabels[activeComponent] || activeComponent}
+                    </span>
                     </BreadcrumbItem>
                   </BreadcrumbList>
                 </Breadcrumb>
