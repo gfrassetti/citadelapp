@@ -73,7 +73,7 @@ export default function LoginForm() {
     const isComingFromRegister = localStorage.getItem("registerSuccess");
   
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && !isComingFromRegister) {
+      if (user) {
         router.push("/dashboard");
       } else {
         setLoading(false);
@@ -96,13 +96,19 @@ export default function LoginForm() {
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      console.log("✅ Usuario con Google:", result.user);
-      // Redirige manualmente al dashboard
+      const user = result.user;
+      if (!user) {
+        throw new Error("No se obtuvo el usuario de Google");
+      }
+      console.log("✅ Usuario logueado con Google:", user);
       router.push("/dashboard");
     } catch (error) {
-      console.error("❌ Error con Google:", error.message);
+      console.error("❌ Error en login con Google:", error);
+      setError("No se pudo iniciar sesión con Google");
+      setLoading(false);
     }
   };
+  
 
   if (loading) return <p>Cargando...</p>;
 
