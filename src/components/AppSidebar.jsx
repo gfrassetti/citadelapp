@@ -11,6 +11,8 @@ import {
 import { NavMain } from "@/components/NavMain";
 import  NavProjects from "@/components/NavProjects";
 import { NavUser } from "@/components/NavUser";
+import { Button } from "@/components/ui/button";
+
 
 import {
   Sidebar,
