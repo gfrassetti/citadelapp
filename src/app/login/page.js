@@ -4,17 +4,18 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTheme } from "next-themes";
-import { 
-  signInWithPopup, 
-  signInWithEmailAndPassword, 
-  onAuthStateChanged, 
+import {
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
   sendPasswordResetEmail,
   setPersistence,
-  browserSessionPersistence
+  browserSessionPersistence,
 } from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { auth, googleProvider, db } from "../../lib/db/db.js";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { auth, googleProvider } from "../../lib/db/db.js";
 import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
 
@@ -34,16 +35,16 @@ export default function LoginForm() {
     resolver: zodResolver(schema),
   });
 
-  // 🔹 Establecer persistencia de sesión en browserSessionPersistence
   useEffect(() => {
-    setPersistence(auth, browserSessionPersistence).then(() => {
-      console.log("🔐 Persistencia de sesión establecida en SESSION");
-    }).catch((error) => {
-      console.error("❌ Error al configurar la persistencia:", error);
-    });
+    setPersistence(auth, browserSessionPersistence)
+      .then(() => {
+        console.log("🔐 Persistencia de sesión establecida en SESSION");
+      })
+      .catch((error) => {
+        console.error("❌ Error al configurar la persistencia:", error);
+      });
   }, []);
 
-  /* Auth */
   const onSubmit = async (data) => {
     setLoading(true);
     try {
@@ -52,26 +53,20 @@ export default function LoginForm() {
       router.push("/dashboard");
     } catch (error) {
       setError("Credenciales inválidas. Intenta nuevamente.");
-      setLoading(false); // ⬅️ Agrega esta línea aquí
+      setLoading(false);
     }
   };
-  
 
-  /* Password Reset */
   const handleResetPassword = async (data) => {
     try {
       await sendPasswordResetEmail(auth, data.email);
-      console.log("Reset Email sent");
       setShowSuccess(true);
     } catch (error) {
       console.error("Error al enviar el correo de restablecimiento:", error.message);
     }
   };
 
-  /* Prevenir login redirect si user loggeado */
   useEffect(() => {
-    const isComingFromRegister = localStorage.getItem("registerSuccess");
-  
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         router.push("/dashboard");
@@ -79,11 +74,9 @@ export default function LoginForm() {
         setLoading(false);
       }
     });
-  
     return () => unsubscribe();
   }, [router]);
 
-  // Eliminar para que no se muestre en futuros inicios de sesión
   useEffect(() => {
     if (localStorage.getItem("registerSuccess") === "true") {
       setShowSuccess(true);
@@ -92,15 +85,26 @@ export default function LoginForm() {
     }
   }, []);
 
-  /* Google auth */
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
-      if (!user) {
-        throw new Error("No se obtuvo el usuario de Google");
+
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName,
+          photoURL: user.photoURL,
+          plan: "free",
+          createdAt: new Date(),
+        });
+        console.log("🆕 Usuario creado en Firestore");
       }
-      console.log("✅ Usuario logueado con Google:", user);
+
       router.push("/dashboard");
     } catch (error) {
       console.error("❌ Error en login con Google:", error);
@@ -108,12 +112,11 @@ export default function LoginForm() {
       setLoading(false);
     }
   };
-  
 
   if (loading) return <p>Cargando...</p>;
 
   return (
-    <div className={`flex flex-col items-center h-screen w-full ${ theme === "dark" ? "bg-gray-600" : "bg-gray-100"}`}>
+    <div className={`flex flex-col items-center h-screen w-full ${theme === "dark" ? "bg-gray-600" : "bg-gray-100"}`}>
       <div className="bg-white p-6 my-auto text-center rounded-3xl shadow-md w-full max-w-md justify-center items-center mx-auto">
         <h2 className="text-2xl font-semibold text-center text-gray-800 mb-2">
           {isResetPassword ? "Recuperar contraseña" : "Bienvenido de nuevo"}
@@ -137,15 +140,14 @@ export default function LoginForm() {
             </div>
           </>
         )}
-  
+
         {isResetPassword ? (
           <form onSubmit={handleSubmit(handleResetPassword)} className="flex flex-col gap-4">
             <div className="flex items-center">
               <Label htmlFor="email">Ingrese su email para restablecer contraseña</Label>
-            </div> 
+            </div>
             <input {...register("email")} placeholder="Email" className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
-  
             <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
               Enviar enlace de recuperación
             </button>
@@ -157,19 +159,17 @@ export default function LoginForm() {
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <div className="flex items-center">
               <Label htmlFor="email">Email</Label>
-            </div> 
+            </div>
             <input {...register("email")} placeholder="Email" className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
             {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
-  
             <div className="flex items-center">
               <Label htmlFor="password">Password</Label>
               <button type="button" onClick={() => setIsResetPassword(true)} className="ml-auto text-sm underline-offset-2 hover:underline">
                 ¿Olvidaste tu contraseña?
               </button>
-            </div>                  
+            </div>
             <input {...register("password")} type="password" placeholder="Password" className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
             {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
-  
             <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Acceso</button>
             {error && <p className="text-red-500" id="login-error">{error}</p>}
             <div className="mt-4 text-center text-sm">
