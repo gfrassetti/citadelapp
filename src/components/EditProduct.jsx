@@ -139,7 +139,7 @@ export default function EditProduct() {
                 <img
                   src={product.imageUrl}
                   alt={product.productName}
-                  className="w-full h-32 object-cover rounded mb-2"
+                  className="w-full h-[12rem] object-cover rounded mb-2"
                 />
                 <p className="font-semibold">{product.productName}</p>
                 <p className="text-sm">{product.description}</p>
