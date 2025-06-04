@@ -34,12 +34,12 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
   });
 
   useEffect(() => {
-    const ensureEmpresaId = async () => {
-      if (empresaId || !user?.uid) return;
-
+    if (!user?.uid || empresaId) return;
+  
+    const crearEmpresa = async () => {
       const generatedEmpresaId = user.uid;
       const empresaRef = doc(db, "empresas", generatedEmpresaId);
-
+  
       const empresaDoc = await getDoc(empresaRef);
       if (!empresaDoc.exists()) {
         await setDoc(empresaRef, {
@@ -52,14 +52,15 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
           tags: [],
         });
       }
-
+  
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, { empresaId: generatedEmpresaId });
       setEmpresaId(generatedEmpresaId);
     };
-
-    ensureEmpresaId();
-  }, [user, empresaId]);
+  
+    crearEmpresa();
+  }, [user?.uid, empresaId]);
+  
 
   const onSubmit = async (data) => {
     if (!user?.uid || !user?.email || !empresaId) {
