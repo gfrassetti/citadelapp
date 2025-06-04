@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/sidebar";
 
 import { signOut } from "firebase/auth";
+import { auth } from "@/lib/db/db";
 import { useRouter } from "next/navigation";
 import { useUserData } from "@/context/UserDataContext";
 
