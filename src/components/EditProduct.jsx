@@ -102,14 +102,6 @@ export default function EditProduct() {
 
   return (
     <div className="p-4">
-      {selectedProduct && (
-        <div className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
-          <span className="text-black font-medium">Mi Cuenta</span>
-          <span>{">"}</span>
-          <span className="text-blue-600 font-medium">Editar Producto</span>
-        </div>
-      )}
-
       {!selectedProduct ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
@@ -129,9 +121,10 @@ export default function EditProduct() {
               <p className="text-sm">{product.description}</p>
               <p className="text-sm text-green-600">💲{product.price}</p>
               <p className="text-xs text-gray-500">
-                {product.createdAt && !isNaN(new Date(product.createdAt))
-                  ? new Date(product.createdAt).toLocaleDateString()
+              {product.createdAt?.toDate
+                  ? product.createdAt.toDate().toLocaleDateString()
                   : "Sin fecha"}
+
               </p>
             </div>
           ))}

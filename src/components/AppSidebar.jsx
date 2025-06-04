@@ -68,7 +68,7 @@ export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
             { name: "Sube Tu Informacion", icon: PieChart, component: "UploadInfo" },
             { name: "Sube tus Productos", icon: Map, component: "UploadProduct" },
             { name: "Edita tus productos", icon: Map, component: "EditProduct" },
-            { name: "Edita tu Informacion", icon: Map, component: "EditInfo" }
+            { name: "Edita Informacion de tu empresas", icon: Map, component: "EditInfo" }
           ]}
         />
         )}
