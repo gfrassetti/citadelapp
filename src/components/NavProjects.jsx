@@ -10,7 +10,7 @@ import {
 export default function NavProjects({ projects, setActiveComponent }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+      <SidebarGroupLabel>Mi Dashboard</SidebarGroupLabel>
       <SidebarMenu>
       {projects.map((project, index) => {
         const Icon = project.icon;

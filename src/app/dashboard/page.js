@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef, lazy, Suspense } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "../../components/AppSidebar";
 import { useRouter } from "next/navigation";
@@ -31,6 +31,13 @@ import SuscriptionInfo from "@/components/SuscriptionInfo";
 import EditInfo from "@/components/EditInfo";
 import EditProduct from "@/components/EditProduct";
 
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbSeparator,
+  BreadcrumbLink,
+} from "@/components/ui/breadcrumb";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -44,7 +51,7 @@ export default function Dashboard() {
   useEffect(() => {
     const url = new URL(window.location.href);
     const preapprovalId = url.searchParams.get("preapproval_id");
-  
+
     if (preapprovalId && user?.uid) {
       fetch("/api/mercadopago/verify-subscription", {
         method: "POST",
@@ -59,7 +66,7 @@ export default function Dashboard() {
         .catch((err) => console.error("❌ Error verificando preapproval:", err));
     }
   }, [user]);
-  
+
   useEffect(() => {
     setPersistence(auth, browserSessionPersistence).then(() => {
       const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -80,7 +87,7 @@ export default function Dashboard() {
         if (snap.exists()) {
           const data = snap.data();
           setUserData(data);
-          updateUserPlan(data.plan); // sincroniza el contexto con Firestore
+          updateUserPlan(data.plan);
         }
       });
       return () => unsubscribe();
@@ -89,9 +96,7 @@ export default function Dashboard() {
 
   const handleUpgrade = useMutation({
     mutationFn: async () => {
-      if (!user?.uid || !user?.email) {
-        throw new Error("Faltan datos del usuario");
-      }
+      if (!user?.uid || !user?.email) throw new Error("Faltan datos del usuario");
       setLoading(true);
       const response = await fetch("/api/create-subscription", {
         method: "POST",
@@ -134,41 +139,63 @@ export default function Dashboard() {
           </div>
         </div>
       </header>
+
       <SidebarProvider>
         <AppSidebar setActiveComponent={setActiveComponent} />
         <MySidebarInset>
-            <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-              {activeComponent === "UploadInfo" && <UploadInfo />}
-              {activeComponent === "UploadProduct" && userData?.empresaId && (
-                <UploadProduct empresaId={userData.empresaId} />
-              )}
-              {activeComponent === "EditInfo" && <EditInfo />}
-              {activeComponent === "EditProduct" && <EditProduct />}
-              {activeComponent === "Profile" && <Profile />}
-              {activeComponent === "SuscriptionInfo" && <SuscriptionInfo />}
-              {!activeComponent && (
-                <>
-                  {authUser?.plan === "free" ? (
-                    <Card className="max-w-lg mx-auto p-6 text-center">
-                      <CardHeader>
-                        <CardTitle>Upgrade to Pro</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p>Accede a todas las funciones premium.</p>
-                      </CardContent>
-                      <CardFooter>
-                        <Button onClick={() => handleUpgrade.mutate()} className="w-full bg-blue-600">
-                          Upgrade Now
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  ) : (
-                    <p>Bienvenido a tu cuenta PRO</p>
-                  )}
-                </>
-              )}
-            </div>
-          </MySidebarInset>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+            {activeComponent && (
+              <div className="mb-4">
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink
+                        className="text-black cursor-pointer"
+                        onClick={() => setActiveComponent(null)}
+                      >
+                        Mi Cuenta
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <span className="capitalize text-black cursor-pointer">{activeComponent}</span>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </div>
+            )}
+
+            {activeComponent === "UploadInfo" && <UploadInfo />}
+            {activeComponent === "UploadProduct" && userData?.empresaId && (
+              <UploadProduct empresaId={userData.empresaId} />
+            )}
+            {activeComponent === "EditInfo" && <EditInfo />}
+            {activeComponent === "EditProduct" && <EditProduct />}
+            {activeComponent === "Profile" && <Profile />}
+            {activeComponent === "SuscriptionInfo" && <SuscriptionInfo />}
+            {!activeComponent && (
+              <>
+                {authUser?.plan === "free" ? (
+                  <Card className="max-w-lg mx-auto p-6 text-center">
+                    <CardHeader>
+                      <CardTitle>Upgrade to Pro</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p>Accede a todas las funciones premium.</p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button onClick={() => handleUpgrade.mutate()} className="w-full bg-blue-600">
+                        Upgrade Now
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ) : (
+                  <p>Bienvenido a tu cuenta PRO</p>
+                )}
+              </>
+            )}
+          </div>
+        </MySidebarInset>
       </SidebarProvider>
     </>
   );

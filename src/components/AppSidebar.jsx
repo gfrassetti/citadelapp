@@ -47,7 +47,7 @@ export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
     <Sidebar collapsible="icon">
       <SidebarHeader />
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        {/* <NavMain items={data.navMain} /> */}
 
         {/* 🔥 "Upgrade to Pro" ahora se muestra si el usuario es "free" */}
         {!isProUser ? (
