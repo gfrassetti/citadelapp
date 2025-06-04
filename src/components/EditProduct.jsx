@@ -8,6 +8,7 @@ import {
   where,
   getDocs,
   doc,
+  deleteDoc,
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/db/db";
@@ -26,6 +27,18 @@ import {
   AlertTitle,
   AlertDescription,
 } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
 
 export default function EditProduct() {
   const { user } = useUser();
@@ -100,35 +113,60 @@ export default function EditProduct() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!selectedProduct) return;
+    await deleteDoc(doc(db, "products", selectedProduct.id));
+    setProducts(products.filter((p) => p.id !== selectedProduct.id));
+    setSelectedProduct(null);
+  };
+
   return (
     <div className="p-4">
-      {!selectedProduct ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {products.map((product) => (
-            <div
-              key={product.id}
-              className="p-4 border rounded shadow cursor-pointer hover:bg-gray-100"
-              onClick={() => onSelectProduct(product)}
-
-            >
-              <img
-                src={product.imageUrl}
-                alt={product.productName}
-                loading="lazy"
-                className="w-full h-32 object-cover rounded mb-2"
-              />
-              <p className="font-semibold">{product.productName}</p>
-              <p className="text-sm">{product.description}</p>
-              <p className="text-sm text-green-600">💲{product.price}</p>
-              <p className="text-xs text-gray-500">
-              {product.createdAt?.toDate
-                  ? product.createdAt.toDate().toLocaleDateString()
-                  : "Sin fecha"}
-
-              </p>
-            </div>
-          ))}
+      {selectedProduct && (
+        <div className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
+          <span className="text-black font-medium">Mi Cuenta</span>
+          <span>{">"}</span>
+          <span className="text-blue-600 font-medium">Editar Producto</span>
         </div>
+      )}
+
+      {!selectedProduct ? (
+        products.length === 0 ? (
+          <p className="text-center text-gray-500">Usted no tiene ningún producto.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {products.map((product) => (
+              <div
+                key={product.id}
+                className="relative p-4 border rounded shadow hover:bg-gray-100"
+                onClick={() => onSelectProduct(product)}
+              >
+                <img
+                  src={product.imageUrl}
+                  alt={product.productName}
+                  className="w-full h-32 object-cover rounded mb-2"
+                />
+                <p className="font-semibold">{product.productName}</p>
+                <p className="text-sm">{product.description}</p>
+                <p className="text-sm text-green-600">💲{product.price}</p>
+                <p className="text-xs text-gray-500">
+                  {product.createdAt?.toDate
+                    ? product.createdAt.toDate().toLocaleDateString()
+                    : "Sin fecha"}
+                </p>
+                <div
+                  className="absolute top-2 right-2 text-gray-400 hover:text-red-600"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedProduct(product);
+                  }}
+                >
+                  <Trash2 size={18} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )
       ) : (
         <div className="max-w-md mx-auto space-y-4">
           <Button
@@ -189,9 +227,34 @@ export default function EditProduct() {
                   </FormItem>
                 )}
               />
-              <Button type="submit">
-                {loading ? "Guardando..." : "Guardar Cambios"}
-              </Button>
+
+              <div className="flex items-center gap-2">
+                <Button type="submit">
+                  {loading ? "Guardando..." : "Guardar Cambios"}
+                </Button>
+
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button type="button" variant="destructive">
+                      Eliminar
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta acción no se puede deshacer. El producto será eliminado permanentemente.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete}>
+                        Confirmar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
 
               {status && (
                 <Alert
@@ -210,4 +273,5 @@ export default function EditProduct() {
     </div>
   );
 }
+
 
