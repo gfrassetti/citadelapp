@@ -174,9 +174,9 @@ export default function Dashboard() {
             )}
 
             {activeComponent === "UploadInfo" && <UploadInfo />}
-            activeComponent === "UploadProduct" && (
+            {activeComponent === "UploadProduct" && (
               <UploadProduct empresaId={userData?.empresaId} />
-            )
+            )}
             {activeComponent === "EditInfo" && <EditInfo />}
             {activeComponent === "EditProduct" && <EditProduct />}
             {activeComponent === "Profile" && <Profile />}
