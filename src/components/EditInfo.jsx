@@ -3,19 +3,16 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { updateCompanyData, getCompanyData } from "@/lib/db/handleEditInfo";
 import { useUser } from "@/context/AuthContext";
-import {
-  Form, FormField, FormItem, FormLabel, FormControl, FormMessage
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export default function EditInfo() {
   const { user } = useUser();
-  const form = useForm({ defaultValues: {} });
+  const { register, handleSubmit, reset } = useForm();
 
   useEffect(() => {
     if (!user?.uid) return;
-    getCompanyData(user.uid).then((data) => form.reset(data));
+    getCompanyData(user.uid).then((data) => reset(data));
   }, [user?.uid]);
 
   const onSubmit = async (data) => {
@@ -24,19 +21,40 @@ export default function EditInfo() {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4">
-        {["companyName", "address", "phone", "whatsapp", "email", "website", "cuit", "postalCode"].map((field) => (
-          <FormField key={field.name} name={field} control={form.control} render={({ field }) => (
-            <FormItem>
-              <FormLabel>{field}</FormLabel>
-              <FormControl><Input {...field} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-        ))}
-        <Button type="submit" className="bg-blue-600">Actualizar</Button>
-      </form>
-    </Form>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
+      <div>
+        <label>Nombre de la empresa</label>
+        <Input {...register("companyName")} />
+      </div>
+      <div>
+        <label>Dirección</label>
+        <Input {...register("address")} />
+      </div>
+      <div>
+        <label>Teléfono</label>
+        <Input {...register("phone")} />
+      </div>
+      <div>
+        <label>Whatsapp</label>
+        <Input {...register("whatsapp")} />
+      </div>
+      <div>
+        <label>Email</label>
+        <Input {...register("email")} />
+      </div>
+      <div>
+        <label>Website</label>
+        <Input {...register("website")} />
+      </div>
+      <div>
+        <label>CUIT</label>
+        <Input {...register("cuit")} />
+      </div>
+      <div>
+        <label>Código Postal</label>
+        <Input {...register("postalCode")} />
+      </div>
+      <Button type="submit" className="bg-blue-600">Actualizar</Button>
+    </form>
   );
 }
