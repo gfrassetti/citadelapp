@@ -14,9 +14,9 @@ import { db } from "@/lib/db/db";
 import UpdatePaymentMethod from "./UpdatePaymentMethod";
 
 const paymentIcons = {
-  visa: "/assets/visa-4.svg",
-  mastercard: "/assets/mastercard-4.svg",
-  amex: "/assets/american-express-1.svg",
+  visa: "/assets/32px-Visa_Inc._logo.svg",
+  mastercard: "/assets/32px-Mastercard-logo.svg",
+  amex: "/assets/American_Express_logo_(2018).png",
 };
 
 async function fetchSubscription(userEmail) {
