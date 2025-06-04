@@ -15,6 +15,11 @@ import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/AuthContext";
 import { getDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/db/db";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 
 const schema = z.object({
   companyName: z.string().optional(),
@@ -26,7 +31,7 @@ const schema = z.object({
 
 export default function EditInfo() {
   const { user } = useUser();
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm({
@@ -66,7 +71,7 @@ export default function EditInfo() {
 
   const onSubmit = async (values) => {
     setIsSubmitting(true);
-    setStatus("");
+    setStatus(null);
 
     try {
       const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -76,12 +81,12 @@ export default function EditInfo() {
       const empresaRef = doc(db, "empresas", empresaId);
       await updateDoc(empresaRef, values);
 
-      setStatus("¡Terminado!");
+      setStatus({ type: "success", message: "Información actualizada correctamente." });
     } catch (err) {
-      setStatus("Hubo un error al guardar.");
       console.error(err);
+      setStatus({ type: "error", message: "Hubo un error al guardar." });
     } finally {
-      setTimeout(() => setStatus(""), 3000);
+      setTimeout(() => setStatus(null), 4000);
       setIsSubmitting(false);
     }
   };
@@ -111,10 +116,17 @@ export default function EditInfo() {
         ))}
 
         <Button type="submit" className="w-full">
-          {isSubmitting ? "Actualizando..." : status === "¡Terminado!" ? "¡Terminado!" : "Actualizar"}
+          {isSubmitting ? "Actualizando..." : "Actualizar"}
         </Button>
 
-        {status && <p className="text-center text-sm text-gray-600">{status}</p>}
+        {status && (
+          <Alert variant={status.type === "error" ? "destructive" : "default"}>
+            <AlertTitle>
+              {status.type === "error" ? "Error" : "Éxito"}
+            </AlertTitle>
+            <AlertDescription>{status.message}</AlertDescription>
+          </Alert>
+        )}
       </form>
     </Form>
   );
@@ -130,4 +142,3 @@ function getLabel(field) {
   };
   return labels[field] || field;
 }
-

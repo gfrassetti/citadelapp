@@ -1,12 +1,8 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
-import { useUser } from "@/context/AuthContext";
-import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/db/db";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormField,
@@ -14,128 +10,164 @@ import {
   FormLabel,
   FormControl,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { getDoc, doc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/db/db";
+import { useUser } from "@/context/AuthContext";
+import {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+} from "@/components/ui/alert";
+
+const schema = z.object({
+  name: z.string().min(1, "Requerido"),
+  description: z.string().min(1, "Requerido"),
+  price: z.string().min(1, "Requerido"),
+  keywords: z.string().optional(),
+});
 
 export default function EditProduct() {
   const { user } = useUser();
-  const [products, setProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [status, setStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const form = useForm({
+    resolver: zodResolver(schema),
     defaultValues: {
-      productName: "",
+      name: "",
       description: "",
       price: "",
-      tags: "",
+      keywords: "",
     },
   });
 
   useEffect(() => {
-    if (!user?.empresaId) return;
-    async function fetchProducts() {
-      const q = query(collection(db, "products"), where("empresaId", "==", user.empresaId));
-      const querySnapshot = await getDocs(q);
-      const data = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setProducts(data);
-    }
-    fetchProducts();
-  }, [user]);
+    const loadProduct = async () => {
+      if (!user?.uid) return;
 
-  const onSelectProduct = (product) => {
-    setSelectedProduct(product);
-    form.reset({
-      productName: product.productName,
-      description: product.description,
-      price: product.price,
-      tags: product.tags?.join(", ") || "",
-    });
-  };
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const empresaId = userDoc.data()?.empresaId;
+      if (!empresaId) return;
+
+      const productRef = doc(db, "products", empresaId);
+      const productSnap = await getDoc(productRef);
+      if (productSnap.exists()) {
+        const product = productSnap.data();
+        form.reset({
+          name: product.name || "",
+          description: product.description || "",
+          price: product.price?.toString() || "",
+          keywords: product.keywords || "",
+        });
+      }
+    };
+
+    loadProduct();
+  }, [user?.uid, form]);
 
   const onSubmit = async (values) => {
-    if (!selectedProduct) return;
-    const updatedData = {
-      productName: values.productName,
-      description: values.description,
-      price: values.price,
-      tags: values.tags.split(",").map((tag) => tag.trim()),
-    };
-    await updateDoc(doc(db, "products", selectedProduct.id), updatedData);
-    alert("Producto actualizado correctamente");
+    setLoading(true);
+    setStatus(null);
+
+    try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const empresaId = userDoc.data()?.empresaId;
+      if (!empresaId) throw new Error("empresaId no encontrado");
+
+      const productRef = doc(db, "products", empresaId);
+      await updateDoc(productRef, {
+        name: values.name,
+        description: values.description,
+        price: Number(values.price),
+        keywords: values.keywords || "",
+      });
+
+      setStatus({
+        type: "success",
+        message: "Producto actualizado correctamente.",
+      });
+    } catch (error) {
+      console.error(error);
+      setStatus({
+        type: "error",
+        message: "Hubo un error al actualizar el producto.",
+      });
+    } finally {
+      setTimeout(() => setStatus(null), 4000);
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="p-4">
-      {!selectedProduct ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {products.map((product) => (
-            <div
-              key={product.id}
-              className="p-4 border rounded shadow cursor-pointer hover:bg-gray-100"
-              onClick={() => onSelectProduct(product)}
-            >
-              <img
-                src={product.imageUrl}
-                alt={product.productName}
-                className="w-full h-32 object-cover rounded mb-2"
-              />
-              <p className="font-semibold">{product.productName}</p>
-              <p className="text-sm">{product.description}</p>
-              <p className="text-sm">💲{product.price}</p>
-              <p className="text-xs text-gray-500">
-                {product.createdAt ? new Date(product.createdAt).toLocaleDateString() : ""}
-              </p>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="max-w-md mx-auto">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="productName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre del Producto</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descripción</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Precio</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="tags"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Palabras clave</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">Guardar Cambios</Button>
-            </form>
-          </Form>
-        </div>
-      )}
+    <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded">
+      <h3 className="text-xl font-bold mb-4">Editar Producto</h3>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nombre del Producto</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descripción</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Precio</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="keywords"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Palabras clave</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" className="bg-black text-white">
+            {loading ? "Guardando..." : "Guardar Cambios"}
+          </Button>
+
+          {status && (
+            <Alert variant={status.type === "error" ? "destructive" : "default"}>
+              <AlertTitle>
+                {status.type === "error" ? "Error" : "Éxito"}
+              </AlertTitle>
+              <AlertDescription>{status.message}</AlertDescription>
+            </Alert>
+          )}
+        </form>
+      </Form>
     </div>
   );
 }
