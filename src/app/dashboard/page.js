@@ -18,7 +18,6 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { useUser } from "@/context/AuthContext";
 import UploadInfo from "@/components/UploadInfo";
@@ -213,9 +212,9 @@ export default function Dashboard() {
                       <p>Accede a todas las funciones premium.</p>
                     </CardContent>
                     <CardFooter>
-                      <Button onClick={() => handleUpgrade.mutate()} className="w-full bg-blue-600">
+                      <button onClick={() => handleUpgrade.mutate()} className="w-full bg-blue-600">
                         Upgrade Now
-                      </Button>
+                      </button>
                     </CardFooter>
                   </Card>
                 ) : (
