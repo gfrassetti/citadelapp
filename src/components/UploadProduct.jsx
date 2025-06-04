@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { uploadProductData } from "@/lib/db/handleUploadProduct";
 import {
@@ -13,12 +13,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/AuthContext";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/db/db";
 
 export default function UploadProduct({ empresaId: initialEmpresaId }) {
   const [uploading, setUploading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [empresaId, setEmpresaId] = useState(initialEmpresaId || null);
+
   const { user } = useUser();
 
   const form = useForm({
@@ -31,31 +33,38 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
     },
   });
 
-  const onSubmit = async (data) => {
-    if (!user?.uid || !user?.email) {
-      alert("Usuario no autenticado.");
-      return;
-    }
+  useEffect(() => {
+    const ensureEmpresaId = async () => {
+      if (empresaId || !user?.uid) return;
 
-    let empresaId = initialEmpresaId;
+      const generatedEmpresaId = user.uid;
+      const empresaRef = doc(db, "empresas", generatedEmpresaId);
 
-    // Si no existe empresaId aún, generamos uno automáticamente
-    if (!empresaId) {
-      empresaId = user.uid;
-
-      const empresaRef = doc(db, "empresas", empresaId);
-      await setDoc(empresaRef, {
-        companyName: "Mi Empresa",
-        createdAt: new Date(),
-        address: "",
-        cuit: "",
-        website: "",
-        postalCode: "",
-        tags: [],
-      });
+      const empresaDoc = await getDoc(empresaRef);
+      if (!empresaDoc.exists()) {
+        await setDoc(empresaRef, {
+          companyName: "Mi Empresa",
+          createdAt: new Date(),
+          address: "",
+          cuit: "",
+          website: "",
+          postalCode: "",
+          tags: [],
+        });
+      }
 
       const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, { empresaId });
+      await updateDoc(userRef, { empresaId: generatedEmpresaId });
+      setEmpresaId(generatedEmpresaId);
+    };
+
+    ensureEmpresaId();
+  }, [user, empresaId]);
+
+  const onSubmit = async (data) => {
+    if (!user?.uid || !user?.email || !empresaId) {
+      alert("Faltan datos del usuario o empresa.");
+      return;
     }
 
     setUploading(true);
@@ -80,9 +89,12 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
     }
   };
 
+  if (!empresaId) return <p className="text-center">Cargando empresa...</p>;
+
   return (
     <div className="max-w-lg mx-auto p-6 shadow-lg bg-white rounded-lg">
       <h1 className="text-2xl font-bold mb-4">Sube un producto</h1>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -98,6 +110,7 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
               </FormItem>
             )}
           />
+
           <FormField
             name="description"
             control={form.control}
@@ -111,6 +124,7 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
               </FormItem>
             )}
           />
+
           <FormField
             name="price"
             control={form.control}
@@ -124,6 +138,7 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
               </FormItem>
             )}
           />
+
           <FormField
             name="tags"
             control={form.control}
@@ -141,6 +156,7 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
               </FormItem>
             )}
           />
+
           <FormField
             name="image"
             control={form.control}
@@ -157,17 +173,18 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
               </FormItem>
             )}
           />
+
           <Button type="submit" className="w-full bg-blue-600" disabled={uploading}>
             {uploading ? "Subiendo..." : "Subir Producto"}
           </Button>
         </form>
-
-        {successMessage && (
-          <div className="mt-4 p-2 bg-green-100 text-green-800 rounded">
-            {successMessage}
-          </div>
-        )}
       </Form>
+
+      {successMessage && (
+        <div className="mt-4 p-2 bg-green-100 text-green-800 rounded">
+          {successMessage}
+        </div>
+      )}
     </div>
   );
 }
