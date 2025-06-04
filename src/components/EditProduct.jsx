@@ -53,6 +53,7 @@ export default function EditProduct() {
       description: "",
       price: "",
       tags: "",
+      imageUrl: "",
     },
   });
 
@@ -80,6 +81,7 @@ export default function EditProduct() {
       description: product.description,
       price: product.price,
       tags: product.tags?.join(", ") || "",
+      imageUrl: product.imageUrl || "",
     });
   };
 
@@ -93,6 +95,7 @@ export default function EditProduct() {
       description: values.description,
       price: values.price,
       tags: values.tags.split(",").map((tag) => tag.trim()),
+      imageUrl: values.imageUrl,
     };
 
     try {
@@ -111,6 +114,13 @@ export default function EditProduct() {
       setTimeout(() => setStatus(null), 4000);
       setLoading(false);
     }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedProduct) return;
+    await deleteDoc(doc(db, "products", selectedProduct.id));
+    setProducts((prev) => prev.filter((p) => p.id !== selectedProduct.id));
+    setSelectedProduct(null);
   };
 
   return (
@@ -140,7 +150,6 @@ export default function EditProduct() {
                     : "Sin fecha"}
                 </p>
 
-                {/* Tachito para eliminar */}
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <div
@@ -159,12 +168,7 @@ export default function EditProduct() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={async () => {
-                          await deleteDoc(doc(db, "products", product.id));
-                          setProducts((prev) => prev.filter((p) => p.id !== product.id));
-                        }}
-                      >
+                      <AlertDialogAction onClick={handleDelete}>
                         Confirmar
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -234,10 +238,46 @@ export default function EditProduct() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="imageUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>URL de la Imagen</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
 
-              <Button type="submit">
-                {loading ? "Guardando..." : "Guardar Cambios"}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button type="submit">
+                  {loading ? "Guardando..." : "Guardar Cambios"}
+                </Button>
+
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" type="button">
+                      Eliminar
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta acción no se puede deshacer. El producto será eliminado permanentemente.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete}>
+                        Confirmar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
 
               {status && (
                 <Alert
@@ -256,6 +296,3 @@ export default function EditProduct() {
     </div>
   );
 }
-
-
-
