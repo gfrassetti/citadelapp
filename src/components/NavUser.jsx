@@ -34,7 +34,9 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/lib/db/db";
 import { useRouter } from "next/navigation";
 import { useUserData } from "@/context/UserDataContext";
+import { useUser } from "@/context/AuthContext";
 import { useHandleUpgrade } from "@/hooks/useHandleUpgrade";
+
 
 // Función para obtener iniciales
 function getInitials(name) {
@@ -48,6 +50,7 @@ export function NavUser({ projects, setActiveComponent }) {
   const userData = useUserData();
   const { isMobile } = useSidebar();
   const router = useRouter();
+  const { user } = useUser();
   const handleUpgrade = useHandleUpgrade(user);
 
   const displayName = userData?.name || "Usuario";
