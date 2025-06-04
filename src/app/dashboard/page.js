@@ -69,7 +69,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!user?.uid) return;
-  
     const url = new URL(window.location.href);
     const preapprovalId = url.searchParams.get("preapproval_id");
     if (!preapprovalId) return;
