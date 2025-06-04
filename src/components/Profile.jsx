@@ -29,14 +29,14 @@ const formSchema = z.object({
   subscription: z.string().optional(),
   avatar: z.any().optional(),
   newPassword: z.string().optional(),
-  confirmPassword: z.string().optional(), // Si quieres confirmar contraseña
+  confirmPassword: z.string().optional(),
 });
 
 export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState("");
 
-  const { control, handleSubmit, reset, watch } = useForm({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -49,7 +49,8 @@ export default function Profile() {
     },
   });
 
-  // Para comparar contraseñas si deseas
+  const { reset, watch } = form;
+
   const newPasswordValue = watch("newPassword");
   const confirmPasswordValue = watch("confirmPassword");
 
@@ -85,22 +86,19 @@ export default function Profile() {
       const user = auth.currentUser;
       if (!user) throw new Error("No hay usuario autenticado.");
 
-      // Verifica contraseñas si deseas
       if (values.newPassword && values.newPassword !== values.confirmPassword) {
         throw new Error("Las contraseñas no coinciden");
       }
 
       let avatarUrl = currentAvatarUrl;
 
-      // Si sube un nuevo archivo
       if (values.avatar instanceof File) {
         const file = values.avatar;
-        const storageRef = ref(storage, `avatars/${user.uid}/${file.name}`);
-        await uploadBytes(storageRef, file);
-        avatarUrl = await getDownloadURL(storageRef);
+        const storagePath = ref(storage, `avatars/${user.uid}/${file.name}`);
+        await uploadBytes(storagePath, file);
+        avatarUrl = await getDownloadURL(storagePath);
       }
 
-      // Actualiza Firestore
       const userRef = doc(db, "users", user.uid);
       const updateData = {
         name: values.name,
@@ -112,7 +110,6 @@ export default function Profile() {
 
       await updateDoc(userRef, updateData);
 
-      // Cambiar contraseña si se proporcionó
       if (values.newPassword && values.newPassword.length > 0) {
         await updatePassword(user, values.newPassword);
       }
@@ -123,7 +120,6 @@ export default function Profile() {
 
       setCurrentAvatarUrl(avatarUrl);
 
-      // Resetea el form
       reset({
         name: values.name,
         email: values.email,
@@ -143,17 +139,14 @@ export default function Profile() {
     }
   }
 
-  // Quitar avatar
   async function handleRemoveAvatar() {
     try {
       const user = auth.currentUser;
       if (!user || !currentAvatarUrl) return;
-  
-      // Crea una referencia al archivo usando la URL
+
       const fileRef = storageRef(storage, currentAvatarUrl);
       await deleteObject(fileRef);
-  
-      // Actualiza Firestore para quitar el avatar
+
       await updateDoc(doc(db, "users", user.uid), { avatarUrl: "" });
       setCurrentAvatarUrl("");
       toast("Avatar removido");
@@ -165,9 +158,7 @@ export default function Profile() {
 
   return (
     <div className="mx-auto mt-8 w-full max-w-7xl px-4">
-      {/* Contenedor principal con dos columnas */}
       <div className="flex flex-col gap-6 md:flex-row">
-        {/* Columna Izquierda (Avatar / Info Básica) */}
         <div className="md:w-1/3 bg-white p-6 shadow rounded">
           <h3 className="mb-4 text-xl font-bold">Profile</h3>
           <div className="flex flex-col items-center">
@@ -180,7 +171,6 @@ export default function Profile() {
             ) : (
               <div className="mb-4 h-32 w-32 rounded-full bg-gray-200" />
             )}
-
             {currentAvatarUrl ? (
               <Button variant="destructive" onClick={handleRemoveAvatar}>
                 Quitar Avatar
@@ -191,15 +181,13 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Columna Derecha (Formulario de edición) */}
         <div className="md:w-2/3 bg-white p-6 shadow rounded">
           <h3 className="text-xl font-bold mb-4">Edit Details</h3>
-          <Form control={control}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                {/* Nombre */}
                 <FormField
-                  control={control}
+                  control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
@@ -211,9 +199,8 @@ export default function Profile() {
                     </FormItem>
                   )}
                 />
-                {/* Email */}
                 <FormField
-                  control={control}
+                  control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
@@ -227,10 +214,9 @@ export default function Profile() {
                 />
               </div>
 
-              {/* Plan (lectura) */}
               <div className="grid grid-cols-2 gap-4">
                 <FormField
-                  control={control}
+                  control={form.control}
                   name="plan"
                   render={({ field }) => (
                     <FormItem>
@@ -242,9 +228,8 @@ export default function Profile() {
                     </FormItem>
                   )}
                 />
-                {/* Suscripción (lectura) */}
                 <FormField
-                  control={control}
+                  control={form.control}
                   name="subscription"
                   render={({ field }) => (
                     <FormItem>
@@ -258,9 +243,8 @@ export default function Profile() {
                 />
               </div>
 
-              {/* Subir nuevo avatar */}
               <FormField
-                control={control}
+                control={form.control}
                 name="avatar"
                 render={({ field }) => (
                   <FormItem>
@@ -280,38 +264,29 @@ export default function Profile() {
                 )}
               />
 
-              {/* Sección Cambio de Contraseña */}
               <h4 className="mt-6 text-lg font-semibold">Change Password</h4>
               <div className="grid grid-cols-2 gap-4">
                 <FormField
-                  control={control}
+                  control={form.control}
                   name="newPassword"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Nueva Contraseña</FormLabel>
                       <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="Dejar vacío para no cambiar"
-                          {...field}
-                        />
+                        <Input type="password" placeholder="Dejar vacío para no cambiar" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
-                  control={control}
+                  control={form.control}
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Confirmar Contraseña</FormLabel>
                       <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="Repite la nueva contraseña"
-                          {...field}
-                        />
+                        <Input type="password" placeholder="Repite la nueva contraseña" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

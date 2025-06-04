@@ -168,7 +168,7 @@ export default function Dashboard() {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                     <span className="capitalize text-white">
-                      {componentLabels[activeComponent] || activeComponent}
+                    {componentLabels[activeComponent?.trim()] ?? activeComponent}
                     </span>
                     </BreadcrumbItem>
                   </BreadcrumbList>
