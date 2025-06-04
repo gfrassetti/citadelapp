@@ -12,15 +12,26 @@ export default function NavProjects({ projects, setActiveComponent }) {
     <SidebarGroup>
       <SidebarGroupLabel>Mi Dashboard</SidebarGroupLabel>
       <SidebarMenu>
-      {projects.map((project, index) => {
-        const Icon = project.icon;
-        return (
-          <SidebarMenuButton key={project.name} onClick={() => setActiveComponent(project.component)}>
-            {Icon && <Icon />}
-            <span>{project.name}</span>
-          </SidebarMenuButton>
-        );
-      })}
+      <SidebarMenu>
+        {projects.map((project, index) => {
+          const Icon = project.icon;
+          const isDisabled = project.disabled;
+
+          return (
+            <SidebarMenuButton
+              key={project.name}
+              onClick={() => {
+                if (!isDisabled) setActiveComponent(project.component);
+              }}
+              disabled={isDisabled}
+              className={isDisabled ? "opacity-40 pointer-events-none" : ""}
+            >
+              {Icon && <Icon className="mr-2 h-4 w-4" />}
+              <span>{project.name}</span>
+            </SidebarMenuButton>
+          );
+        })}
+      </SidebarMenu>
       </SidebarMenu>
     </SidebarGroup>
   );

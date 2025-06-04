@@ -22,7 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { Loader2Icon } from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -96,10 +96,21 @@ export function NavUser({ projects, setActiveComponent }) {
 
             <DropdownMenuGroup>
               {userPlan === "free" && (
-                <DropdownMenuItem>
-                  <Sparkles className="mr-2" />
-                  Upgrade to Pro
-                </DropdownMenuItem>
+                <DropdownMenuItem
+                    onClick={() => handleUpgrade.mutate()}
+                    disabled={handleUpgrade.isPending}
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    {handleUpgrade.isPending ? (
+                      <>
+                        <Loader2Icon className="animate-spin h-4 w-4 mr-1" />
+                        Cargando...
+                      </>
+                    ) : (
+                      "Upgrade to Pro"
+                    )}
+                  </DropdownMenuItem>
+
               )}
             </DropdownMenuGroup>
 

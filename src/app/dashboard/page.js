@@ -15,8 +15,10 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
-  CardFooter,
+  CardFooter
 } from "@/components/ui/card";
+import { Loader2Icon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useMutation } from "@tanstack/react-query";
 import { useUser } from "@/context/AuthContext";
@@ -204,17 +206,35 @@ export default function Dashboard() {
             {!activeComponent && (
               <>
                 {authUser?.plan === "free" ? (
-                  <Card className="max-w-lg mx-auto p-6 text-center">
-                    <CardHeader>
-                      <CardTitle>Upgrade to Pro</CardTitle>
+                  <Card className="max-w-md mx-auto text-center border border-gray-800 bg-muted text-foreground shadow-md">
+                    <CardHeader className="space-y-2">
+                      <h2 className="text-2xl font-bold tracking-tight">Plan gratuito activado</h2>
+                      <p className="text-sm text-muted-foreground">
+                        Estás en el plan free. Para subir y editar productos, actualizá tu cuenta a PRO.
+                      </p>
                     </CardHeader>
                     <CardContent>
-                      <p>Accede a todas las funciones premium.</p>
+                      <ul className="text-left text-sm mb-4 space-y-2">
+                        <li>✅ Acceso básico al panel</li>
+                        <li>🚫 No podés subir ni editar productos</li>
+                        <li>💡 Desbloqueá funciones premium al actualizar</li>
+                      </ul>
                     </CardContent>
                     <CardFooter>
-                      <button onClick={() => handleUpgrade.mutate()} className="w-full bg-blue-600">
-                        Upgrade Now
-                      </button>
+                      <Button
+                        onClick={() => handleUpgrade.mutate()}
+                        disabled={handleUpgrade.isPending}
+                        className="w-full bg-gray-900 hover:bg-gray-800 text-white"
+                      >
+                        {handleUpgrade.isPending ? (
+                          <>
+                            <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                            Procesando...
+                          </>
+                        ) : (
+                          "Actualizar a PRO"
+                        )}
+                      </Button>
                     </CardFooter>
                   </Card>
                 ) : (

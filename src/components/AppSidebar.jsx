@@ -46,34 +46,41 @@ export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
   const isProUser = user?.plan === "pro";
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader />
+    <Sidebar collapsible="icon" className="w-full sm:w-64">
+      <SidebarHeader className="block sm:hidden p-4 border-b">
+        <h2 className="text-lg font-bold">Mi Panel</h2>
+      </SidebarHeader>
       <SidebarContent>
-        {/* <NavMain items={data.navMain} /> */}
-
-        {/* 🔥 "Upgrade to Pro" ahora se muestra si el usuario es "free" */}
-        {!isProUser ? (
-          <Button
-              onClick={() => {
-                setShowUpgrade(true);
-                setActiveComponent(null); // 👈 esto activa la vista por defecto
-              }}
-              className="w-full text-left flex items-center gap-2 text-gray-500 hover:text-black p-2"
-            >
-              <Frame className="text-gray-400" />
-              Upgrade to Pro
-         </Button>
-        ) : (
+        {/* SIDE NAV BAR */}
         <NavProjects
           setActiveComponent={setActiveComponent}
           projects={[
-            { name: "Sube Tu Informacion", icon: PieChart, component: "UploadInfo" },
-            { name: "Sube tus Productos", icon: Map, component: "UploadProduct" },
-            { name: "Edita tus productos", icon: Map, component: "EditProduct" },
-            { name: "Edita Informacion de tu empresas", icon: Map, component: "EditInfo" }
+            {
+              name: "Sube Tu Informacion",
+              icon: PieChart,
+              component: "UploadInfo",
+              disabled: !isProUser,
+            },
+            {
+              name: "Sube tus Productos",
+              icon: Map,
+              component: "UploadProduct",
+              disabled: !isProUser,
+            },
+            {
+              name: "Edita tus productos",
+              icon: Map,
+              component: "EditProduct",
+              disabled: !isProUser,
+            },
+            {
+              name: "Edita Informacion de tu empresas",
+              icon: Map,
+              component: "EditInfo",
+              disabled: !isProUser,
+            },
           ]}
         />
-        )}
       </SidebarContent>
       <SidebarFooter>
         {user ? (
