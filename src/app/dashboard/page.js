@@ -48,7 +48,7 @@ export default function Dashboard() {
   const [activeComponent, setActiveComponent] = useState(null);
   const ref = useRef(null);
 
-  useEffect(() => {
+/*   useEffect(() => {
     const url = new URL(window.location.href);
     const preapprovalId = url.searchParams.get("preapproval_id");
 
@@ -65,7 +65,26 @@ export default function Dashboard() {
         })
         .catch((err) => console.error("❌ Error verificando preapproval:", err));
     }
-  }, [user]);
+  }, [user]); */
+
+  useEffect(() => {
+    if (!user?.uid) return;
+  
+    const url = new URL(window.location.href);
+    const preapprovalId = url.searchParams.get("preapproval_id");
+    if (!preapprovalId) return;
+  
+    fetch("/api/mercadopago/verify-subscription", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ preapprovalId, uid: user.uid }),
+    })
+      .then((res) => {
+        if (res.ok) updateUserPlan("pro");
+      })
+      .catch((err) => console.error("❌ Error verificando preapproval:", err));
+  }, [user?.uid]);
+  
 
   useEffect(() => {
     setPersistence(auth, browserSessionPersistence).then(() => {
