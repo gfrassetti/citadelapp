@@ -1,12 +1,20 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateCompanyData, getCompanyData } from "@/lib/db/handleEditInfo";
-import { useUser } from "@/context/AuthContext";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useUser } from "@/context/AuthContext";
+import { getDoc, doc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/db/db";
 
 const schema = z.object({
   companyName: z.string().optional(),
@@ -18,6 +26,8 @@ const schema = z.object({
 
 export default function EditInfo() {
   const { user } = useUser();
+  const [status, setStatus] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -30,56 +40,94 @@ export default function EditInfo() {
     },
   });
 
-  const { register, handleSubmit, reset } = form;
-
   useEffect(() => {
     if (!user?.uid) return;
 
-    getCompanyData(user.uid).then((data) => {
-      if (data) {
-        reset({
-          companyName: data.companyName || "",
-          address: data.address || "",
-          cuit: data.cuit || "",
-          postalCode: data.postalCode || "",
-          website: data.website || "",
+    const loadCompany = async () => {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const empresaId = userDoc.data()?.empresaId;
+      if (!empresaId) return;
+
+      const empresaDoc = await getDoc(doc(db, "empresas", empresaId));
+      const empresaData = empresaDoc.data();
+      if (empresaData) {
+        form.reset({
+          companyName: empresaData.companyName || "",
+          address: empresaData.address || "",
+          cuit: empresaData.cuit || "",
+          postalCode: empresaData.postalCode || "",
+          website: empresaData.website || "",
         });
       }
-    });
-  }, [user?.uid, reset]);
+    };
 
-  const onSubmit = async (data) => {
-    await updateCompanyData(user.uid, data);
-    alert("Información actualizada");
+    loadCompany();
+  }, [user?.uid, form.reset]);
+
+  const onSubmit = async (values) => {
+    setIsSubmitting(true);
+    setStatus("");
+
+    try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const empresaId = userDoc.data()?.empresaId;
+      if (!empresaId) throw new Error("No se encontró empresaId");
+
+      const empresaRef = doc(db, "empresas", empresaId);
+      await updateDoc(empresaRef, values);
+
+      setStatus("¡Terminado!");
+    } catch (err) {
+      setStatus("Hubo un error al guardar.");
+      console.error(err);
+    } finally {
+      setTimeout(() => setStatus(""), 3000);
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="max-w-md mx-auto space-y-5 p-6 rounded border border-neutral-300"
-      style={{ backgroundColor: "#f5f5f5", color: "#363636" }}
-    >
-      <div>
-        <label className="block text-sm mb-1">Nombre de la empresa</label>
-        <Input {...register("companyName")} className="bg-white text-black" />
-      </div>
-      <div>
-        <label className="block text-sm mb-1">Dirección</label>
-        <Input {...register("address")} className="bg-white text-black" />
-      </div>
-      <div>
-        <label className="block text-sm mb-1">CUIT</label>
-        <Input {...register("cuit")} className="bg-white text-black" />
-      </div>
-      <div>
-        <label className="block text-sm mb-1">Código Postal</label>
-        <Input {...register("postalCode")} className="bg-white text-black" />
-      </div>
-      <div>
-        <label className="block text-sm mb-1">Website</label>
-        <Input {...register("website")} className="bg-white text-black" />
-      </div>
-      <Button type="submit" className="bg-white text-black w-full">Actualizar</Button>
-    </form>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="max-w-md mx-auto space-y-5 p-6 rounded border border-neutral-300 bg-gray-100"
+      >
+        {["companyName", "address", "cuit", "postalCode", "website"].map((field) => (
+          <FormField
+            key={field}
+            name={field}
+            control={form.control}
+            render={({ field: f }) => (
+              <FormItem>
+                <FormLabel className="capitalize text-black">
+                  {getLabel(field)}
+                </FormLabel>
+                <FormControl>
+                  <Input {...f} className="bg-white text-black" />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        ))}
+
+        <Button type="submit" className="w-full">
+          {isSubmitting ? "Actualizando..." : status === "¡Terminado!" ? "¡Terminado!" : "Actualizar"}
+        </Button>
+
+        {status && <p className="text-center text-sm text-gray-600">{status}</p>}
+      </form>
+    </Form>
   );
 }
+
+function getLabel(field) {
+  const labels = {
+    companyName: "Nombre de la empresa",
+    address: "Dirección",
+    cuit: "CUIT",
+    postalCode: "Código Postal",
+    website: "Website",
+  };
+  return labels[field] || field;
+}
+
