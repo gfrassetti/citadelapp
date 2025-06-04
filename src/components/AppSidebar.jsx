@@ -22,7 +22,7 @@ import {
 
 import { useUser } from "@/context/AuthContext";
 
-const data = {
+/* const data = {
   user: { avatar: 'https://github.com/shadcn.png' },
   navMain: [
     {
@@ -36,7 +36,7 @@ const data = {
       ]
     }
   ]
-};
+}; */
 
 
 export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
@@ -84,7 +84,7 @@ export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
             user={{ 
               name: user.name || user.displayName || "Usuario", 
               email: user.email || "", 
-              avatar: user.photoURL || data.user.avatar 
+              /* avatar: user.photoURL || data.user.avatar  */
             }} 
           />
         ) : (

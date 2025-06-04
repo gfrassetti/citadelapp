@@ -113,13 +113,6 @@ export default function EditProduct() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!selectedProduct) return;
-    await deleteDoc(doc(db, "products", selectedProduct.id));
-    setProducts(products.filter((p) => p.id !== selectedProduct.id));
-    setSelectedProduct(null);
-  };
-
   return (
     <div className="p-4">
       {!selectedProduct ? (
@@ -130,7 +123,7 @@ export default function EditProduct() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="relative p-4 border rounded shadow hover:bg-gray-100 cursor-pointer"
+                className="relative p-4 border rounded shadow hover:bg-gray-100"
                 onClick={() => onSelectProduct(product)}
               >
                 <img
@@ -146,15 +139,37 @@ export default function EditProduct() {
                     ? product.createdAt.toDate().toLocaleDateString()
                     : "Sin fecha"}
                 </p>
-                <div
-                  className="absolute top-2 right-2 text-gray-400 hover:text-red-600"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedProduct(product);
-                  }}
-                >
-                  <Trash2 size={18} />
-                </div>
+
+                {/* Tachito para eliminar */}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <div
+                      className="absolute top-2 right-2 text-gray-400 hover:text-red-600"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Trash2 size={18} />
+                    </div>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta acción no se puede deshacer. El producto será eliminado permanentemente.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={async () => {
+                          await deleteDoc(doc(db, "products", product.id));
+                          setProducts((prev) => prev.filter((p) => p.id !== product.id));
+                        }}
+                      >
+                        Confirmar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             ))}
           </div>
@@ -220,33 +235,9 @@ export default function EditProduct() {
                 )}
               />
 
-              <div className="flex items-center gap-2">
-                <Button type="submit">
-                  {loading ? "Guardando..." : "Guardar Cambios"}
-                </Button>
-
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button type="button" variant="destructive">
-                      Eliminar
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Esta acción no se puede deshacer. El producto será eliminado permanentemente.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDelete}>
-                        Confirmar
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
+              <Button type="submit">
+                {loading ? "Guardando..." : "Guardar Cambios"}
+              </Button>
 
               {status && (
                 <Alert
@@ -265,5 +256,6 @@ export default function EditProduct() {
     </div>
   );
 }
+
 
 

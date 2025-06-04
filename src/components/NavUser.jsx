@@ -2,9 +2,7 @@
 
 import {
   BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
   Sparkles,
 } from "lucide-react";
@@ -32,35 +30,27 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-import {
-  signOut,
-} from "firebase/auth";
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { useUserData } from "@/context/UserDataContext";
 
-import { useEffect, useState } from "react";
-import { doc, onSnapshot } from "firebase/firestore";
-import { auth, db } from "@/lib/db/db";
+// Función para obtener iniciales
+function getInitials(name) {
+  if (!name) return "";
+  const parts = name.trim().split(" ");
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
 
-export function NavUser({ user, projects, setActiveComponent }) {
+export function NavUser({ projects, setActiveComponent }) {
+  const userData = useUserData();
   const { isMobile } = useSidebar();
-  const [userData, setUserData] = useState(null);
+  const router = useRouter();
 
-  useEffect(() => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
-
-    const unsubscribe = onSnapshot(doc(db, "users", currentUser.uid), (snapshot) => {
-      if (snapshot.exists()) {
-        setUserData(snapshot.data());
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const displayName = userData?.name || user.name || "Usuario";
-  const displayEmail = userData?.email || user.email || "";
-  const avatarUrl = userData?.avatarUrl || user.avatar || "";
-  const userPlan = userData?.plan || user.plan || "free";
+  const displayName = userData?.name || "Usuario";
+  const displayEmail = userData?.email || "";
+  const avatarUrl = userData?.avatarUrl || "";
+  const userPlan = userData?.plan || "free";
 
   return (
     <SidebarMenu>
@@ -73,7 +63,7 @@ export function NavUser({ user, projects, setActiveComponent }) {
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={avatarUrl} alt={displayName} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{displayName}</span>
@@ -93,7 +83,7 @@ export function NavUser({ user, projects, setActiveComponent }) {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-full">
                   <AvatarImage className="rounded-full" src={avatarUrl} alt={displayName} />
-                  <AvatarFallback className="rounded-full">CN</AvatarFallback>
+                  <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{displayName}</span>
@@ -104,12 +94,12 @@ export function NavUser({ user, projects, setActiveComponent }) {
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              {userPlan === "free" ? (
+              {userPlan === "free" && (
                 <DropdownMenuItem>
                   <Sparkles className="mr-2" />
                   Upgrade to Pro
                 </DropdownMenuItem>
-              ) : null}
+              )}
             </DropdownMenuGroup>
 
             {userPlan === "free" && <DropdownMenuSeparator />}
@@ -130,8 +120,8 @@ export function NavUser({ user, projects, setActiveComponent }) {
             <DropdownMenuItem>
               <LogOut className="mr-2" />
               <button onClick={() => signOut(auth).then(() => router.push("/login"))}>
-              Cerrar sesión
-            </button>
+                Cerrar sesión
+              </button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
