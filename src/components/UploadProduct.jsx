@@ -12,10 +12,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useUser } from "@/context/AuthContext";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/db/db";
 
-export default function UploadProduct({ empresaId }) {
+export default function UploadProduct({ empresaId: initialEmpresaId }) {
   const [uploading, setUploading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const { user } = useUser();
 
   const form = useForm({
     defaultValues: {
@@ -23,25 +27,48 @@ export default function UploadProduct({ empresaId }) {
       description: "",
       price: "",
       image: null,
-      tags: "", // Nuevo campo para tags de búsqueda
+      tags: "",
     },
   });
 
   const onSubmit = async (data) => {
-    if (!empresaId) {
-      alert("No se ha proporcionado empresaId.");
+    if (!user?.uid || !user?.email) {
+      alert("Usuario no autenticado.");
       return;
     }
+
+    let empresaId = initialEmpresaId;
+
+    // Si no existe empresaId aún, generamos uno automáticamente
+    if (!empresaId) {
+      empresaId = user.uid;
+
+      const empresaRef = doc(db, "empresas", empresaId);
+      await setDoc(empresaRef, {
+        companyName: "Mi Empresa",
+        createdAt: new Date(),
+        address: "",
+        cuit: "",
+        website: "",
+        postalCode: "",
+        tags: [],
+      });
+
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, { empresaId });
+    }
+
     setUploading(true);
     try {
       const formattedData = {
         ...data,
-        tags: typeof data.tags === "string" 
-          ? data.tags.split(",").map(tag => tag.trim()) 
-          : Array.isArray(data.tags) 
-            ? data.tags 
-            : [], // Si no es string ni array, se asigna un array vacío
+        tags: typeof data.tags === "string"
+          ? data.tags.split(",").map(tag => tag.trim())
+          : Array.isArray(data.tags)
+            ? data.tags
+            : [],
       };
+
       await uploadProductData(formattedData, empresaId);
       setSuccessMessage("¡Producto subido exitosamente!");
       form.reset();
@@ -71,7 +98,6 @@ export default function UploadProduct({ empresaId }) {
               </FormItem>
             )}
           />
-
           <FormField
             name="description"
             control={form.control}
@@ -85,7 +111,6 @@ export default function UploadProduct({ empresaId }) {
               </FormItem>
             )}
           />
-
           <FormField
             name="price"
             control={form.control}
@@ -99,25 +124,23 @@ export default function UploadProduct({ empresaId }) {
               </FormItem>
             )}
           />
-
-        <FormField
-          name="tags"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Palabras clave (separadas por comas)</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Ej: acero, cables, bobinas"
-                  onChange={(e) => field.onChange(e.target.value.split(","))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+          <FormField
+            name="tags"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Palabras clave (separadas por comas)</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="Ej: acero, cables, bobinas"
+                    onChange={(e) => field.onChange(e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             name="image"
             control={form.control}
@@ -134,7 +157,6 @@ export default function UploadProduct({ empresaId }) {
               </FormItem>
             )}
           />
-
           <Button type="submit" className="w-full bg-blue-600" disabled={uploading}>
             {uploading ? "Subiendo..." : "Subir Producto"}
           </Button>
