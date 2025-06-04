@@ -17,6 +17,22 @@ const paymentIcons = {
   visa: "/assets/32px-Visa_Inc._logo.svg",
   mastercard: "/assets/32px-Mastercard-logo.svg",
   amex: "/assets/American_Express_logo_(2018).svg",
+  default: "/assets/default_cc.svg",
+};
+
+const normalizeMethod = (method) => {
+  if (!method) return "default";
+  const map = {
+    visa: "visa",
+    "visa inc.": "visa",
+    mastercard: "mastercard",
+    "master card": "mastercard",
+    amex: "amex",
+    "american express": "amex",
+    account_money: "default",
+    credit_card: "default",
+  };
+  return map[method.toLowerCase()] || "default";
 };
 
 async function fetchSubscription(userEmail) {
@@ -53,7 +69,7 @@ async function pauseSubscription(subscriptionId) {
 }
 
 async function reactivateSubscription(subscriptionId) {
-  const response = await fetch(`/api/mercadopago/reactivate-subscription`, {
+  const response = await(`/api/mercadopago/reactivate-subscription`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ subscriptionId }),
@@ -74,7 +90,8 @@ export default function SubscriptionInfo() {
   });
 
   const subscription = data?.subscription;
-  const normalizedPaymentMethod = (data?.paymentMethod || "default").toLowerCase();
+  const paymentMethod = subscription?.payment_method_id;
+  const normalizedPaymentMethod = normalizeMethod(paymentMethod);
   const lastFourDigits = data?.lastFourDigits || "****";
 
   const mutationCancel = useMutation({
@@ -112,7 +129,11 @@ export default function SubscriptionInfo() {
           <TableRow>
             <TableCell className="font-semibold">Método de Pago</TableCell>
             <TableCell className="flex items-center">
-              <img src={paymentIcons[normalizedPaymentMethod] || paymentIcons.default} alt={normalizedPaymentMethod} className="w-8 h-8 mr-2" />
+              <img
+                src={paymentIcons[normalizedPaymentMethod]}
+                alt={normalizedPaymentMethod}
+                className="w-8 h-8 mr-2"
+              />
               Terminada en {lastFourDigits}
             </TableCell>
           </TableRow>
@@ -145,3 +166,4 @@ export default function SubscriptionInfo() {
     </div>
   );
 }
+

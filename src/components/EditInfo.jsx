@@ -9,15 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const schema = z.object({
-  companyName: z.string().min(1, "Requerido"),
-  address: z.string().min(1, "Requerido"),
-  cuit: z.string().min(1, "Requerido"),
-  postalCode: z.string().min(1, "Requerido"),
-  website: z.string().url("URL inválida"),
+  companyName: z.string().optional(),
+  address: z.string().optional(),
+  cuit: z.string().optional(),
+  postalCode: z.string().optional(),
+  website: z.string().optional(),
 });
 
 export default function EditInfo() {
   const { user } = useUser();
+
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -29,12 +30,23 @@ export default function EditInfo() {
     },
   });
 
-  const { register, handleSubmit, reset, formState: { errors } } = form;
+  const { register, handleSubmit, reset } = form;
 
   useEffect(() => {
     if (!user?.uid) return;
-    getCompanyData(user.uid).then((data) => reset(data));
-  }, [user?.uid]);
+
+    getCompanyData(user.uid).then((data) => {
+      if (data) {
+        reset({
+          companyName: data.companyName || "",
+          address: data.address || "",
+          cuit: data.cuit || "",
+          postalCode: data.postalCode || "",
+          website: data.website || "",
+        });
+      }
+    });
+  }, [user?.uid, reset]);
 
   const onSubmit = async (data) => {
     await updateCompanyData(user.uid, data);
@@ -49,43 +61,23 @@ export default function EditInfo() {
     >
       <div>
         <label className="block text-sm mb-1">Nombre de la empresa</label>
-        <Input
-          {...register("companyName")}
-          className="bg-white text-black"
-        />
-        {errors.companyName && <p className="text-red-400 text-xs">{errors.companyName.message}</p>}
+        <Input {...register("companyName")} className="bg-white text-black" />
       </div>
       <div>
         <label className="block text-sm mb-1">Dirección</label>
-        <Input
-          {...register("address")}
-          className="bg-white text-black"
-        />
-        {errors.address && <p className="text-red-400 text-xs">{errors.address.message}</p>}
+        <Input {...register("address")} className="bg-white text-black" />
       </div>
       <div>
         <label className="block text-sm mb-1">CUIT</label>
-        <Input
-          {...register("cuit")}
-          className="bg-white text-black"
-        />
-        {errors.cuit && <p className="text-red-400 text-xs">{errors.cuit.message}</p>}
+        <Input {...register("cuit")} className="bg-white text-black" />
       </div>
       <div>
         <label className="block text-sm mb-1">Código Postal</label>
-        <Input
-          {...register("postalCode")}
-          className="bg-white text-black"
-        />
-        {errors.postalCode && <p className="text-red-400 text-xs">{errors.postalCode.message}</p>}
+        <Input {...register("postalCode")} className="bg-white text-black" />
       </div>
       <div>
         <label className="block text-sm mb-1">Website</label>
-        <Input
-          {...register("website")}
-          className="bg-white text-black"
-        />
-        {errors.website && <p className="text-red-400 text-xs">{errors.website.message}</p>}
+        <Input {...register("website")} className="bg-white text-black" />
       </div>
       <Button type="submit" className="bg-white text-black w-full">Actualizar</Button>
     </form>
