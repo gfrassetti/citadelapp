@@ -102,6 +102,14 @@ export default function EditProduct() {
 
   return (
     <div className="p-4">
+      {selectedProduct && (
+        <div className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
+          <span className="text-black font-medium">Mi Cuenta</span>
+          <span>{">"}</span>
+          <span className="text-blue-600 font-medium">Editar Producto</span>
+        </div>
+      )}
+
       {!selectedProduct ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
@@ -109,25 +117,35 @@ export default function EditProduct() {
               key={product.id}
               className="p-4 border rounded shadow cursor-pointer hover:bg-gray-100"
               onClick={() => onSelectProduct(product)}
+
             >
               <img
                 src={product.imageUrl}
                 alt={product.productName}
+                loading="lazy"
                 className="w-full h-32 object-cover rounded mb-2"
               />
               <p className="font-semibold">{product.productName}</p>
               <p className="text-sm">{product.description}</p>
-              <p className="text-sm">💲{product.price}</p>
+              <p className="text-sm text-green-600">💲{product.price}</p>
               <p className="text-xs text-gray-500">
                 {product.createdAt && !isNaN(new Date(product.createdAt))
                   ? new Date(product.createdAt).toLocaleDateString()
-                  : ""}
+                  : "Sin fecha"}
               </p>
             </div>
           ))}
         </div>
       ) : (
-        <div className="max-w-md mx-auto">
+        <div className="max-w-md mx-auto space-y-4">
+          <Button
+            variant="outline"
+            className="text-sm"
+            onClick={() => setSelectedProduct(null)}
+          >
+            ← Volver
+          </Button>
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
