@@ -11,10 +11,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { UserDataProvider } from "@/context/UserDataContext";
 
-
-
-
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -27,7 +23,7 @@ const geistMono = Geist_Mono({
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
-  const [queryClient] = useState(() => new QueryClient())
+  const [queryClient] = useState(() => new QueryClient());
 
   const layouts = {
     "/": { header: <Header />, footer: <Footer /> },
@@ -36,7 +32,10 @@ export default function RootLayout({ children }) {
     "/dashboard": { header: null, footer: null },
   };
 
-  const { header, footer } = layouts[pathname] || { header: <Header />, footer: <Footer /> };
+  const { header, footer } = layouts[pathname] || {
+    header: <Header />,
+    footer: <Footer />,
+  };
 
   return (
     <QueryClientProvider client={queryClient}>
