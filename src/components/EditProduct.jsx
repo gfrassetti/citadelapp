@@ -122,14 +122,6 @@ export default function EditProduct() {
 
   return (
     <div className="p-4">
-      {selectedProduct && (
-        <div className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
-          <span className="text-black font-medium">Mi Cuenta</span>
-          <span>{">"}</span>
-          <span className="text-blue-600 font-medium">Editar Producto</span>
-        </div>
-      )}
-
       {!selectedProduct ? (
         products.length === 0 ? (
           <p className="text-center text-gray-500">Usted no tiene ningún producto.</p>
@@ -138,7 +130,7 @@ export default function EditProduct() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="relative p-4 border rounded shadow hover:bg-gray-100"
+                className="relative p-4 border rounded shadow hover:bg-gray-100 cursor-pointer"
                 onClick={() => onSelectProduct(product)}
               >
                 <img
