@@ -139,7 +139,7 @@ export default function EditProduct() {
                 <img
                   src={product.imageUrl}
                   alt={product.productName}
-                  className="w-full h-[12rem] object-cover rounded mb-2"
+                  className="w-full h-[12rem] object-cover rounded mb-2 cursor-pointer"
                 />
                 <p className="font-semibold">{product.productName}</p>
                 <p className="text-sm">{product.description}</p>
@@ -153,7 +153,7 @@ export default function EditProduct() {
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <div
-                      className="absolute top-2 right-2 text-gray-400 hover:text-red-600"
+                      className="absolute top-2 right-2 text-gray-400 hover:text-red-600 cursor-pointer"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Trash2 size={18} />
