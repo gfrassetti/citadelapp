@@ -1,86 +1,95 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/db/db";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { db } from "@/lib/db/db";
+import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import clsx from "clsx";
+import { useTheme } from "next-themes";
 
 export default function ViewDetails({ selectedItem, onBack }) {
-  const [itemData, setItemData] = useState(null);
+  const [fullData, setFullData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { theme } = useTheme();
 
   useEffect(() => {
-    const fetchItem = async () => {
+    const fetchDetails = async () => {
       if (!selectedItem?.id || !selectedItem?.type) return;
 
       setLoading(true);
       try {
-        const collection = selectedItem.type === "producto" ? "products" : "empresas";
-        const ref = doc(db, collection, selectedItem.id);
+        const ref = doc(db, selectedItem.type === "empresa" ? "empresas" : "products", selectedItem.id);
         const snap = await getDoc(ref);
-        if (snap.exists()) {
-          setItemData({ ...snap.data(), type: selectedItem.type });
-        } else {
-          console.warn("No existe el documento");
+        const data = snap.exists() ? snap.data() : null;
+
+        if (selectedItem.type === "producto" && data?.empresaId) {
+          const empresaSnap = await getDoc(doc(db, "empresas", data.empresaId));
+          data.empresaData = empresaSnap.exists() ? empresaSnap.data() : null;
         }
+
+        setFullData(data);
       } catch (err) {
-        console.error("Error obteniendo datos:", err);
+        console.error("Error al obtener detalles:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchItem();
+    fetchDetails();
   }, [selectedItem]);
 
-  if (loading) return <Skeleton className="w-full h-40" />;
-  if (!itemData) return <p className="text-center text-red-600">No se pudo cargar la información.</p>;
+  if (loading || !fullData) {
+    return <Skeleton className="h-40 w-full" />;
+  }
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      <Button onClick={onBack} className="mb-4">
-        Volver
-      </Button>
+    <div className="flex flex-col gap-6">
+      <button onClick={onBack} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded self-start">Volver</button>
 
-      {itemData.type === "producto" ? (
-        <div>
-          <h2 className="text-2xl font-bold mb-2">{itemData.productName}</h2>
-          {itemData.imageUrl && (
-            <img
-              src={itemData.imageUrl}
-              alt={itemData.productName}
-              className="h-48 object-contain mb-2"
-            />
-          )}
-          <p>{itemData.description}</p>
-          <p className="font-semibold mt-2">Precio: ${itemData.price}</p>
+      {selectedItem.type === "empresa" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className={clsx("border p-4 rounded shadow", theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black")}>
+            <h2 className="text-2xl font-bold mb-4">{fullData.companyName}</h2>
+            <p><strong>Dirección:</strong> {fullData.address || "No disponible"}</p>
+            <p><strong>Código Postal:</strong> {fullData.postalCode || "-"}</p>
+            <p><strong>Teléfono:</strong> {fullData.phone || "No disponible"}</p>
+            <p><strong>Email:</strong> {fullData.email || "No disponible"}</p>
+            <p><strong>WhatsApp:</strong> {fullData.whatsapp || "No disponible"}</p>
+            <p><strong>CUIT:</strong> {fullData.cuit || "-"}</p>
+            <p><strong>Website:</strong> {fullData.website ? <a href={`https://${fullData.website}`} className="text-blue-500 underline">{fullData.website}</a> : "No disponible"}</p>
+            {fullData.address && (
+              <div className="mt-4">
+                <iframe
+                  width="100%"
+                  height="200"
+                  className="rounded"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(fullData.address)}&output=embed`}
+                />
+              </div>
+            )}
+          </div>
+
+          <div>
+            <h3 className="text-lg font-bold mb-2">Productos</h3>
+            <p>No hay productos para esta empresa.</p>
+          </div>
         </div>
       ) : (
-        <div className="border p-4 rounded shadow">
-          <div className="flex items-center mb-4">
-            <Avatar className="h-12 w-12 mr-4">
-              <AvatarImage src={itemData.imageUrl} />
-              <AvatarFallback>EM</AvatarFallback>
-            </Avatar>
-            <h3 className="text-xl font-bold">{itemData.companyName}</h3>
-          </div>
-          <p>{itemData.address || "Dirección no disponible"}</p>
-          <p>Tel: {itemData.phone || "No disponible"}</p>
-          <p>WhatsApp: {itemData.whatsapp || "No disponible"}</p>
-          <p>Email: {itemData.email || "No disponible"}</p>
-          {itemData.website && (
-            <p>
-              Website:{" "}
-              <a
-                href={`https://${itemData.website}`}
-                className="text-blue-500 underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {itemData.website}
-              </a>
+        <div className={clsx("border p-4 rounded shadow max-w-2xl", theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black")}>
+          <h2 className="text-2xl font-bold mb-4">{fullData.productName}</h2>
+          {fullData.imageUrl && (
+            <img src={fullData.imageUrl} alt={fullData.productName} className="w-full h-64 object-contain mb-4 rounded" />
+          )}
+          <p><strong>Descripción:</strong> {fullData.description}</p>
+          <p className="font-semibold text-green-600 dark:text-green-400">Precio: ${fullData.price}</p>
+
+          {fullData.empresaData && (
+            <p className="mt-4 text-blue-600 dark:text-blue-400 font-bold">
+              Este producto se vende en: {fullData.empresaData.companyName}
             </p>
           )}
         </div>
@@ -88,3 +97,4 @@ export default function ViewDetails({ selectedItem, onBack }) {
     </div>
   );
 }
+

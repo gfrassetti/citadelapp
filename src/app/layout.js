@@ -30,6 +30,8 @@ export default function RootLayout({ children }) {
     "/login": { header: <AuthHeader />, footer: <Footer /> },
     "/register": { header: <AuthHeader />, footer: <Footer /> },
     "/dashboard": { header: null, footer: null },
+    "/product": { header: null, footer: null },
+    "/company": { header: null, footer: null },
   };
 
   const { header, footer } = layouts[pathname] || {

@@ -21,12 +21,12 @@ export default function UploadInfo() {
       address: "",
       website: "",
       phone: "",
-      whatsapp: "",
       email: "",
+      whatsapp: "",
       image: null,
       cuit: "",
       postalCode: "",
-    },
+    },    
   });
 
   const [uploading, setUploading] = useState(false);

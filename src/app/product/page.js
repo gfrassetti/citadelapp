@@ -1,35 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import ViewDetails from "@/components/ViewDetails";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Avatar } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useTheme } from "next-themes";
-import clsx from "clsx";
 
 export default function HomeSearch() {
   const [term, setTerm] = useState("");
   const [results, setResults] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [searched, setSearched] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-
-  const { theme } = useTheme();
+  const router = useRouter();
 
   useEffect(() => {
     if (searched) fetchResults();
   }, [selectedFilter]);
 
   const fetchResults = async () => {
-    setLoading(true);
     const queryParam = term ? `query=${term}&filter=${selectedFilter}` : `filter=${selectedFilter}`;
     const res = await fetch(`/api/search?${queryParam}`);
     const data = await res.json();
     setResults(data.results || []);
-    setLoading(false);
     setSearched(true);
   };
 
@@ -45,41 +37,62 @@ export default function HomeSearch() {
     }
   };
 
-  if (selectedItem) return <ViewDetails selectedItem={selectedItem} onBack={() => setSelectedItem(null)} />;
+  const handleItemClick = (item) => {
+    const url = item.type === "empresa" ? `/company?id=${item.id}` : `/product?id=${item.id}`;
+    router.push(url);
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-4 w-full">
       <h1 className="text-center text-2xl font-bold mb-6">Homepage</h1>
 
-      <div className="flex flex-col md:flex-row gap-6">
-        {/* Filtros */}
-        <div className="md:w-1/4 bg-gray-100 p-4 rounded shadow">
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="lg:w-1/4 w-full bg-gray-100 p-4 rounded shadow">
           <h3 className="font-bold mb-2">FILTROS</h3>
           <div className="mb-4">
             <p className="font-semibold">Mostrar resultados para:</p>
-            {[
-              { label: "Todas", value: "all" },
-              { label: "Empresa", value: "empresa" },
-              { label: "Producto o servicio", value: "producto" },
-            ].map(({ label, value }) => (
-              <label key={value} className="block">
-                <input
-                  type="radio"
-                  name="filter"
-                  value={value}
-                  checked={selectedFilter === value}
-                  onChange={() => {
-                    setSelectedFilter(value);
-                    setSearched(true);
-                  }}
-                />
-                {" " + label}
-              </label>
-            ))}
+            <label className="block">
+              <input
+                type="radio"
+                name="filter"
+                value="all"
+                checked={selectedFilter === "all"}
+                onChange={() => {
+                  setSelectedFilter("all");
+                  setSearched(true);
+                }}
+              />
+              Todas
+            </label>
+            <label className="block">
+              <input
+                type="radio"
+                name="filter"
+                value="empresa"
+                checked={selectedFilter === "empresa"}
+                onChange={() => {
+                  setSelectedFilter("empresa");
+                  setSearched(true);
+                }}
+              />
+              Empresa
+            </label>
+            <label className="block">
+              <input
+                type="radio"
+                name="filter"
+                value="producto"
+                checked={selectedFilter === "producto"}
+                onChange={() => {
+                  setSelectedFilter("producto");
+                  setSearched(true);
+                }}
+              />
+              Producto o servicio
+            </label>
           </div>
         </div>
 
-        {/* Buscador y Resultados */}
         <div className="flex-1">
           <div className="flex gap-2 mb-4">
             <Input
@@ -89,37 +102,28 @@ export default function HomeSearch() {
               onChange={(e) => setTerm(e.target.value)}
               onKeyDown={handleKeyDown}
             />
-            <Button onClick={handleSearch}>Buscar</Button>
+            <Button onClick={handleSearch} className="bg-blue-600 text-white">
+              Buscar
+            </Button>
           </div>
 
           <div className="space-y-4">
-            {loading ? (
-              <Skeleton className="h-32 w-full" />
-            ) : searched ? (
+            {searched ? (
               results.length > 0 ? (
                 results.map((item, index) => (
                   <div
-                    key={item.id || index}
-                    className={clsx(
-                      "border p-4 rounded shadow cursor-pointer",
-                      theme === "dark"
-                        ? "bg-gray-800 text-white border-[#06f388]"
-                        : "bg-white text-black border-gray-200"
-                    )}
-                    onClick={() => setSelectedItem({ id: item.id, type: item.type })}
+                    key={index}
+                    className="border p-4 rounded shadow cursor-pointer hover:bg-gray-50"
+                    onClick={() => handleItemClick(item)}
                   >
                     {item.type === "empresa" ? (
-                      <>
-                        <div className="flex items-center mb-2">
-                          <Avatar className="h-8 w-8 mr-2">
-                            <AvatarImage src={item.imageUrl} />
-                            <AvatarFallback>EM</AvatarFallback>
-                          </Avatar>
+                      <div className="flex gap-4 items-center">
+                        {item.imageUrl && <Avatar src={item.imageUrl} alt={item.companyName} />}
+                        <div>
                           <h3 className="font-bold">{item.companyName}</h3>
+                          <p>{item.address}</p>
                         </div>
-                        <p>{item.address}</p>
-                        <p>Tel: {item.phone || "No disponible"}</p>
-                      </>
+                      </div>
                     ) : (
                       <>
                         <h3 className="font-bold">{item.productName}</h3>
@@ -142,6 +146,3 @@ export default function HomeSearch() {
     </div>
   );
 }
-
-
-
