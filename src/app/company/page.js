@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { doc, getDoc, collection, getDocs, query, where } from "firebase/firestore"
 import { db } from "@/lib/db/db"
-import RelatedProductsGrid from "@/components/RelatedProductsGrid"
+import Link from "next/link"
 
 export default function CompanyPage() {
   const searchParams = useSearchParams()
@@ -44,43 +44,40 @@ export default function CompanyPage() {
         Volver
       </button>
 
-      <div className="flex flex-col md:flex-row gap-6">
-        {/* Info Empresa */}
-        <div className="md:w-1/3 border rounded-lg p-4 shadow">
-          <h2 className="text-xl font-bold mb-2">{empresa.companyName || "Mi Empresa"}</h2>
-          <p><strong>Dirección:</strong> {empresa.address || "No disponible"}</p>
-          <p><strong>Código Postal:</strong> {empresa.postalCode || "-"}</p>
-          <p><strong>Teléfono:</strong> {empresa.phone || "No disponible"}</p>
-          <p><strong>Email:</strong> {empresa.email || "No disponible"}</p>
-          <p><strong>WhatsApp:</strong> {empresa.whatsapp || "No disponible"}</p>
-          <p><strong>CUIT:</strong> {empresa.cuit || "-"}</p>
-          <p><strong>Website:</strong>{" "}
-            {empresa.website ? (
-              <a href={`https://${empresa.website}`} className="text-blue-600 underline" target="_blank">
-                {empresa.website}
-              </a>
-            ) : (
-              "No disponible"
-            )}
-          </p>
-
-          {empresa.address && (
-            <div className="mt-4">
-              <iframe
-                width="100%"
-                height="200"
-                style={{ border: 0 }}
-                loading="lazy"
-                allowFullScreen
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(empresa.address)}&output=embed`}
-              ></iframe>
-            </div>
-          )}
+      <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-xl shadow-md p-6 space-y-2 col-span-1 border">
+          <h2 className="text-lg font-bold">{empresa.companyName || "Empresa sin nombre"}</h2>
+          <p><span className="font-semibold">Dirección:</span> {empresa.address || "-"}</p>
+          <p><span className="font-semibold">Código Postal:</span> {empresa.postalCode || "-"}</p>
+          <p><span className="font-semibold">Teléfono:</span> {empresa.phone || "-"}</p>
+          <p><span className="font-semibold">Email:</span> {empresa.email || "-"}</p>
+          <p><span className="font-semibold">WhatsApp:</span> {empresa.whatsapp || "-"}</p>
+          <p><span className="font-semibold">CUIT:</span> {empresa.cuit || "-"}</p>
+          <p><span className="font-semibold">Website:</span> {empresa.website
+            ? <a href={`https://${empresa.website}`} target="_blank" className="text-blue-600 underline">{empresa.website}</a>
+            : "-"}</p>
         </div>
 
-        {/* Productos */}
-        <div className="md:w-2/3">
-          <RelatedProductsGrid products={productos} />
+        <div className="md:col-span-2">
+          <h2 className="text-xl font-semibold mb-4">Productos</h2>
+          {productos.length === 0 ? (
+            <p className="text-gray-500 italic">No hay productos asociados a esta empresa.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {productos.map((prod) => (
+                <Link
+                  key={prod.id}
+                  href={`/product?id=${prod.id}`}
+                  className="border rounded p-4 bg-white shadow-sm hover:shadow-md transition-shadow block"
+                >
+                  <h3 className="font-bold">{prod.productName}</h3>
+                  {prod.imageUrl && <img src={prod.imageUrl} alt={prod.productName} className="h-32 object-contain my-2" />}
+                  <p className="text-sm text-gray-700">{prod.description}</p>
+                  <p className="font-semibold text-green-600 mt-2">${prod.price}</p>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

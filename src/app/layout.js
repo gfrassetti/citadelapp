@@ -1,4 +1,5 @@
 "use client";
+
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { AuthProvider } from "@/context/AuthContext";
@@ -30,8 +31,8 @@ export default function RootLayout({ children }) {
     "/login": { header: <AuthHeader />, footer: <Footer /> },
     "/register": { header: <AuthHeader />, footer: <Footer /> },
     "/dashboard": { header: null, footer: null },
-    "/product": { header: null, footer: null },
-    "/company": { header: null, footer: null },
+    "/product": { header: <Header />, footer:  <Footer /> },
+    "/company": { header: <Header />, footer:  <Footer /> },
   };
 
   const { header, footer } = layouts[pathname] || {
@@ -41,13 +42,13 @@ export default function RootLayout({ children }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <html lang="en">
-        <body className="antialiased flex flex-col justify-center items-center w-full">
+      <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+        <body className="min-h-screen flex flex-col">
           <ThemeProvider>
             <AuthProvider>
               <UserDataProvider>
                 {header}
-                {children}
+                <main className="flex-1 w-full mx-auto pt-[80px]">{children}</main>
                 {footer}
               </UserDataProvider>
             </AuthProvider>
@@ -57,3 +58,4 @@ export default function RootLayout({ children }) {
     </QueryClientProvider>
   );
 }
+

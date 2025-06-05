@@ -4,14 +4,9 @@ import { useState } from "react";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { useTheme } from "next-themes";
-import ThemeToggle from "@/components/ThemeToggle"
-import { Card, CardContent } from "@/components/ui/card";
+import ThemeToggle from "@/components/ThemeToggle";
 import Image from "next/image";
 import clsx from "clsx";
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-
-
 import Link from "next/link";
 
 export default function Header() {
@@ -19,38 +14,73 @@ export default function Header() {
   const { theme } = useTheme();
 
   return (
-      <header
-        className={clsx(
-          "flex items-center justify-between transition-colors fixed w-full top-0",
-          theme === "dark" ? "bg-[#292554] text-white" : "bg-gray-300 text-black"
-        )}
-      >
-      <Image src="/assets/logo.png" alt="Logo de Mi App" width={80} height={80} className="mb-2" />
-      <span className="text-2xl font-bold text-gray-800"></span>
-      <div className="hidden items-center gap-4 px-6 w-auto sm:flex">
-      <Link href="/login" className={clsx("hover:text-[#c646a2] transition-colors" , theme === "dark" ? "text-[#06f388]" : "text-[#292554]")}>Ingresa</Link>
-      <Link href="/register" className={clsx("hover:text-[#c646a2] transition-colors" , theme === "dark" ? "text-[#06f388]" : "text-[#292554]")}>Si sos Mayorista, Crea tu cuenta</Link>
-      <Link className={clsx("hover:text-[#c646a2] transition-colors" , theme === "dark" ? "text-[#06f388]" : "text-[#292554]")} href="">Link</Link>
+    <header
+      className={clsx(
+        "fixed top-0 inset-x-0 z-50 h-[80px] flex items-center justify-between px-6 transition-colors",
+        theme === "dark" ? "bg-[#292554] text-white" : "bg-gray-300 text-black"
+      )}
+    >
+      {/* Logo + Marca */}
+      <div className="flex items-center gap-3">
+        <Image
+          src="/assets/logo.png"
+          alt="Logo"
+          width={50}
+          height={50}
+          className="rounded-full"
+        />
+        <span className="text-xl font-semibold tracking-tight">La Citadel</span>
       </div>
-      <div className="flex items-center gap-4 px-2 sm:px-8 w-auto">
-        {/* Botón de cambio de tema */}
-        <ThemeToggle />  
-        {/* Menú Hamburguesa */}
+
+      {/* Navegación escritorio */}
+      <nav className="hidden sm:flex items-center gap-6 text-sm font-medium">
+        <Link
+          href="/login"
+          className={clsx(
+            "hover:underline",
+            theme === "dark" ? "text-[#06f388]" : "text-[#292554]"
+          )}
+        >
+          Ingresa
+        </Link>
+        <Link
+          href="/register"
+          className={clsx(
+            "hover:underline",
+            theme === "dark" ? "text-[#06f388]" : "text-[#292554]"
+          )}
+        >
+          Si sos Mayorista, Crea tu cuenta
+        </Link>
+        <Link
+          href="#"
+          className={clsx(
+            "hover:underline",
+            theme === "dark" ? "text-[#06f388]" : "text-[#292554]"
+          )}
+        >
+          Link
+        </Link>
+      </nav>
+
+      {/* Toggle + Menú móvil */}
+      <div className="flex items-center gap-3">
+        <ThemeToggle />
         <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger className="p-2 rounded-md transition-colors bg-gray-300 dark:bg-gray-600 block sm:hidden">
+          <SheetTrigger className="block sm:hidden p-2 rounded-md bg-gray-200 dark:bg-gray-600">
             <Menu className="h-6 w-6 text-black dark:text-white" />
           </SheetTrigger>
           <SheetContent
             side="left"
             className={clsx(
-              "transition-colors",
-              theme === "dark" ? "bg-gray-900 text-[#5deb5a]" : "bg-white text-black"
+              "pt-10",
+              theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
             )}
           >
-            <ul className="flex flex-col gap-4">
-              <li><a href="/" onClick={() => setOpen(false)}>Inicio</a></li>
-              <li><a href="/about" onClick={() => setOpen(false)}>Sobre Nosotros</a></li>
-              <li><a href="/contact" onClick={() => setOpen(false)}>Contacto</a></li>
+            <ul className="flex flex-col gap-4 text-lg px-4">
+              <li><Link href="/" onClick={() => setOpen(false)}>Inicio</Link></li>
+              <li><Link href="/register" onClick={() => setOpen(false)}>Crear cuenta</Link></li>
+              <li><Link href="/login" onClick={() => setOpen(false)}>Ingresar</Link></li>
             </ul>
           </SheetContent>
         </Sheet>

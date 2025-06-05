@@ -7,6 +7,9 @@ body {
 }
 html, body {
   @apply min-h-screen w-full;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 @layer base {

@@ -55,7 +55,7 @@ export default function HomeSearch() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 w-full">
+    <div className="max-w-7xl mx-auto p-4 w-full h-max">
       <h1 className="text-center text-2xl font-bold mb-6">Homepage</h1>
 
       <div className="flex flex-col md:flex-row gap-6">
