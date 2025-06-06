@@ -109,7 +109,7 @@ export default function LoginForm() {
   if (loading) return <Loader text="" />;
 
   return (
-    <div className={`flex flex-col items-center h-screen w-full ${theme === "dark" ? "bg-gray-600" : "bg-gray-100"}`}>
+    <div className={`flex flex-col items-center h-screen w-full px-4 ${theme === "dark" ? "bg-gray-600" : "bg-gray-100"}`}>
       <div className="bg-white p-6 my-auto text-center rounded-3xl shadow-md w-full max-w-md justify-center items-center mx-auto">
         <h2 className="text-2xl font-semibold text-center text-gray-800 mb-2">
           {isResetPassword ? "Recuperar contraseña" : "Bienvenido de nuevo"}
