@@ -129,7 +129,8 @@ export default function LoginForm() {
             <button
               type="button"
               onClick={handleGoogleSignIn}
-              className="rounded-full mx-auto px-4 py-2 text-sm font-normal text-black border solid flex"
+// Suggested code may be subject to a license. Learn more: ~LicenseLog:2460848206.
+              className="rounded-full mx-auto px-4 py-2 text-sm font-normal text-black border solid flex hover:bg-gray-300 transition-colors ease-in-out duration-150"
             >
               <Image src="/assets/google-logo.png" alt="Google" width={20} height={20} className="mr-4" />
               Iniciar sesión con Google
@@ -143,26 +144,26 @@ export default function LoginForm() {
         {isResetPassword ? (
           <form onSubmit={handleSubmit(handleResetPassword)} className="flex flex-col gap-4">
             <Label htmlFor="email">Ingrese su email para restablecer contraseña</Label>
-            <input {...register("email")} placeholder="Email" className="input" />
+            <input {...register("email")} placeholder="Email" className="input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
             <button type="submit" className="btn">Enviar enlace de recuperación</button>
             <button type="button" onClick={() => setIsResetPassword(false)} className="text-sm text-blue-500 hover:underline">Volver al login</button>
           </form>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col text-left gap-4">
             <Label>Email</Label>
-            <input {...register("email")} placeholder="Email" className="input" />
+            <input {...register("email")} placeholder="Email" className="input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
             <div className="flex items-center">
               <Label>Password</Label>
               <button type="button" onClick={() => setIsResetPassword(true)} className="ml-auto text-sm underline-offset-2 hover:underline">¿Olvidaste tu contraseña?</button>
             </div>
-            <input {...register("password")} type="password" placeholder="Password" className="input" />
+            <input {...register("password")} type="password" placeholder="Password" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
-            <button type="submit" className="btn">Acceso</button>
+            <button type="submit" className="btn bg-blue-700 hover:bg-blue-600 text-white w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200">Acceso</button>
             {error && <p className="text-red-500">{error}</p>}
             <div className="text-sm text-center">
-              Don&apos;t have an account? <a href="/register" className="underline">Sign up</a>
+              Don&apos;t have an account? <a href="/register" className="underline hover:text-blue-600">Sign up</a>
             </div>
           </form>
         )}
