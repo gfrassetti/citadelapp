@@ -42,7 +42,7 @@ const api = {
               currency_id: "ARS",
               start_date: startDate.toISOString(),
             },
-            payer_email: "test_user_895208562@testuser.com", //email
+            payer_email: emial, //email
             back_url: "https://admin-panel-psi-two.vercel.app/dashboard", //cambiar
             external_reference: uid,
           },
