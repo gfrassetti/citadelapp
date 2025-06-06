@@ -21,6 +21,7 @@ import {
 import { Loader2Icon, PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ProDashboardPanel } from "@/components/ProDashboardPanel";
 import { useUser } from "@/context/AuthContext";
 import UploadInfo from "@/components/UploadInfo";
 import UploadProduct from "@/components/UploadProduct";
@@ -31,6 +32,8 @@ import SuscriptionInfo from "@/components/SuscriptionInfo";
 import EditInfo from "@/components/EditInfo";
 import EditProduct from "@/components/EditProduct";
 import { useHandleUpgrade } from "@/hooks/useHandleUpgrade";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -47,6 +50,8 @@ export default function Dashboard() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeComponent, setActiveComponent] = useState(null);
+  const [products, setProducts] = useState([]);
+
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -115,7 +120,7 @@ export default function Dashboard() {
         <AppSidebar setActiveComponent={setActiveComponent} />
 
         <SidebarInset>
-          <header className="flex items-center justify-between px-4 py-4 border-b">
+          <header className="flex items-center justify-between sm:justify-end px-4 py-4 border-b">
             <SidebarToggle />
             <div className="flex flex-col-reverse welcome-content">
               <button className="italic" onClick={() => signOut(auth).then(() => router.push("/login"))}>
@@ -200,7 +205,7 @@ export default function Dashboard() {
                     </CardFooter>
                   </Card>
                 ) : (
-                  <p>Bienvenido a tu cuenta PRO</p>
+                  <ProDashboardPanel />
                 )}
               </>
             )}
