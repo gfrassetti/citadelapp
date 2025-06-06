@@ -6,6 +6,9 @@ import { doc, getDoc, collection, getDocs, query, where } from "firebase/firesto
 import { db } from "@/lib/db/db";
 import Loader from "@/components/Loader";
 import Link from "next/link";
+import { Suspense } from "react";
+import CompanyPage from "./CompanyPage";
+
 
 export default function CompanyPage() {
   const searchParams = useSearchParams();
@@ -41,6 +44,9 @@ export default function CompanyPage() {
 
   return (
     <div className="max-w-7xl mx-auto p-6 mt-[6rem]">
+    <Suspense fallback={<p>Cargando empresa...</p>}>
+      <CompanyPage />
+    </Suspense>
       <div className="flex justify-between items-center mb-6">
         <div>
           <nav className="text-sm text-muted-foreground mb-1">
