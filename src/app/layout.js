@@ -48,7 +48,7 @@ export default function RootLayout({ children }) {
             <AuthProvider>
               <UserDataProvider>
                 {header}
-                <main className="flex-1 w-full mx-auto pt-[80px]">{children}</main>
+                <main className="flex-1 w-full mx-auto">{children}</main>
                 {footer}
               </UserDataProvider>
             </AuthProvider>

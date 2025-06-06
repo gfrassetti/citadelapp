@@ -18,6 +18,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
+import Loader from "@/components/Loader";
 
 const schema = z.object({
   email: z.string().email("Email inválido"),
@@ -113,7 +114,7 @@ export default function LoginForm() {
     }
   };
 
-  if (loading) return <p>Cargando...</p>;
+  if (loading) return <Loader text="" />;
 
   return (
     <div className={`flex flex-col items-center h-screen w-full ${theme === "dark" ? "bg-gray-600" : "bg-gray-100"}`}>

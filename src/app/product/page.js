@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { db } from "@/lib/db/db";
 import { doc, getDoc } from "firebase/firestore";
+import Loader from "@/components/Loader";
 
 export default function ProductPage() {
   const searchParams = useSearchParams();
@@ -37,11 +38,11 @@ export default function ProductPage() {
   }, [id]);
 
   if (!product) {
-    return <p className="text-center mt-10">Cargando producto...</p>;
+    return <Loader text="Cargando producto..." />;
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-3xl mx-auto p-6 mt-[6rem]">
       <button
         className="mb-4 px-4 py-2 bg-gray-200 rounded"
         onClick={() => router.back()}

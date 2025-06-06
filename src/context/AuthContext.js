@@ -25,7 +25,10 @@ export const AuthProvider = ({ children }) => {
         headers: { "x-user-email": userEmail },
       });
 
-      if (!response.ok) throw new Error("Error al obtener la suscripción");
+      if (!response.ok) {
+        console.warn("❗ No se pudo obtener la suscripción. Status:", response.status);
+        return;
+      }
 
       const data = await response.json();
       const subscription = data.subscription;

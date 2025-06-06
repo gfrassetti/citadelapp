@@ -1,51 +1,32 @@
 "use client";
-import { useState } from "react";
 
-export default function Filters({ setFilter }) {
-  const [selectedFilter, setSelectedFilter] = useState("all");
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
-  const handleFilterChange = (filter) => {
-    setSelectedFilter(filter);
-    setFilter(filter);
-  };
-
+export default function Filters({ selectedFilter, setSelectedFilter }) {
   return (
-    <div className="bg-gray-100 p-4 rounded-md w-64">
-      <h2 className="font-bold text-lg mb-2">FILTROS</h2>
-      <div className="space-y-2">
-        <label className="flex items-center space-x-2">
-          <input
-            type="radio"
-            name="filter"
-            value="empresa"
-            checked={selectedFilter === "empresa"}
-            onChange={() => handleFilterChange("empresa")}
-          />
-          <span>Empresa</span>
-        </label>
+    <div className="w-full md:w-1/4 bg-gray-50 p-6 rounded-lg shadow-md border">
+      <h3 className="text-lg font-bold mb-4 text-gray-800">Filtros</h3>
+      <p className="text-sm text-muted-foreground mb-2">Mostrar resultados para:</p>
 
-        <label className="flex items-center space-x-2">
-          <input
-            type="radio"
-            name="filter"
-            value="rubro"
-            checked={selectedFilter === "rubro"}
-            onChange={() => handleFilterChange("rubro")}
-          />
-          <span>Rubro</span>
-        </label>
-
-        <label className="flex items-center space-x-2">
-          <input
-            type="radio"
-            name="filter"
-            value="producto"
-            checked={selectedFilter === "producto"}
-            onChange={() => handleFilterChange("producto")}
-          />
-          <span>Producto o servicio</span>
-        </label>
-      </div>
+      <RadioGroup
+        value={selectedFilter}
+        onValueChange={setSelectedFilter}
+        className="space-y-3"
+      >
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="all" id="all" />
+          <Label htmlFor="all">Todas</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="empresa" id="empresa" />
+          <Label htmlFor="empresa">Empresa</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="producto" id="producto" />
+          <Label htmlFor="producto">Producto o servicio</Label>
+        </div>
+      </RadioGroup>
     </div>
   );
 }

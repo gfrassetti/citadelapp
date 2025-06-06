@@ -4,10 +4,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { auth } from "../../lib/db/db.js";
-import { createUserWithEmailAndPassword, updateProfile  } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import {
+  Form, FormField, FormItem, FormLabel, FormControl, FormMessage
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -35,19 +37,15 @@ export default function RegisterPage() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
-  
-      console.log("✅ Usuario registrado:", user);
-  
       await updateProfile(user, { displayName: data.name });
-  
-      //usuario en Firestore con `plan: "free"`
+
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         name: data.name,
-        plan: "free",  //Todos los nuevos usuarios comienzan en "free"
+        plan: "free",
         createdAt: new Date(),
       });
-  
+
       await auth.signOut();
       localStorage.setItem("registerSuccess", "true");
       router.push("/login");
@@ -57,54 +55,64 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className={clsx("flex flex-col justify-center items-center p-4 h-full w-full max-w-sm mx-auto my-auto rounded-3xl shadow-xl border-solid border", theme === "dark" ? "bg-gray-900 text-white border-[#06f388]" : "bg-white text-black border-gray-200")}> 
-      <h1 className="text-2xl font-semibold mb-4">Crea tu cuenta</h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full max-w-md">
-          <FormField name="name" control={form.control} render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Name" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
+    <main className="flex flex-col items-center justify-center min-h-[calc(100vh-150px)] px-4 py-8">
+      <div className={clsx(
+        "w-full max-w-md p-6 rounded-3xl shadow-xl border",
+        theme === "dark" ? "bg-gray-900 text-white border-[#06f388]" : "bg-white text-black border-gray-200"
+      )}>
+        <h1 className="text-2xl font-semibold mb-4 text-center">Crea tu cuenta</h1>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField name="name" control={form.control} render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nombre</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Name" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
 
-          <FormField name="email" control={form.control} render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" {...field} placeholder="Email" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
+            <FormField name="email" control={form.control} render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input type="email" {...field} placeholder="Email" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
 
-          <FormField name="password" control={form.control} render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} placeholder="Password" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
+            <FormField name="password" control={form.control} render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contraseña</FormLabel>
+                <FormControl>
+                  <Input type="password" {...field} placeholder="Password" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
 
-          <FormField name="confirmPassword" control={form.control} render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} placeholder="Confirm Password" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
+            <FormField name="confirmPassword" control={form.control} render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirmar Contraseña</FormLabel>
+                <FormControl>
+                  <Input type="password" {...field} placeholder="Confirm Password" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
 
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-gray-700 transition">Register</Button>
-        </form>
-      </Form>
-      <div className="mt-4">Ya tienes cuenta? <Link href="/login" className="text-blue-500 hover:underline">Ingresa</Link></div>
-    </div>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 transition">
+              Registrarse
+            </Button>
+          </form>
+        </Form>
+        <p className="text-center text-sm mt-4">
+          Ya tienes cuenta?{" "}
+          <Link href="/login" className="text-blue-500 hover:underline">Ingresa</Link>
+        </p>
+      </div>
+    </main>
   );
 }

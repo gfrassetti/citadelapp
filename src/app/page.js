@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
 import clsx from "clsx";
+import Loader from "@/components/Loader";
+import Filters from "@/components/Filters";
+
 
 export default function HomeSearch() {
   const router = useRouter();
@@ -55,49 +58,12 @@ export default function HomeSearch() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 w-full h-max">
-      <h1 className="text-center text-2xl font-bold mb-6">Homepage</h1>
+    <div className="max-w-7xl mx-auto p-4 w-full h-max pt-[80px]">
+      <h1 className="text-center text-2xl font-bold mb-6"></h1>
 
       <div className="flex flex-col md:flex-row gap-6">
         {/* Filtros */}
-        <div className="w-full md:w-1/4 bg-gray-100 p-4 rounded shadow">
-          <h3 className="font-bold mb-2">FILTROS</h3>
-
-          <div className="mb-4">
-            <p className="font-semibold">Mostrar resultados para:</p>
-            <label className="block">
-              <input
-                type="radio"
-                name="filter"
-                value="all"
-                checked={selectedFilter === "all"}
-                onChange={() => setSelectedFilter("all")}
-              />
-              Todas
-            </label>
-            <label className="block">
-              <input
-                type="radio"
-                name="filter"
-                value="empresa"
-                checked={selectedFilter === "empresa"}
-                onChange={() => setSelectedFilter("empresa")}
-              />
-              Empresa
-            </label>
-            <label className="block">
-              <input
-                type="radio"
-                name="filter"
-                value="producto"
-                checked={selectedFilter === "producto"}
-                onChange={() => setSelectedFilter("producto")}
-              />
-              Producto o servicio
-            </label>
-          </div>
-        </div>
-
+        <Filters selectedFilter={selectedFilter} setSelectedFilter={setSelectedFilter} />
         {/* Buscador y Resultados */}
         <div className="flex-1">
           <div className="flex gap-2 mb-4">
@@ -119,7 +85,7 @@ export default function HomeSearch() {
 
           <div className="space-y-4">
             {loading ? (
-              <div className="p-6 text-center text-gray-500">Cargando...</div>
+               <Loader text="Cargando..." />
             ) : searched ? (
               results.length > 0 ? (
                 results.map((item) => (
