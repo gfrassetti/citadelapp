@@ -1,37 +1,25 @@
 "use client";
-import { useState } from "react";
+
 import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton
+  SidebarMenuButton,
 } from "@/components/ui/sidebar";
 
-export default function NavProjects({ projects, setActiveComponent }) {
+export default function NavUser({ user, projects, setActiveComponent }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Mi Dashboard</SidebarGroupLabel>
+      <SidebarGroupLabel>Mi Cuenta</SidebarGroupLabel>
       <SidebarMenu>
-      <SidebarMenu>
-        {projects.map((project, index) => {
-          const Icon = project.icon;
-          const isDisabled = project.disabled;
-
-          return (
-            <SidebarMenuButton
-              key={project.name}
-              onClick={() => {
-                if (!isDisabled) setActiveComponent(project.component);
-              }}
-              disabled={isDisabled}
-              className={isDisabled ? "opacity-40 pointer-events-none" : ""}
-            >
-              {Icon && <Icon className="mr-2 h-4 w-4" />}
-              <span>{project.name}</span>
-            </SidebarMenuButton>
-          );
-        })}
-      </SidebarMenu>
+        {projects.map((item) => (
+          <SidebarMenuButton
+            key={item.name}
+            onClick={() => setActiveComponent(item.component)}
+          >
+            {item.name}
+          </SidebarMenuButton>
+        ))}
       </SidebarMenu>
     </SidebarGroup>
   );

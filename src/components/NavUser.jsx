@@ -46,7 +46,7 @@ function getInitials(name) {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
-export function NavUser({ projects, setActiveComponent }) {
+export default function NavUser({ projects, setActiveComponent }) {
   const userData = useUserData();
   const { isMobile } = useSidebar();
   const router = useRouter();

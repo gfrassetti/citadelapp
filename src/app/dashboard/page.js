@@ -115,15 +115,15 @@ export default function Dashboard() {
         <AppSidebar setActiveComponent={setActiveComponent} />
 
         <SidebarInset>
-          <header className="flex items-center justify-end px-4 py-4 border-b">
+          <header className="flex items-center justify-between px-4 py-4 border-b">
             <SidebarToggle />
             <div className="flex flex-col-reverse welcome-content">
-              <button onClick={() => signOut(auth).then(() => router.push("/login"))}>
+              <button className="italic" onClick={() => signOut(auth).then(() => router.push("/login"))}>
                 Cerrar sesión
               </button>
               <div className="flex items-center">
                 <h4 className="mr-2">
-                  Bienvenido, {userData?.name || user.displayName || user.email}
+                  Bienvenido, <span class="text-blue-600 font-bold">{userData?.name || user.displayName || user.email}</span>
                 </h4>
                 <Badge className="bg-gray-700 hover:bg-gray-600 ml-1 text-white" variant="secondary">
                   {authUser?.plan}
