@@ -19,6 +19,7 @@ const paymentIcons = {
   amex: "/assets/American_Express_logo_(2018).svg",
   default: "/assets/default_cc.svg",
 };
+import Loader from "@/components/Loader";
 
 const normalizeMethod = (method) => {
   if (!method) return "default";
@@ -39,9 +40,16 @@ async function fetchSubscription(userEmail) {
   const response = await fetch("/api/mercadopago/subscription-info", {
     headers: { "x-user-email": userEmail },
   });
+
+  if (response.status === 404) {
+    return { subscription: null };
+  }
+
   if (!response.ok) throw new Error("Error al obtener la suscripción");
+
   return response.json();
 }
+
 
 async function updatePlanInFirestore(userId, newPlan) {
   const userRef = doc(db, "users", userId);
@@ -109,9 +117,23 @@ export default function SubscriptionInfo() {
     onSuccess: () => queryClient.invalidateQueries(["mercadoPagoSubscription"]),
   });
 
-  if (isLoading) return <p>Cargando suscripción...</p>;
-  if (isError) return <p>Error: {error.message}</p>;
-  if (!subscription) return <p>No hay suscripción activa.</p>;
+  if (isLoading) return <Loader text="Cargando Suscripcion..." />
+  
+  if (isError) return (
+    <div className="flex items-center justify-center h-64">
+      <p className="text-red-600 font-semibold">Error: {error.message}</p>
+    </div>
+  );
+  
+  if (!subscription) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <h2 className="text-xl font-bold mb-2">No tenés una suscripción activa</h2>
+        <p className="text-gray-600">Suscribite para desbloquear funciones premium.</p>
+      </div>
+    </div>
+  );
+  
 
   return (
     <div className="p-4">

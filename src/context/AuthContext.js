@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkSubscriptionStatus = async (userEmail, userId) => {
     try {
-      const response = await fetch("/api/mercadopago/subscription", {
+      const response = await fetch("/api/mercadopago/subscription-info", {
         headers: { "x-user-email": userEmail },
       });
 
