@@ -11,12 +11,13 @@ const api = {
       try {
         console.log("📩 Recibiendo solicitud de suscripción...");
 
-        const { uid } = await req.json();
+        const { uid, email } = await req.json();
 
-        if (!uid) {
+        if (!uid || !email) {
           console.error("❌ Faltan datos requeridos");
           return NextResponse.json({ error: "Faltan datos requeridos" }, { status: 400 });
         }
+        
 
         if (!process.env.MERCADOPAGO_ACCESS_TOKEN) {
           console.error("❌ ERROR: `MERCADOPAGO_ACCESS_TOKEN` no está definido.");
