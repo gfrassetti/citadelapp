@@ -92,3 +92,7 @@ html, body {
     @apply bg-background text-foreground;
   }
 }
+
+.btn {
+  @apply bg-blue-700 hover:bg-blue-600 text-white w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200;
+}

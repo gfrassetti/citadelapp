@@ -146,7 +146,7 @@ export default function LoginForm() {
             <Label htmlFor="email">Ingrese su email para restablecer contraseña</Label>
             <input {...register("email")} placeholder="Email" className="input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
-            <button type="submit" className="btn">Enviar enlace de recuperación</button>
+            <button type="submit" className="btn">Enviar</button>
             <button type="button" onClick={() => setIsResetPassword(false)} className="text-sm text-blue-500 hover:underline">Volver al login</button>
           </form>
         ) : (
@@ -160,7 +160,7 @@ export default function LoginForm() {
             </div>
             <input {...register("password")} type="password" placeholder="Password" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
-            <button type="submit" className="btn bg-blue-700 hover:bg-blue-600 text-white w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200">Acceso</button>
+            <button type="submit" className="btn">Acceso</button>
             {error && <p className="text-red-500">{error}</p>}
             <div className="text-sm text-center">
               Don&apos;t have an account? <a href="/register" className="underline hover:text-blue-600">Sign up</a>
