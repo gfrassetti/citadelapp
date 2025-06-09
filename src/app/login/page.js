@@ -74,13 +74,20 @@ export default function LoginForm() {
   };
 
   const handleResetPassword = async (data) => {
+    setLoading(true);
     try {
-      await sendPasswordResetEmail(auth, data.email);
+      await sendPasswordResetEmail(auth, data.email, {
+        url: "https://admin-panel-psi-two.vercel.app/login",
+      });
       setShowSuccess(true);
+      setError("");
     } catch (error) {
-      console.error("Reset error:", error.message);
+      setError("No se pudo enviar el correo. ¿El email está registrado?");
+    } finally {
+      setLoading(false);
     }
   };
+  
 
   const handleGoogleSignIn = async () => {
     try {
@@ -147,6 +154,7 @@ export default function LoginForm() {
             <input {...register("email")} placeholder="Email" className="input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
             <button type="submit" className="btn">Enviar</button>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
             <button type="button" onClick={() => setIsResetPassword(false)} className="text-sm text-blue-500 hover:underline">Volver al login</button>
           </form>
         ) : (
