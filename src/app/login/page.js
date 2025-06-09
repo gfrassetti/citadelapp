@@ -38,6 +38,7 @@ export default function LoginForm() {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm({ resolver: zodResolver(schema) });
 
   useEffect(() => {
@@ -75,18 +76,20 @@ export default function LoginForm() {
 
   const handleResetPassword = async (data) => {
     setLoading(true);
+    setError("");
     try {
       await sendPasswordResetEmail(auth, data.email, {
         url: "https://admin-panel-psi-two.vercel.app/login",
       });
       setShowSuccess(true);
-      setError("");
+      reset(); // limpia los campos
     } catch (error) {
-      setError("No se pudo enviar el correo. ¿El email está registrado?");
+      setError("No se pudo enviar el email. Verifica que el correo esté registrado.");
     } finally {
       setLoading(false);
     }
   };
+  
   
 
   const handleGoogleSignIn = async () => {
@@ -147,7 +150,20 @@ export default function LoginForm() {
             </div>
           </>
         )}
+        {showSuccess && (
+          <Alert variant="success" className="mb-4">
+            <CheckCircle2 className="h-5 w-5 text-green-500" />
+            <AlertTitle>Email enviado</AlertTitle>
+            <AlertDescription>Revisa tu bandeja de entrada para restablecer tu contraseña.</AlertDescription>
+          </Alert>
+        )}
 
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         {isResetPassword ? (
           <form onSubmit={handleSubmit(handleResetPassword)} className="flex flex-col gap-4">
             <Label htmlFor="email">Ingrese su email para restablecer contraseña</Label>
