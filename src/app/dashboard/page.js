@@ -120,7 +120,7 @@ export default function Dashboard() {
         <AppSidebar setActiveComponent={setActiveComponent} />
 
         <SidebarInset>
-          <header className="flex items-center justify-between sm:justify-end px-4 py-4 border-b">
+          <header className="flex items-center justify-between md:justify-end px-4 py-4 border-b">
             <SidebarToggle />
             <div className="flex flex-col-reverse welcome-content">
               <button className="italic" onClick={() => signOut(auth).then(() => router.push("/login"))}>

@@ -66,7 +66,7 @@ export default function UpdatePaymentMethod() {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Actualizar Método de Pago</h2>
+      <h2 className="text-2xl font-bold mb-4 pt-8">Actualizar Método de Pago</h2>
       
       <input
         type="text"

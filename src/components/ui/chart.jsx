@@ -1,42 +1,78 @@
 "use client";
 
+import * as React from "react";
 import {
-  Bar,
   BarChart,
-  ResponsiveContainer,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
+  ResponsiveContainer,
 } from "recharts";
 
-export function Chart({ data, index, categories, colors, className, showLegend }) {
+const THEMES = { light: "", dark: ".dark" };
+
+const ChartContext = React.createContext(null);
+
+export function useChart() {
+  return React.useContext(ChartContext);
+}
+
+export function ChartContainer({ id, className, children, config, ...props }) {
+  const uniqueId = React.useId();
+  const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
+
   return (
-    <ResponsiveContainer width="100%" height={300} className={className}>
-      <BarChart data={data}>
-        <XAxis dataKey={index} stroke="#888888" fontSize={12} />
-        <YAxis stroke="#888888" fontSize={12} />
-        <Tooltip content={<CustomTooltip />} />
-        {categories.map((cat, i) => (
-          <Bar key={cat} dataKey={cat} fill={colors[i] || "#8884d8"} radius={[4, 4, 0, 0]} />
-        ))}
-      </BarChart>
-    </ResponsiveContainer>
+    <ChartContext.Provider value={{ config }}>
+      <div
+        data-slot="chart"
+        data-chart={chartId}
+        className={className}
+        {...props}
+      >
+        <ChartStyle id={chartId} config={config} />
+        <ResponsiveContainer>
+          {children}
+        </ResponsiveContainer>
+      </div>
+    </ChartContext.Provider>
   );
 }
 
-function CustomTooltip({ active, payload }) {
-  if (!active || !payload || !payload.length) return null;
+function ChartStyle({ id, config }) {
+  const colorConfig = Object.entries(config).filter(([, cfg]) => cfg.theme || cfg.color);
+  if (!colorConfig.length) return null;
 
   return (
-    <div className="rounded-md border bg-background p-2 shadow-sm">
-      {payload.map((item, i) => (
-        <div key={i} className="text-sm text-muted-foreground">
-          <span className="font-medium">{item.name}:</span> {item.value}
+    <style
+      dangerouslySetInnerHTML={{
+        __html: Object.entries(THEMES).map(([theme, prefix]) => `
+${prefix} [data-chart=${id}] {
+${colorConfig
+  .map(([key, cfg]) => {
+    const color = cfg.theme?.[theme] || cfg.color;
+    return color ? `  --color-${key}: ${color};` : null;
+  })
+  .join("\n")}
+}
+`).join("\n"),
+      }}
+    />
+  );
+}
+
+export function ChartTooltipContent({ active, payload }) {
+  const chart = useChart();
+  if (!active || !payload?.length) return null;
+
+  return (
+    <div className="rounded-md border bg-background p-2 shadow-sm text-xs">
+      {payload.map((item) => (
+        <div key={item.dataKey} className="flex items-center justify-between gap-4">
+          <span className="text-muted-foreground">{item.name}</span>
+          <span className="font-medium text-foreground">{item.value}</span>
         </div>
       ))}
     </div>
   );
 }
-
-export const ChartTooltip = ({ content }) => content;
-export const ChartTooltipContent = () => null;

@@ -31,6 +31,7 @@ const schema = z.object({
 
 export default function EditCompanyInfoForm() {
   const { user } = useUser();
+  const [empresaId, setEmpresaId] = useState(null);
   const [loadingData, setLoadingData] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -51,11 +52,19 @@ export default function EditCompanyInfoForm() {
   useEffect(() => {
     const fetchData = async () => {
       if (!user?.uid) return;
-      console.log("🧾 UID actual:", user.uid);
-      const ref = doc(db, "empresas", user.uid);
-      const snap = await getDoc(ref);
-      console.log("📄 Documento:", snap.exists(), snap.data());
-
+  
+      // Obtener el documento del usuario para leer el empresaId
+      const userSnap = await getDoc(doc(db, "users", user.uid));
+      if (!userSnap.exists()) {
+        setNotFound(true);
+        setLoadingData(false);
+        return;
+      }
+  
+      const userData = userSnap.data();
+      const empresaRef = doc(db, "empresas", userData.empresaId);
+      const snap = await getDoc(empresaRef);
+  
       if (snap.exists()) {
         const data = snap.data();
         form.reset({
@@ -71,15 +80,17 @@ export default function EditCompanyInfoForm() {
       } else {
         setNotFound(true);
       }
-
+  
       setLoadingData(false);
     };
+  
     fetchData();
   }, [user, form]);
+  
 
   const onSubmit = async (data) => {
     if (!user?.uid) return;
-    const ref = doc(db, "empresas", user.uid);
+    const ref = doc(db, "empresas", userData.empresaId);
     await setDoc(ref, data, { merge: true });
     alert("Información actualizada correctamente.");
   };

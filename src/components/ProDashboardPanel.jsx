@@ -15,12 +15,31 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Chart, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  ChartContainer,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+
+
+
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
+
+
 
 export function ProDashboardPanel() {
   const { theme } = useTheme();
-  const { empresaId } = useUserData() || {};
+  const { empresaId, email } = useUserData() || {};
   const [products, setProducts] = useState([]);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [nextBilling, setNextBilling] = useState(null);
 
   useEffect(() => {
     if (!empresaId) return;
@@ -35,14 +54,55 @@ export function ProDashboardPanel() {
     fetchUserProducts();
   }, [empresaId]);
 
-  const chartData = [
-    { name: "Jan", total: 20 },
-    { name: "Feb", total: 45 },
-    { name: "Mar", total: 30 },
-    { name: "Apr", total: 50 },
-    { name: "May", total: 25 },
-    { name: "Jun", total: 40 },
-  ];
+  useEffect(() => {
+    if (!email) return;
+
+    const fetchSubscription = async () => {
+      const res = await fetch("/api/mercadopago/subscription-info", {
+        headers: { "x-user-email": email },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const status = data?.subscription?.status;
+        setSubscriptionStatus(status === "authorized" ? "active" : status || null);
+        setNextBilling(data?.subscription?.next_payment_date || null);
+      }
+    };
+
+    fetchSubscription();
+  }, [email]);
+
+  const [chartData, setChartData] = useState([]);
+
+  useEffect(() => {
+    const monthsMap = {
+      0: "Jan", 1: "Feb", 2: "Mar", 3: "Apr", 4: "May", 5: "Jun",
+      6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec",
+    };
+  
+    const countByMonth = {};
+  
+    products.forEach((p) => {
+      if (p.createdAt?.toDate) {
+        const date = p.createdAt.toDate();
+        const month = date.getMonth();
+        const label = monthsMap[month];
+        countByMonth[label] = (countByMonth[label] || 0) + 1;
+      }
+    });
+  
+    const formatted = Object.keys(monthsMap).map((i) => {
+      const label = monthsMap[i];
+      return {
+        name: label,
+        total: countByMonth[label] || 0,
+      };
+    });
+  
+    setChartData(formatted);
+  }, [products]);
+  
 
   const isDark = theme === "dark";
 
@@ -80,7 +140,7 @@ export function ProDashboardPanel() {
             <CardDescription>Current status</CardDescription>
           </CardHeader>
           <CardContent>
-            <Badge variant="default">Active</Badge>
+            <Badge variant="default">{subscriptionStatus || "-"}</Badge>
           </CardContent>
         </Card>
 
@@ -100,7 +160,9 @@ export function ProDashboardPanel() {
             <CardDescription>Auto-renewal date</CardDescription>
           </CardHeader>
           <CardContent>
-            <span className="text-sm">07/06/2025</span>
+            <span className="text-sm">
+              {nextBilling ? new Date(nextBilling).toLocaleDateString() : "-"}
+            </span>
           </CardContent>
         </Card>
       </div>
@@ -109,16 +171,26 @@ export function ProDashboardPanel() {
 
       <div>
         <h3 className="text-lg font-bold mb-4">Monthly activity</h3>
-        <ChartTooltip content={<ChartTooltipContent />}>
-          <Chart
-            className="w-full aspect-[2/1]"
-            data={chartData}
-            index="name"
-            categories={["total"]}
-            colors={[isDark ? "blue-400" : "blue-600"]}
-            showLegend={false}
-          />
-        </ChartTooltip>
+        <ChartContainer
+          className="w-full aspect-[2/1]"
+          config={{
+            total: {
+              label: "Total",
+              color: isDark ? "#60a5fa" : "#2563eb",
+            },
+          }}
+        >
+          <BarChart data={chartData}>
+            <XAxis dataKey="name" stroke="#888888" fontSize={12} />
+            <YAxis stroke="#888888" fontSize={12} />
+            <Tooltip content={<ChartTooltipContent />} />
+            <Bar
+              dataKey="total"
+              fill="var(--color-total)"
+              radius={[4, 4, 0, 0]}
+            />
+          </BarChart>
+    </ChartContainer>
       </div>
 
       <Separator />
