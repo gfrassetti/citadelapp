@@ -131,7 +131,7 @@ export default function Dashboard() {
               </button>
               <div className="flex items-center">
                 <h4 className="mr-2">
-                  Bienvenido, <span class="text-blue-600 font-bold">{userData?.name || user.displayName || user.email}</span>
+                  Bienvenido, <span className="text-blue-600 font-bold">{userData?.name || user.displayName || user.email}</span>
                 </h4>
                 <Badge className="bg-gray-700 hover:bg-gray-600 ml-1 text-white" variant="secondary">
                   {authUser?.plan}
@@ -176,7 +176,7 @@ export default function Dashboard() {
             {!activeComponent && (
               <>
                 {authUser?.plan === "free" ? (
-                  <Card className="max-w-md mx-auto text-center border border-gray-800 bg-muted text-foreground shadow-md">
+                  <Card className="max-w-md mx-auto mt-10 text-center border border-gray-800 bg-muted text-foreground shadow-md">
                     <CardHeader className="space-y-2">
                       <h2 className="text-2xl font-bold tracking-tight">Plan gratuito activado</h2>
                       <p className="text-sm text-muted-foreground">

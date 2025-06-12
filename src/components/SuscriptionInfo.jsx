@@ -145,8 +145,24 @@ export default function SubscriptionInfo() {
           <TableRow><TableCell className="font-semibold">Razón</TableCell><TableCell>{subscription.reason}</TableCell></TableRow>
           <TableRow><TableCell className="font-semibold">Fecha Alta</TableCell><TableCell>{new Date(subscription.date_created).toLocaleDateString()}</TableCell></TableRow>
           <TableRow><TableCell className="font-semibold">Próximo Pago</TableCell><TableCell>{subscription.next_payment_date ? new Date(subscription.next_payment_date).toLocaleDateString() : "N/A"}</TableCell></TableRow>
-          <TableRow><TableCell className="font-semibold">Monto</TableCell><TableCell>{subscription.auto_recurring?.transaction_amount} {subscription.auto_recurring?.currency_id}</TableCell></TableRow>
-          <TableRow><TableCell className="font-semibold">Frecuencia</TableCell><TableCell>{subscription.auto_recurring?.frequency} {subscription.auto_recurring?.frequency_type}</TableCell></TableRow>
+          <TableRow>
+            <TableCell className="font-semibold">Monto</TableCell>
+            <TableCell>
+              {new Intl.NumberFormat("es-AR", {
+                style: "currency",
+                currency: subscription.auto_recurring?.currency_id || "ARS",
+              }).format(subscription.auto_recurring?.transaction_amount || 0)}
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell className="font-semibold">Frecuencia</TableCell>
+            <TableCell>
+              {subscription.auto_recurring?.frequency === 1
+                ? `Cada ${subscription.auto_recurring?.frequency_type === "months" ? "mes" : subscription.auto_recurring?.frequency_type}`
+                : `Cada ${subscription.auto_recurring?.frequency} ${subscription.auto_recurring?.frequency_type}`}
+            </TableCell>
+          </TableRow>
+
           <TableRow><TableCell className="font-semibold">Vencimiento</TableCell><TableCell>{subscription.auto_recurring?.end_date ? new Date(subscription.auto_recurring.end_date).toLocaleDateString() : "N/A"}</TableCell></TableRow>
           <TableRow>
             <TableCell className="font-semibold">Método de Pago</TableCell>
