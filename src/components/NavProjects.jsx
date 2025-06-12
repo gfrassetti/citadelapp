@@ -7,7 +7,7 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 
-export default function NavUser({ user, projects, setActiveComponent }) {
+export default function NavProjects({ projects, setActiveComponent }) {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Mi Cuenta</SidebarGroupLabel>
@@ -15,7 +15,8 @@ export default function NavUser({ user, projects, setActiveComponent }) {
         {projects.map((item) => (
           <SidebarMenuButton
             key={item.name}
-            onClick={() => setActiveComponent(item.component)}
+            onClick={() => !item.disabled && setActiveComponent(item.component)}
+            className={item.disabled ? "opacity-50 pointer-events-none" : ""}
           >
             {item.name}
           </SidebarMenuButton>

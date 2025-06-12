@@ -32,7 +32,6 @@ import SuscriptionInfo from "@/components/SuscriptionInfo";
 import EditInfo from "@/components/EditInfo";
 import EditProduct from "@/components/EditProduct";
 import { useHandleUpgrade } from "@/hooks/useHandleUpgrade";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import {
   Breadcrumb,
@@ -117,7 +116,11 @@ export default function Dashboard() {
       }}
     >
       <div className="flex h-dvh w-full">
-        <AppSidebar setActiveComponent={setActiveComponent} />
+      <AppSidebar
+          setActiveComponent={setActiveComponent}
+          plan={authUser?.plan || userData?.plan}
+        />
+
 
         <SidebarInset>
           <header className="flex items-center justify-between md:justify-end px-4 py-4 border-b">
