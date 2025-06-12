@@ -9,11 +9,19 @@ const client = new MercadoPagoConfig({
 export async function GET(request) {
   try {
     const userEmail = request.headers.get("x-user-email");
+    console.log("🧪 HEADER userEmail:", request.headers.get("x-user-email"));
+    console.log("🧪 TOKEN parcial:", process.env.MERCADOPAGO_ACCESS_TOKEN?.slice(0, 8));
 
     if (!userEmail) {
+      console.warn("⚠️ No llegó el header x-user-email");
       return NextResponse.json({ error: "Falta el email del usuario" }, { status: 400 });
     }
-
+    
+    if (!process.env.MERCADOPAGO_ACCESS_TOKEN) {
+      console.warn("⚠️ Access token no definido");
+      return NextResponse.json({ error: "Token no definido" }, { status: 500 });
+    }
+    
     const userSnapshot = await db.collection("users").where("email", "==", userEmail).limit(1).get();
 
     if (userSnapshot.empty) {
