@@ -8,39 +8,40 @@ import {
   signInWithPopup,
   signInWithEmailAndPassword,
   onAuthStateChanged,
-  sendPasswordResetEmail,
   setPersistence,
   browserSessionPersistence,
-} from "firebase/auth";
+} from "@/lib/db/db";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { auth, googleProvider, db } from "../../lib/db/db.js";
+import { auth, googleProvider, db } from "@/lib/db/db";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import Loader from "@/components/Loader";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import ResetPasswordForm from "@/components/ResetPasswordForm";
 import { CheckCircle2 } from "lucide-react";
 
 const schema = z.object({
   email: z.string().email("Email inválido").optional(),
   password: z.string().min(6, "Debe tener al menos 6 caracteres").optional(),
-  emailReset: z.string().email("Email inválido").optional(),
 });
 
 export default function LoginForm() {
   const [isResetPassword, setIsResetPassword] = useState(false);
   const router = useRouter();
   const { theme } = useTheme();
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [showRegisterSuccess, setShowRegisterSuccess] = useState(false);
+  const [showResetSuccess, setShowResetSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm({ resolver: zodResolver(schema) });
 
   useEffect(() => {
@@ -59,9 +60,14 @@ export default function LoginForm() {
 
   useEffect(() => {
     if (localStorage.getItem("registerSuccess") === "true") {
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
+      setShowRegisterSuccess(true);
+      setTimeout(() => setShowRegisterSuccess(false), 3000);
       localStorage.removeItem("registerSuccess");
+    }
+    if (localStorage.getItem("resetSuccess") === "true") {
+      setShowResetSuccess(true);
+      setTimeout(() => setShowResetSuccess(false), 3000);
+      localStorage.removeItem("resetSuccess");
     }
   }, []);
 
@@ -72,21 +78,6 @@ export default function LoginForm() {
       router.push("/dashboard");
     } catch {
       setError("Credenciales inválidas. Intenta nuevamente.");
-      setLoading(false);
-    }
-  };
-
-  const handleResetPassword = async (data) => {
-    console.log("reset ejecutado con:", data.emailReset);
-    setLoading(true);
-    setError("");
-    try {
-      await sendPasswordResetEmail(auth, data.emailReset);
-      setShowSuccess(true);
-      reset();
-    } catch (error) {
-      setError("No se pudo enviar el correo. ¿El email está registrado?");
-    } finally {
       setLoading(false);
     }
   };
@@ -124,46 +115,60 @@ export default function LoginForm() {
           {isResetPassword ? "Recuperar contraseña" : "Bienvenido de nuevo"}
         </h2>
 
-        {showSuccess && (
-          <Alert variant="success" className="mb-4">
-            <CheckCircle2 className="h-5 w-5 text-green-500" />
-            <AlertTitle>Email enviado</AlertTitle>
-            <AlertDescription>Revisa tu bandeja de entrada para restablecer tu contraseña.</AlertDescription>
-          </Alert>
-        )}
-
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
         {isResetPassword ? (
-          <form onSubmit={handleSubmit(handleResetPassword)} className="flex flex-col gap-4">
-            <Label htmlFor="emailReset">Ingrese su email para restablecer contraseña</Label>
-            <input {...register("emailReset")} placeholder="Email" className="input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            {errors.emailReset && <p className="text-red-500 text-sm">{errors.emailReset.message}</p>}
-            <button type="submit" className="btn">Enviar</button>
-            <button type="button" onClick={() => setIsResetPassword(false)} className="text-sm text-blue-500 hover:underline">Volver al login</button>
-          </form>
+          <ResetPasswordForm onBack={() => setIsResetPassword(false)} />
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col text-left gap-4">
-            <Label>Email</Label>
-            <input {...register("email")} placeholder="Email" className="input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
-            <div className="flex items-center">
-              <Label>Password</Label>
-              <button type="button" onClick={() => setIsResetPassword(true)} className="ml-auto text-sm underline-offset-2 hover:underline">¿Olvidaste tu contraseña?</button>
+          <>
+            {showRegisterSuccess && (
+              <Alert variant="success" className="mb-4">
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <AlertTitle>Registro exitoso</AlertTitle>
+                <AlertDescription>Ahora puedes iniciar sesión.</AlertDescription>
+              </Alert>
+            )}
+            {showResetSuccess && (
+              <Alert variant="success" className="mb-4">
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <AlertTitle>Email enviado</AlertTitle>
+                <AlertDescription>Revisa tu bandeja de entrada para restablecer tu contraseña.</AlertDescription>
+              </Alert>
+            )}
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <span className="py-2 block">Inicie sesión con su cuenta de Google</span>
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              className="rounded-full mx-auto px-4 py-2 text-sm font-normal text-black border solid flex hover:bg-gray-300 transition-colors ease-in-out duration-150"
+            >
+              <Image src="/assets/google-logo.png" alt="Google" width={20} height={20} className="mr-4" />
+              Iniciar sesión con Google
+            </button>
+
+            <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border py-4">
+              <span className="relative z-10 bg-background px-2 text-muted-foreground bg-white">Or continue with</span>
             </div>
-            <input {...register("password")} type="password" placeholder="Password" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
-            <button type="submit" className="btn">Acceso</button>
-            {error && <p className="text-red-500">{error}</p>}
-            <div className="text-sm text-center">
-              Don&apos;t have an account? <a href="/register" className="underline hover:text-blue-600">Sign up</a>
-            </div>
-          </form>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col text-left gap-4">
+              <Label>Email</Label>
+              <Input {...register("email")} placeholder="Email" />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+              <div className="flex items-center">
+                <Label>Password</Label>
+                <button type="button" onClick={() => setIsResetPassword(true)} className="ml-auto text-sm underline-offset-2 hover:underline">¿Olvidaste tu contraseña?</button>
+              </div>
+              <Input {...register("password")} type="password" placeholder="Password" />
+              {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+              <Button type="submit" className="btn">Acceso</Button>
+              <div className="text-sm text-center">
+                Don&apos;t have an account? <a href="/register" className="underline hover:text-blue-600">Sign up</a>
+              </div>
+            </form>
+          </>
         )}
       </div>
     </div>

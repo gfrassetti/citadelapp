@@ -1,5 +1,15 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  setPersistence,
+  browserSessionPersistence,
+  browserLocalPersistence,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -15,10 +25,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const storage = getStorage(app); // Exportar storage aquí
+export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 
-// Configurar persistencia de sesión
-setPersistence(auth, browserLocalPersistence)
-  .then(() => console.log("✅ Persistencia configurada en localStorage"))
-  .catch((error) => console.error("❌ Error en persistencia:", error));
+export {
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  setPersistence,
+  browserSessionPersistence,
+  browserLocalPersistence,
+};
