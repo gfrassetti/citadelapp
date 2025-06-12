@@ -23,8 +23,9 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckCircle2 } from "lucide-react";
 
 const schema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Debe tener al menos 6 caracteres"),
+  email: z.string().email("Email inválido").optional(),
+  password: z.string().min(6, "Debe tener al menos 6 caracteres").optional(),
+  emailReset: z.string().email("Email inválido").optional(),
 });
 
 export default function LoginForm() {
@@ -34,6 +35,7 @@ export default function LoginForm() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -66,7 +68,7 @@ export default function LoginForm() {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+      await signInWithEmailAndPassword(auth, data.email, data.password);
       router.push("/dashboard");
     } catch {
       setError("Credenciales inválidas. Intenta nuevamente.");
@@ -75,21 +77,19 @@ export default function LoginForm() {
   };
 
   const handleResetPassword = async (data) => {
+    console.log("reset ejecutado con:", data.emailReset);
     setLoading(true);
     setError("");
     try {
-      await sendPasswordResetEmail(auth, data.email);
+      await sendPasswordResetEmail(auth, data.emailReset);
       setShowSuccess(true);
-      reset(); // limpia los campos
+      reset();
     } catch (error) {
       setError("No se pudo enviar el correo. ¿El email está registrado?");
     } finally {
       setLoading(false);
     }
   };
-  
-  
-  
 
   const handleGoogleSignIn = async () => {
     try {
@@ -127,31 +127,6 @@ export default function LoginForm() {
         {showSuccess && (
           <Alert variant="success" className="mb-4">
             <CheckCircle2 className="h-5 w-5 text-green-500" />
-            <AlertTitle>Registro exitoso</AlertTitle>
-            <AlertDescription>Ahora puedes iniciar sesión.</AlertDescription>
-          </Alert>
-        )}
-
-        {!isResetPassword && (
-          <>
-            <span className="py-2 block">Inicie sesión con su cuenta de Google</span>
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-// Suggested code may be subject to a license. Learn more: ~LicenseLog:2460848206.
-              className="rounded-full mx-auto px-4 py-2 text-sm font-normal text-black border solid flex hover:bg-gray-300 transition-colors ease-in-out duration-150"
-            >
-              <Image src="/assets/google-logo.png" alt="Google" width={20} height={20} className="mr-4" />
-              Iniciar sesión con Google
-            </button>
-            <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border py-4">
-              <span className="relative z-10 bg-background px-2 text-muted-foreground bg-white">Or continue with</span>
-            </div>
-          </>
-        )}
-        {showSuccess && (
-          <Alert variant="success" className="mb-4">
-            <CheckCircle2 className="h-5 w-5 text-green-500" />
             <AlertTitle>Email enviado</AlertTitle>
             <AlertDescription>Revisa tu bandeja de entrada para restablecer tu contraseña.</AlertDescription>
           </Alert>
@@ -163,13 +138,13 @@ export default function LoginForm() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
+
         {isResetPassword ? (
-          <form onSubmit={handleSubmit(handleResetPassword)}>
-            <Label htmlFor="email">Ingrese su email para restablecer contraseña</Label>
-            <input {...register("email")} placeholder="Email" className="input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+          <form onSubmit={handleSubmit(handleResetPassword)} className="flex flex-col gap-4">
+            <Label htmlFor="emailReset">Ingrese su email para restablecer contraseña</Label>
+            <input {...register("emailReset")} placeholder="Email" className="input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            {errors.emailReset && <p className="text-red-500 text-sm">{errors.emailReset.message}</p>}
             <button type="submit" className="btn">Enviar</button>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
             <button type="button" onClick={() => setIsResetPassword(false)} className="text-sm text-blue-500 hover:underline">Volver al login</button>
           </form>
         ) : (
