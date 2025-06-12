@@ -1,13 +1,11 @@
-// app/api/mercadopago/subscription-info/route.js
 import { NextResponse } from "next/server";
-import { db, updateUserPlan } from "@/lib/db/firebaseAdmin";
+import { db } from "@/lib/db/firebaseAdmin";
 import { MercadoPagoConfig, PreApproval } from "mercadopago";
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
 });
 
-// 🔹 Endpoint para el FRONTEND (consulta)
 export async function GET(request) {
   try {
     const userEmail = request.headers.get("x-user-email");
@@ -22,6 +20,7 @@ export async function GET(request) {
       return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
     }
 
+    const userRef = userSnapshot.docs[0].ref;
     const userData = userSnapshot.docs[0].data();
     const subscriptionId = userData.subscription;
 
@@ -29,53 +28,42 @@ export async function GET(request) {
       return NextResponse.json({ error: "El usuario no tiene suscripción" }, { status: 404 });
     }
 
-    const ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN;
+    const response = await fetch(`https://api.mercadopago.com/preapproval/${subscriptionId}`, {
+      headers: {
+        Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+    });
 
-    const mpResponse = await fetch(
-      `https://api.mercadopago.com/preapproval/${subscriptionId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${ACCESS_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    if (!mpResponse.ok) {
-      const errorData = await mpResponse.json();
-      return NextResponse.json({ error: errorData }, { status: mpResponse.status });
+    if (!response.ok) {
+      const error = await response.json();
+      return NextResponse.json({ error }, { status: response.status });
     }
 
-    const subscriptionData = await mpResponse.json();
-
+    const subscriptionData = await response.json();
     const now = new Date();
-    const nextPaymentDate = subscriptionData.next_payment_date
-      ? new Date(subscriptionData.next_payment_date)
-      : null;
-    
+    const nextPaymentDate = subscriptionData.next_payment_date ? new Date(subscriptionData.next_payment_date) : null;
     const isExpired = nextPaymentDate && now > nextPaymentDate;
     const status = subscriptionData.status;
-    
+
     if (
-      (status === "cancelled") ||
-      (isExpired && (status !== "authorized" && status !== "paused"))
+      status === "cancelled" ||
+      (isExpired && status !== "authorized" && status !== "paused")
     ) {
-      console.log("⏳ Suscripción inactiva o vencida. Actualizando Firestore a FREE...");
-      await db.collection("users").doc(userSnapshot.docs[0].id).update({
-        plan: "free",
-      });
+      await userRef.update({ plan: "free" });
     } else {
-      console.log("✅ Suscripción activa. Actualizando Firestore a PRO...");
-      await db.collection("users").doc(userSnapshot.docs[0].id).update({
-        plan: "pro",
-      });
+      await userRef.update({ plan: "pro" });
     }
-    
+
     return NextResponse.json(
       {
         subscription: subscriptionData,
         paymentMethod: subscriptionData.payment_method_id || "unknown",
         lastFourDigits: subscriptionData.card?.last_four_digits || "****",
+        frequency: subscriptionData.auto_recurring?.frequency || null,
+        frequencyType: subscriptionData.auto_recurring?.frequency_type || null,
+        transactionAmount: subscriptionData.auto_recurring?.transaction_amount || null,
+        currencyId: subscriptionData.auto_recurring?.currency_id || null,
       },
       { status: 200 }
     );
@@ -85,23 +73,29 @@ export async function GET(request) {
   }
 }
 
-// 🔹 Endpoint para MERCADOPAGO (webhook)
 export async function POST(req) {
   try {
     const body = await req.json();
 
     if (body.type === "subscription_preapproval") {
-      console.log("📩 Recibiendo notificación de suscripción...");
-
       const preApproval = new PreApproval(client);
       const subData = await preApproval.get({ id: body.data.id });
 
       if (subData.status === "authorized") {
-        console.log("✅ Pago autorizado. Actualizando Firestore...");
-      
-        // Esto reemplaza cualquier subscription anterior
-        await updateUserPlan(subData.external_reference, subData.id);
-      }      
+        const userSnapshot = await db
+          .collection("users")
+          .where("email", "==", subData.external_reference)
+          .limit(1)
+          .get();
+
+        if (!userSnapshot.empty) {
+          const userRef = userSnapshot.docs[0].ref;
+          await userRef.update({
+            subscription: subData.id,
+            plan: "pro",
+          });
+        }
+      }
     }
 
     return new Response(null, { status: 200 });
