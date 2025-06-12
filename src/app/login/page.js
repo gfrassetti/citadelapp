@@ -78,17 +78,16 @@ export default function LoginForm() {
     setLoading(true);
     setError("");
     try {
-      await sendPasswordResetEmail(auth, data.email, {
-        url: "https://admin-panel-psi-two.vercel.app/login",
-      });
+      await sendPasswordResetEmail(auth, data.email);
       setShowSuccess(true);
       reset(); // limpia los campos
     } catch (error) {
-      setError("No se pudo enviar el email. Verifica que el correo esté registrado.");
+      setError("No se pudo enviar el correo. ¿El email está registrado?");
     } finally {
       setLoading(false);
     }
   };
+  
   
   
 
@@ -165,7 +164,7 @@ export default function LoginForm() {
           </Alert>
         )}
         {isResetPassword ? (
-          <form onSubmit={handleSubmit(handleResetPassword)} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit(handleResetPassword)}>
             <Label htmlFor="email">Ingrese su email para restablecer contraseña</Label>
             <input {...register("email")} placeholder="Email" className="input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
