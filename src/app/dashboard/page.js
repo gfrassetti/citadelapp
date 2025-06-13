@@ -1,37 +1,36 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
+import React, { useEffect, useState, useRef } from "react";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "../../components/AppSidebar";
 import { useRouter } from "next/navigation";
-import Loader from "@/components/Loader";
 import {
   onAuthStateChanged,
   signOut,
   setPersistence,
   browserSessionPersistence,
 } from "firebase/auth";
-import { auth } from "@/lib/db/db.js";
+import { auth } from "../../lib/db/db.js";
 import {
   Card,
   CardHeader,
+  CardTitle,
   CardContent,
-  CardFooter,
+  CardFooter
 } from "@/components/ui/card";
-import { Loader2Icon, PanelLeft } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ProDashboardPanel } from "@/components/ProDashboardPanel";
+import { useMutation } from "@tanstack/react-query";
 import { useUser } from "@/context/AuthContext";
 import UploadInfo from "@/components/UploadInfo";
 import UploadProduct from "@/components/UploadProduct";
 import Profile from "@/components/Profile";
+import { SidebarInset as MySidebarInset } from "@/components/ui/sidebar";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/db/db";
 import SuscriptionInfo from "@/components/SuscriptionInfo";
 import EditInfo from "@/components/EditInfo";
 import EditProduct from "@/components/EditProduct";
-import { useHandleUpgrade } from "@/hooks/useHandleUpgrade";
 
 import {
   Breadcrumb,
@@ -40,7 +39,6 @@ import {
   BreadcrumbSeparator,
   BreadcrumbLink,
 } from "@/components/ui/breadcrumb";
-import { useSidebar } from "@/components/ui/sidebar";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -49,14 +47,33 @@ export default function Dashboard() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeComponent, setActiveComponent] = useState(null);
-  const [products, setProducts] = useState([]);
+  const ref = useRef(null);
 
-
-  useEffect(() => {
+/*   useEffect(() => {
     const url = new URL(window.location.href);
     const preapprovalId = url.searchParams.get("preapproval_id");
-    if (!preapprovalId || !user?.uid) return;
 
+    if (preapprovalId && user?.uid) {
+      fetch("/api/mercadopago/verify-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ preapprovalId, uid: user.uid }),
+      })
+        .then((res) => {
+          if (res.ok) {
+            updateUserPlan("pro");
+          }
+        })
+        .catch((err) => console.error("❌ Error verificando preapproval:", err));
+    }
+  }, [user]); */
+
+  useEffect(() => {
+    if (!user?.uid) return;
+    const url = new URL(window.location.href);
+    const preapprovalId = url.searchParams.get("preapproval_id");
+    if (!preapprovalId) return;
+  
     fetch("/api/mercadopago/verify-subscription", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -67,6 +84,7 @@ export default function Dashboard() {
       })
       .catch((err) => console.error("❌ Error verificando preapproval:", err));
   }, [user?.uid]);
+  
 
   useEffect(() => {
     setPersistence(auth, browserSessionPersistence).then(() => {
@@ -95,8 +113,31 @@ export default function Dashboard() {
     }
   }, [user]);
 
-  const handleUpgrade = useHandleUpgrade(user);
-
+  const handleUpgrade = useMutation({
+    mutationFn: async () => {
+      if (!user?.uid || !user?.email) throw new Error("Faltan datos del usuario");
+      setLoading(true);
+      const response = await fetch("/api/create-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uid: user.uid, email: user.email }),
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error en la respuesta: ${errorText}`);
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.subscriptionUrl) {
+        window.location.href = data.subscriptionUrl;
+      }
+    },
+    onError: (error) => {
+      console.error("❌ Error en la suscripción:", error);
+    },
+  });
+  
   const componentLabels = {
     UploadInfo: "Subir información",
     UploadProduct: "Subir producto",
@@ -105,42 +146,32 @@ export default function Dashboard() {
     Profile: "Perfil",
     SuscriptionInfo: "Mi suscripción",
   };
-
-  if (loading || !authUser?.plan || !userData) return <Loader text="" />;
+  
+  if (loading || !authUser?.plan || !userData) return <p>Cargando...</p>;
 
   return (
-    <SidebarProvider
-      style={{
-        "--sidebar-width": "16rem",
-        "--sidebar-width-mobile": "16rem",
-      }}
-    >
-      <div className="flex h-dvh w-full">
-      <AppSidebar
-          setActiveComponent={setActiveComponent}
-          plan={authUser?.plan || userData?.plan}
-        />
+    <>
+      <header className="w-full flex justify-between py-4">
+        <div></div>
+        <div className="flex flex-col-reverse welcome-content px-4">
+          <button onClick={() => signOut(auth).then(() => router.push("/login"))}>
+            Cerrar sesión
+          </button>
+          <div className="flex items-center">
+            <h4 className="mr-2">
+              Bienvenido, {userData?.name || user.displayName || user.email}
+            </h4>
+            <Badge className="bg-gray-700 hover:bg-gray-600 ml-1 text-white" variant="secondary">
+              {authUser?.plan}
+            </Badge>
+          </div>
+        </div>
+      </header>
 
-
-        <SidebarInset>
-          <header className="flex items-center justify-between md:justify-end px-4 py-4 border-b">
-            <SidebarToggle />
-            <div className="flex flex-col-reverse welcome-content">
-              <button className="italic" onClick={() => signOut(auth).then(() => router.push("/login"))}>
-                Cerrar sesión
-              </button>
-              <div className="flex items-center">
-                <h4 className="mr-2">
-                  Bienvenido, <span className="text-blue-600 font-bold">{userData?.name || user.displayName || user.email}</span>
-                </h4>
-                <Badge className="bg-gray-700 hover:bg-gray-600 ml-1 text-white" variant="secondary">
-                  {authUser?.plan}
-                </Badge>
-              </div>
-            </div>
-          </header>
-
-          <main className="flex-1 p-4 pt-0">
+      <SidebarProvider>
+        <AppSidebar setActiveComponent={setActiveComponent} />
+        <MySidebarInset>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             {activeComponent && (
               <div className="mb-4">
                 <Breadcrumb>
@@ -155,9 +186,9 @@ export default function Dashboard() {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                      <span className="capitalize text-blue-600">
-                        {componentLabels[activeComponent?.trim()] ?? activeComponent}
-                      </span>
+                    <span className="capitalize text-blue-600">
+                    {componentLabels[activeComponent?.trim()] ?? activeComponent}
+                    </span>
                     </BreadcrumbItem>
                   </BreadcrumbList>
                 </Breadcrumb>
@@ -165,18 +196,17 @@ export default function Dashboard() {
             )}
 
             {activeComponent === "UploadInfo" && <UploadInfo />}
-            {activeComponent === "UploadProduct" && (
-              <UploadProduct empresaId={userData?.empresaId} />
+            {activeComponent === "UploadProduct" && userData?.empresaId && (
+              <UploadProduct empresaId={userData.empresaId} />
             )}
             {activeComponent === "EditInfo" && <EditInfo />}
             {activeComponent === "EditProduct" && <EditProduct />}
             {activeComponent === "Profile" && <Profile />}
             {activeComponent === "SuscriptionInfo" && <SuscriptionInfo />}
-
             {!activeComponent && (
               <>
                 {authUser?.plan === "free" ? (
-                  <Card className="max-w-md mx-auto mt-10 text-center border border-gray-800 bg-muted text-foreground shadow-md">
+                  <Card className="max-w-md mx-auto text-center border border-gray-800 bg-muted text-foreground shadow-md">
                     <CardHeader className="space-y-2">
                       <h2 className="text-2xl font-bold tracking-tight">Plan gratuito activado</h2>
                       <p className="text-sm text-muted-foreground">
@@ -208,27 +238,13 @@ export default function Dashboard() {
                     </CardFooter>
                   </Card>
                 ) : (
-                  <ProDashboardPanel />
+                  <p>Bienvenido a tu cuenta PRO</p>
                 )}
               </>
             )}
-          </main>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
-  );
-}
-
-function SidebarToggle() {
-  const { toggleSidebar } = useSidebar();
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={toggleSidebar}
-      className="md:hidden"
-    >
-      <PanelLeft className="h-5 w-5" />
-    </Button>
+          </div>
+        </MySidebarInset>
+      </SidebarProvider>
+    </>
   );
 }
