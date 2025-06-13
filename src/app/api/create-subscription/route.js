@@ -14,10 +14,9 @@ const api = {
         const { uid, email } = await req.json();
 
         if (!uid || !email) {
-          console.error("❌ Faltan datos requeridos");
+          console.error("❌ Faltan datos requeridos", { uid, email });
           return NextResponse.json({ error: "Faltan datos requeridos" }, { status: 400 });
         }
-        
 
         if (!process.env.MERCADOPAGO_ACCESS_TOKEN) {
           console.error("❌ ERROR: `MERCADOPAGO_ACCESS_TOKEN` no está definido.");
@@ -39,12 +38,12 @@ const api = {
             auto_recurring: {
               frequency: 1,
               frequency_type: "months",
-              transaction_amount: 15.00,
+              transaction_amount: 15.0,
               currency_id: "ARS",
               start_date: startDate.toISOString(),
             },
-            payer_email: "test_user_895208562@testuser.com",
-            back_url: "https://admin-panel-psi-two.vercel.app/dashboard", //cambiar
+            payer_email: "test_user_895208562@testuser.com", // O reemplazalo si querés que sea dinámico
+            back_url: "https://admin-panel-psi-two.vercel.app/dashboard",
             external_reference: uid,
           },
         });
@@ -52,16 +51,29 @@ const api = {
         console.log("✅ Respuesta de MercadoPago:", subscription);
 
         return NextResponse.json({ subscriptionUrl: subscription.init_point });
-
       } catch (error) {
         console.error("❌ Error al crear la suscripción:", error);
 
+        // Log completo si MercadoPago respondió algo
         if (error.response) {
           console.error("📌 Respuesta de MercadoPago:", error.response.data);
-          return NextResponse.json({ error: error.response.data }, { status: error.response.status || 500 });
+          return NextResponse.json(
+            {
+              error: error.response.data.message || "Error desconocido",
+              detail: error.response.data,
+            },
+            { status: error.response.status || 500 }
+          );
         }
 
-        return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
+        // Log para otros errores
+        return NextResponse.json(
+          {
+            error: error.message || "Error en el servidor",
+            stack: error.stack || null,
+          },
+          { status: 500 }
+        );
       }
     },
   },
