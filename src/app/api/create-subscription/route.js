@@ -35,7 +35,7 @@ const api = {
 
         const subscription = await preApproval.create({
           body: {
-            reason: "Admin Panel - Acceso Premium",
+            reason: "Plan Pro - Acceso Premium",
             auto_recurring: {
               frequency: 1,
               frequency_type: "months",
@@ -43,7 +43,7 @@ const api = {
               currency_id: "ARS",
               start_date: startDate.toISOString(),
             },
-            payer_email: email,
+            payer_email: email, //email
             back_url: "https://admin-panel-psi-two.vercel.app/dashboard", //cambiar
             external_reference: uid,
           },
@@ -54,14 +54,15 @@ const api = {
         return NextResponse.json({ subscriptionUrl: subscription.init_point });
 
       } catch (error) {
-        console.error("❌ Error al crear la suscripción:", JSON.stringify(error, null, 2));
+        console.error("❌ Error al crear la suscripción:", error);
+
         if (error.response) {
-          console.error("📌 Detalle MercadoPago:", error.response.data);
+          console.error("📌 Respuesta de MercadoPago:", error.response.data);
           return NextResponse.json({ error: error.response.data }, { status: error.response.status || 500 });
         }
-        return NextResponse.json({ error: error.message || "Error en el servidor" }, { status: 500 });
+
+        return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
       }
-      
     },
   },
 };
