@@ -35,7 +35,7 @@ const api = {
 
         const subscription = await preApproval.create({
           body: {
-            reason: "Plan Pro - Acceso Premium",
+            reason: "Admin Panel - Acceso Premium",
             auto_recurring: {
               frequency: 1,
               frequency_type: "months",
