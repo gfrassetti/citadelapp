@@ -58,15 +58,14 @@ const api = {
         return NextResponse.json({ subscriptionUrl: subscription.init_point });
 
       } catch (error) {
-        console.error("❌ Error al crear la suscripción:", error);
-
+        console.error("❌ Error al crear la suscripción:", JSON.stringify(error, null, 2));
         if (error.response) {
-          console.error("📌 Respuesta de MercadoPago:", error.response.data);
+          console.error("📌 Detalle MercadoPago:", error.response.data);
           return NextResponse.json({ error: error.response.data }, { status: error.response.status || 500 });
         }
-
-        return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
+        return NextResponse.json({ error: error.message || "Error en el servidor" }, { status: 500 });
       }
+      
     },
   },
 };
