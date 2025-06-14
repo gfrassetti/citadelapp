@@ -17,6 +17,9 @@ export async function POST(req) {
       email,
       metadata: { uid },
     });
+    
+    console.log("🧪 Price ID:", process.env.STRIPE_PRICE_ID);
+    console.log("🧪 Price ID (trimmed):", process.env.STRIPE_PRICE_ID.trim());
 
     const session = await stripe.checkout.sessions.create({
       customer: customer.id,
@@ -24,7 +27,7 @@ export async function POST(req) {
       payment_method_types: ["card"],
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID, // ID del producto/plan de Stripe
+          price: process.env.STRIPE_PRICE_ID.trim(), // ID del producto/plan de Stripe
           quantity: 1,
         },
       ],
