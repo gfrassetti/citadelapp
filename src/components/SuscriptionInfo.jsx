@@ -99,9 +99,12 @@ export default function SubscriptionInfo() {
 
   const subscription = data?.subscription;
   const customer = data?.customer;
+  if (!subscription) return <Loader text="Cargando Suscripción..." />;
+
   const card = subscription?.default_payment_method?.card;
   const normalized = normalizeMethod(card?.brand);
-  const isPaused = !!subscription.pause_collection;
+  const isPaused = !subscription?.pause_collection;
+  
 
   if (isLoading) return <Loader text="Cargando Suscripción..." />;
 
@@ -165,33 +168,32 @@ export default function SubscriptionInfo() {
       </Table>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {subscription.status === "active" && !isPaused && (
-          <button
-            onClick={() => mutationPause.mutate(subscription.id)}
-            className="bg-yellow-500 text-white px-4 py-2 rounded"
-          >
-            Pausar Suscripción
-          </button>
-        )}
+      {subscription.status === "active" && (
+        <button
+          onClick={() => mutationPause.mutate(subscription.id)}
+          className="bg-yellow-500 text-white px-4 py-2 rounded"
+        >
+          Pausar Suscripción
+        </button>
+      )}
 
-        {isPaused && (
-          <button
-            onClick={() => mutationReactivate.mutate(subscription.id)}
-            className="bg-green-600 text-white px-4 py-2 rounded"
-          >
-            Reactivar Suscripción
-          </button>
-        )}
+      {subscription.status === "paused" && (
+        <button
+          onClick={() => mutationReactivate.mutate(subscription.id)}
+          className="bg-green-600 text-white px-4 py-2 rounded"
+        >
+          Reactivar Suscripción
+        </button>
+      )}
 
-        {subscription.status === "active" && (
-          <button
-            onClick={() => mutationCancel.mutate(subscription.id)}
-            className="bg-red-600 text-white px-4 py-2 rounded"
-            disabled={isCancelling}
-          >
-            Cancelar Suscripción
-          </button>
-        )}
+      {subscription.status !== "cancelled" && (
+        <button
+          onClick={() => mutationCancel.mutate(subscription.id)}
+          className="bg-red-600 text-white px-4 py-2 rounded"
+        >
+          Cancelar Suscripción
+        </button>
+      )}
       </div>
       <UpdatePaymentMethod />
     </div>

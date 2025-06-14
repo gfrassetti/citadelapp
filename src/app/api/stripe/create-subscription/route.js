@@ -18,9 +18,6 @@ export async function POST(req) {
       metadata: { uid },
     });
 
-    console.log("🧪 Price ID:", process.env.STRIPE_PRICE_ID);
-    console.log("🧪 Price ID (trimmed):", process.env.STRIPE_PRICE_ID.trim());
-
     const session = await stripe.checkout.sessions.create({
       customer: customer.id,
       mode: "subscription",
