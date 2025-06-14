@@ -140,55 +140,62 @@ export default function EditProduct() {
           <p className="text-center text-gray-500">Usted no tiene ningún producto.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {products.map((product) => (
-              <div
-                key={product.id}
-                className="relative p-4 border rounded shadow hover:bg-gray-100"
-                onClick={() => onSelectProduct(product)}
-              >
-                <img
-                  src={product.imageUrl}
-                  alt={product.productName}
-                  className="w-full h-[12rem] object-cover rounded mb-2 cursor-pointer"
-                />
-                <p className="font-semibold">{product.productName}</p>
-                <p className="text-sm">{product.description}</p>
-                <p className="text-sm text-green-600">💲{product.price}</p>
-                <p className="text-xs text-gray-500">
-                  {product.createdAt?.toDate
-                    ? product.createdAt.toDate().toLocaleDateString()
-                    : "Sin fecha"}
-                </p>
+{products.map((product) => {
+  const handleDelete = async () => {
+    await deleteDoc(doc(db, "products", product.id));
+    setProducts((prev) => prev.filter((p) => p.id !== product.id));
+  };
 
-                <AlertDialog open={pendingId === product.id} onOpenChange={(open) => setPendingId(open ? product.id : null)}>
-                  <AlertDialogTrigger asChild>
-                    <div
-                      className="absolute top-2 right-2 text-gray-400 hover:text-red-600 cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPendingId(product.id);
-                      }}
-                    >
-                      <Trash2 size={18} />
-                    </div>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Esta acción no se puede deshacer. El producto será eliminado permanentemente.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDelete(product.id)} disabled={deleting}>
-                        {deleting ? <Loader text="Eliminando..." /> : "Confirmar"}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            ))}
+  return (
+    <div
+      key={product.id}
+      className="relative p-4 border rounded shadow hover:bg-gray-100"
+      onClick={() => onSelectProduct(product)}
+    >
+      <img
+        src={product.imageUrl}
+        alt={product.productName}
+        className="w-full h-[12rem] object-cover rounded mb-2 cursor-pointer"
+      />
+      <p className="font-semibold">{product.productName}</p>
+      <p className="text-sm">{product.description}</p>
+      <p className="text-sm text-green-600">💲{product.price}</p>
+      <p className="text-xs text-gray-500">
+        {product.createdAt?.toDate
+          ? product.createdAt.toDate().toLocaleDateString()
+          : "Sin fecha"}
+      </p>
+
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <button
+            className="absolute top-2 right-2 text-gray-400 hover:text-red-600 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <Trash2 size={18} />
+          </button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. El producto será eliminado permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+})}
+
           </div>
         )
       ) : (
