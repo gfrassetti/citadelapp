@@ -40,7 +40,9 @@ const api = {
               currency_id: "ARS",
               start_date: startDate.toISOString(),
             },
-            payer_email: email,               // ✅ Email dinámico del usuario real
+            payer_email: process.env.NEXT_PUBLIC_ENV === "sandbox"
+            ? "test_user_895208562@testuser.com"
+            : email,              // ✅ Email dinámico del usuario real
             back_url: "https://admin-panel-psi-two.vercel.app/dashboard",
             external_reference: email,        // ✅ También el email para que el webhook lo relacione
           },
