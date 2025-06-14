@@ -26,8 +26,6 @@ const api = {
         const startDate = new Date();
         startDate.setMinutes(startDate.getMinutes() + 1);
 
-        console.log("📅 Fecha de inicio:", startDate.toISOString());
-
         const preApproval = new PreApproval(client);
 
         console.log("🚀 Enviando solicitud a MercadoPago...");
@@ -42,9 +40,9 @@ const api = {
               currency_id: "ARS",
               start_date: startDate.toISOString(),
             },
-            payer_email: "test_user_895208562@testuser.com", // O reemplazalo si querés que sea dinámico
+            payer_email: email,               // ✅ Email dinámico del usuario real
             back_url: "https://admin-panel-psi-two.vercel.app/dashboard",
-            external_reference: uid,
+            external_reference: email,        // ✅ También el email para que el webhook lo relacione
           },
         });
 
@@ -54,7 +52,6 @@ const api = {
       } catch (error) {
         console.error("❌ Error al crear la suscripción:", error);
 
-        // Log completo si MercadoPago respondió algo
         if (error.response) {
           console.error("📌 Respuesta de MercadoPago:", error.response.data);
           return NextResponse.json(
@@ -66,7 +63,6 @@ const api = {
           );
         }
 
-        // Log para otros errores
         return NextResponse.json(
           {
             error: error.message || "Error en el servidor",
