@@ -13,8 +13,8 @@ import Loader from "@/components/Loader";
 import UpdatePaymentMethod from "@/components/UpdatePaymentMethod";
 
 const paymentIcons = {
-  visa: "/assets/32px-Visa_Inc._logo.svg",
-  mastercard: "/assets/32px-Mastercard-logo.svg",
+  visa: "/assets/visa-4.svg",
+  mastercard: "/assets/mastercard-4.svg",
   amex: "/assets/American_Express_logo_(2018).svg",
   default: "/assets/default_cc.svg",
 };
@@ -35,9 +35,7 @@ async function fetchStripeSubscription(uid) {
   });
 
   if (res.status === 404) return { subscription: null };
-
   if (!res.ok) throw new Error("Error al obtener la suscripción");
-
   return res.json();
 }
 
@@ -74,7 +72,6 @@ async function reactivateStripeSubscription(subscriptionId) {
 export default function SubscriptionInfo() {
   const { user } = useUser();
   const queryClient = useQueryClient();
-  const [isCancelling, setIsCancelling] = useState(false);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["stripeSubscription", user.uid],
@@ -99,14 +96,8 @@ export default function SubscriptionInfo() {
 
   const subscription = data?.subscription;
   const customer = data?.customer;
-  if (!subscription) return <Loader text="Cargando Suscripción..." />;
 
-  const card = subscription?.default_payment_method?.card;
-  const normalized = normalizeMethod(card?.brand);
-  const isPaused = !subscription?.pause_collection;
-  
-
-  if (isLoading) return <Loader text="Cargando Suscripción..." />;
+  if (isLoading || !subscription) return <Loader text="Cargando Suscripción..." />;
 
   if (isError)
     return (
@@ -115,15 +106,9 @@ export default function SubscriptionInfo() {
       </div>
     );
 
-  if (!subscription)
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <h2 className="text-xl font-bold mb-2">No tenés una suscripción activa</h2>
-          <p className="text-gray-600">Suscribite para desbloquear funciones premium.</p>
-        </div>
-      </div>
-    );
+  const card = subscription?.default_payment_method?.card;
+  const normalized = normalizeMethod(card?.brand);
+  const isPaused = !!subscription?.pause_collection;
 
   return (
     <div className="p-4">
@@ -136,7 +121,7 @@ export default function SubscriptionInfo() {
           </TableRow>
           <TableRow>
             <TableCell className="font-semibold">Estado</TableCell>
-            <TableCell>{subscription.status}</TableCell>
+            <TableCell>{isPaused ? "paused" : subscription.status}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell className="font-semibold">Monto</TableCell>
@@ -157,7 +142,7 @@ export default function SubscriptionInfo() {
             <TableCell className="font-semibold">Método de Pago</TableCell>
             <TableCell className="flex items-center">
               <img
-                src={paymentIcons[normalized]}
+                src={paymentIcons[normalized] || paymentIcons.default}
                 alt={normalized}
                 className="w-8 h-8 mr-2"
               />
@@ -168,33 +153,34 @@ export default function SubscriptionInfo() {
       </Table>
 
       <div className="mt-4 flex flex-wrap gap-2">
-      {subscription.status === "active" && (
-        <button
-          onClick={() => mutationPause.mutate(subscription.id)}
-          className="bg-yellow-500 text-white px-4 py-2 rounded"
-        >
-          Pausar Suscripción
-        </button>
-      )}
+        {subscription.status === "active" && !isPaused && (
+          <button
+            onClick={() => mutationPause.mutate(subscription.id)}
+            className="bg-yellow-500 text-white px-4 py-2 rounded"
+          >
+            Pausar Suscripción
+          </button>
+        )}
 
-      {subscription.status === "paused" && (
-        <button
-          onClick={() => mutationReactivate.mutate(subscription.id)}
-          className="bg-green-600 text-white px-4 py-2 rounded"
-        >
-          Reactivar Suscripción
-        </button>
-      )}
+        {isPaused && (
+          <button
+            onClick={() => mutationReactivate.mutate(subscription.id)}
+            className="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Reactivar Suscripción
+          </button>
+        )}
 
-      {subscription.status !== "cancelled" && (
-        <button
-          onClick={() => mutationCancel.mutate(subscription.id)}
-          className="bg-red-600 text-white px-4 py-2 rounded"
-        >
-          Cancelar Suscripción
-        </button>
-      )}
+        {subscription.status !== "canceled" && (
+          <button
+            onClick={() => mutationCancel.mutate(subscription.id)}
+            className="bg-red-600 text-white px-4 py-2 rounded"
+          >
+            Cancelar Suscripción
+          </button>
+        )}
       </div>
+
       <UpdatePaymentMethod />
     </div>
   );
