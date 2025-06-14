@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { UserDataProvider } from "@/context/UserDataContext";
 import { Toaster } from "@/components/ui/sonner";
+import { SubscriptionProvider } from "@/context/SubscriptionContext";
 
 
 const geistSans = Geist({
@@ -49,10 +50,12 @@ export default function RootLayout({ children }) {
           <ThemeProvider>
             <AuthProvider>
               <UserDataProvider>
+                <SubscriptionProvider>
                 {header}
                 <main className="flex-1 w-full mx-auto">{children}</main>
                 <Toaster /> {/* ✅ Agregado aquí */}
                 {footer}
+                </SubscriptionProvider>
               </UserDataProvider>
             </AuthProvider>
           </ThemeProvider>
