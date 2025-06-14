@@ -39,6 +39,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
+import Loader from "@/components/Loader";
 
 export default function EditProduct() {
   const { user } = useUser();
@@ -46,6 +47,8 @@ export default function EditProduct() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [pendingId, setPendingId] = useState(null);
 
   const form = useForm({
     defaultValues: {
@@ -116,11 +119,18 @@ export default function EditProduct() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!selectedProduct) return;
-    await deleteDoc(doc(db, "products", selectedProduct.id));
-    setProducts((prev) => prev.filter((p) => p.id !== selectedProduct.id));
-    setSelectedProduct(null);
+  const handleDelete = async (id) => {
+    setDeleting(true);
+    try {
+      await deleteDoc(doc(db, "products", id));
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      if (selectedProduct?.id === id) setSelectedProduct(null);
+    } catch (error) {
+      console.error("Error eliminando producto:", error);
+    } finally {
+      setDeleting(false);
+      setPendingId(null);
+    }
   };
 
   return (
@@ -150,11 +160,14 @@ export default function EditProduct() {
                     : "Sin fecha"}
                 </p>
 
-                <AlertDialog>
+                <AlertDialog open={pendingId === product.id} onOpenChange={(open) => setPendingId(open ? product.id : null)}>
                   <AlertDialogTrigger asChild>
                     <div
                       className="absolute top-2 right-2 text-gray-400 hover:text-red-600 cursor-pointer"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPendingId(product.id);
+                      }}
                     >
                       <Trash2 size={18} />
                     </div>
@@ -167,9 +180,9 @@ export default function EditProduct() {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDelete}>
-                        Confirmar
+                      <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDelete(product.id)} disabled={deleting}>
+                        {deleting ? <Loader text="Eliminando..." /> : "Confirmar"}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -271,7 +284,7 @@ export default function EditProduct() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDelete}>
+                      <AlertDialogAction onClick={() => handleDelete(selectedProduct.id)}>
                         Confirmar
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -280,12 +293,8 @@ export default function EditProduct() {
               </div>
 
               {status && (
-                <Alert
-                  variant={status.type === "error" ? "destructive" : "default"}
-                >
-                  <AlertTitle>
-                    {status.type === "error" ? "Error" : "Éxito"}
-                  </AlertTitle>
+                <Alert variant={status.type === "error" ? "destructive" : "default"}>
+                  <AlertTitle>{status.type === "error" ? "Error" : "Éxito"}</AlertTitle>
                   <AlertDescription>{status.message}</AlertDescription>
                 </Alert>
               )}
