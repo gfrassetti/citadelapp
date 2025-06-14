@@ -11,6 +11,8 @@ import { usePathname } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { UserDataProvider } from "@/context/UserDataContext";
+import { Toaster } from "@/components/ui/sonner";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,6 +51,7 @@ export default function RootLayout({ children }) {
               <UserDataProvider>
                 {header}
                 <main className="flex-1 w-full mx-auto">{children}</main>
+                <Toaster /> {/* ✅ Agregado aquí */}
                 {footer}
               </UserDataProvider>
             </AuthProvider>

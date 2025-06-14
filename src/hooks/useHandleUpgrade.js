@@ -5,7 +5,7 @@ export function useHandleUpgrade(user) {
     mutationFn: async () => {
       if (!user?.uid || !user?.email) throw new Error("Faltan datos del usuario");
 
-      const response = await fetch("/api/create-subscription", {
+      const response = await fetch("/api/stripe/create-subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uid: user.uid, email: user.email }),
@@ -19,8 +19,8 @@ export function useHandleUpgrade(user) {
       return response.json();
     },
     onSuccess: (data) => {
-      if (data.subscriptionUrl) {
-        window.location.href = data.subscriptionUrl;
+      if (data.url) {
+        window.location.href = data.url;
       }
     },
     onError: (error) => {

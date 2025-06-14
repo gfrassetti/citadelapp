@@ -32,6 +32,7 @@ import SuscriptionInfo from "@/components/SuscriptionInfo";
 import EditInfo from "@/components/EditInfo";
 import EditProduct from "@/components/EditProduct";
 import { useHandleUpgrade } from "@/hooks/useHandleUpgrade";
+import ReactivateBanner from "@/components/ReactivateBanner";
 
 import {
   Breadcrumb,
@@ -49,24 +50,7 @@ export default function Dashboard() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeComponent, setActiveComponent] = useState(null);
-  const [products, setProducts] = useState([]);
 
-
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    const preapprovalId = url.searchParams.get("preapproval_id");
-    if (!preapprovalId || !user?.uid) return;
-
-    fetch("/api/mercadopago/verify-subscription", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ preapprovalId, uid: user.uid }),
-    })
-      .then((res) => {
-        if (res.ok) updateUserPlan("pro");
-      })
-      .catch((err) => console.error("❌ Error verificando preapproval:", err));
-  }, [user?.uid]);
 
   useEffect(() => {
     setPersistence(auth, browserSessionPersistence).then(() => {
@@ -215,6 +199,7 @@ export default function Dashboard() {
           </main>
         </SidebarInset>
       </div>
+      <ReactivateBanner />
     </SidebarProvider>
   );
 }
