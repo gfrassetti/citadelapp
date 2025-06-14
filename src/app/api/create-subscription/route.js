@@ -44,6 +44,7 @@ const api = {
             ? "test_user_895208562@testuser.com"
             : email,              // ✅ Email dinámico del usuario real
             back_url: "https://admin-panel-psi-two.vercel.app/dashboard",
+            external_reference: email,        // ✅ También el email para que el webhook lo relacione
           },
         });
 
