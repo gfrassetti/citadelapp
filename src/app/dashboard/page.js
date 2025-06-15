@@ -82,13 +82,15 @@ export default function Dashboard() {
   const handleUpgrade = useHandleUpgrade(user);
 
   const componentLabels = {
-    UploadInfo: "Subir información",
-    UploadProduct: "Subir producto",
-    EditInfo: "Editar tu información",
-    EditProduct: "Editar producto",
+    UploadInfo: "Subir Información",
+    UploadProduct: "Subir Producto",
+    EditProduct: "Editar Productos",
+    EditInfo: "Editar Empresa",
     Profile: "Perfil",
-    SuscriptionInfo: "Mi suscripción",
+    SuscriptionInfo: "Suscripción",
+    ProDashboard: "Dashboard",
   };
+  
 
   if (loading || !authUser?.plan || !userData) return <Loader text="" />;
 

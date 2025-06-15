@@ -12,34 +12,14 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/db/db";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-} from "@/components/ui/form";
+import { toast } from "sonner";
+import ProductEditForm from "@/components/ProductEditForm";
+import { DataTable } from "@/components/ui/data-table";
+import { columns } from "@/lib/columns";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { useTheme } from "next-themes";
 import { useForm } from "react-hook-form";
-import {
-  Alert,
-  AlertTitle,
-  AlertDescription,
-} from "@/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from "@/components/ui/alert-dialog";
-import { Trash2 } from "lucide-react";
-import { toast } from "sonner"; 
 
 export default function EditProduct() {
   const { user } = useUser();
@@ -47,8 +27,7 @@ export default function EditProduct() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [pendingId, setPendingId] = useState(null);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const form = useForm({
     defaultValues: {
@@ -73,6 +52,7 @@ export default function EditProduct() {
         ...doc.data(),
       }));
       setProducts(data);
+      setInitialLoading(false);
     }
     fetchProducts();
   }, [user]);
@@ -103,16 +83,23 @@ export default function EditProduct() {
 
     try {
       await updateDoc(doc(db, "products", selectedProduct.id), updatedData);
+      setProducts((prev) =>
+        prev.map((item) =>
+          item.id === selectedProduct.id ? { ...item, ...updatedData } : item
+        )
+      );
       setStatus({
         type: "success",
         message: "Producto actualizado correctamente.",
       });
+      toast.success("Producto actualizado correctamente");
     } catch (error) {
       console.error(error);
       setStatus({
         type: "error",
         message: "Error al actualizar el producto.",
       });
+      toast.error("Error al actualizar el producto");
     } finally {
       setTimeout(() => setStatus(null), 4000);
       setLoading(false);
@@ -120,168 +107,48 @@ export default function EditProduct() {
   };
 
   const handleDelete = async (id) => {
-    setDeleting(true);
     try {
       await deleteDoc(doc(db, "products", id));
       setProducts((prev) => prev.filter((p) => p.id !== id));
       if (selectedProduct?.id === id) setSelectedProduct(null);
+      toast.success("Producto eliminado correctamente");
     } catch (error) {
       console.error("Error eliminando producto:", error);
-    } finally {
-      setDeleting(false);
-      setPendingId(null);
+      toast.error("No se pudo eliminar el producto");
     }
   };
+
+  const theme = useTheme().theme;
 
   return (
     <div className="p-4">
       {!selectedProduct ? (
-        products.length === 0 ? (
-          <p className="text-center text-gray-500">Usted no tiene ningún producto.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-{products.map((product) => {
-  const handleDelete = async () => {
-    await deleteDoc(doc(db, "products", product.id));
-    setProducts((prev) => prev.filter((p) => p.id !== product.id));
-    toast.success("Producto eliminado correctamente");
-  };
-
-  return (
-    <div
-      key={product.id}
-      className="relative p-4 border rounded shadow hover:bg-gray-100"
-      onClick={() => onSelectProduct(product)}
-    >
-      <img
-        src={product.imageUrl}
-        alt={product.productName}
-        className="w-full h-[12rem] object-cover rounded mb-2 cursor-pointer"
-      />
-      <p className="font-semibold">{product.productName}</p>
-      <p className="text-sm">{product.description}</p>
-      <p className="text-sm text-green-600">💲{product.price}</p>
-      <p className="text-xs text-gray-500">
-        {product.createdAt?.toDate
-          ? product.createdAt.toDate().toLocaleDateString()
-          : "Sin fecha"}
-      </p>
-    </div>
-  );
-})}
-
-          </div>
-        )
-      ) : (
-        <div className="max-w-md mx-auto space-y-4">
-          <Button
-            variant="outline"
-            className="text-sm"
-            onClick={() => setSelectedProduct(null)}
-          >
-            ← Volver
-          </Button>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="productName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre del Producto</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descripción</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Precio</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="tags"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Palabras clave</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="imageUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL de la Imagen</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex items-center gap-2">
-                <Button type="submit">
-                  {loading ? "Guardando..." : "Guardar Cambios"}
-                </Button>
-
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive" type="button">
-                      Eliminar
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Esta acción no se puede deshacer. El producto será eliminado permanentemente.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDelete(selectedProduct.id)}>
-                        Confirmar
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-
-              {status && (
-                <Alert variant={status.type === "error" ? "destructive" : "default"}>
-                  <AlertTitle>{status.type === "error" ? "Error" : "Éxito"}</AlertTitle>
-                  <AlertDescription>{status.message}</AlertDescription>
-                </Alert>
-              )}
-            </form>
-          </Form>
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold">Editar productos</h2>
+          <Separator />
+          {initialLoading ? (
+            <Skeleton className="w-full h-[300px] rounded-md" />
+          ) : (
+            <DataTable
+              columns={columns({
+                onSelect: onSelectProduct,
+                showImage: true,
+                disableLink: true,
+              })}
+              data={products}
+            />
+          )}
         </div>
+      ) : (
+        <ProductEditForm
+          form={form}
+          loading={loading}
+          selectedProduct={selectedProduct}
+          setSelectedProduct={setSelectedProduct}
+          handleDelete={handleDelete}
+          onSubmit={onSubmit}
+          status={status}
+        />
       )}
     </div>
   );
