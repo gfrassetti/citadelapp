@@ -4,8 +4,13 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-
+import { auth, db, storage } from "@/lib/db/db";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { updatePassword } from "firebase/auth";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Form,
   FormField,
@@ -14,17 +19,12 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-
-import { auth, db, storage } from "@/lib/db/db";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL, deleteObject, ref as storageRef } from "firebase/storage";
-import { updatePassword } from "firebase/auth";
+import { Loader2Icon, PencilIcon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const formSchema = z.object({
-  name: z.string().min(2, "Mínimo 2 caracteres"),
-  email: z.string().email("Formato de correo inválido"),
+  name: z.string().min(2),
+  email: z.string().email(),
   plan: z.string().optional(),
   subscription: z.string().optional(),
   avatar: z.any().optional(),
@@ -34,7 +34,9 @@ const formSchema = z.object({
 
 export default function Profile() {
   const [loading, setLoading] = useState(false);
+  const [editMode, setEditMode] = useState(false);
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -49,33 +51,26 @@ export default function Profile() {
     },
   });
 
-  const { reset, watch } = form;
-
-  const newPasswordValue = watch("newPassword");
-  const confirmPasswordValue = watch("confirmPassword");
+  const { reset } = form;
 
   useEffect(() => {
     const user = auth.currentUser;
     if (!user) return;
 
     (async () => {
-      try {
-        const snap = await getDoc(doc(db, "users", user.uid));
-        if (snap.exists()) {
-          const data = snap.data();
-          setCurrentAvatarUrl(data.avatarUrl || "");
-          reset({
-            name: data.name || "",
-            email: data.email || "",
-            plan: data.plan || "",
-            subscription: data.subscription || "",
-            avatar: null,
-            newPassword: "",
-            confirmPassword: "",
-          });
-        }
-      } catch (err) {
-        console.error("Error al cargar datos:", err);
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (snap.exists()) {
+        const data = snap.data();
+        setCurrentAvatarUrl(data.avatarUrl || "");
+        reset({
+          name: data.name || "",
+          email: data.email || "",
+          plan: data.plan || "",
+          subscription: data.subscription || "",
+          avatar: null,
+          newPassword: "",
+          confirmPassword: "",
+        });
       }
     })();
   }, [reset]);
@@ -84,225 +79,187 @@ export default function Profile() {
     setLoading(true);
     try {
       const user = auth.currentUser;
-      if (!user) throw new Error("No hay usuario autenticado.");
+      if (!user) throw new Error("Usuario no autenticado.");
 
       if (values.newPassword && values.newPassword !== values.confirmPassword) {
         throw new Error("Las contraseñas no coinciden");
       }
 
       let avatarUrl = currentAvatarUrl;
-
       if (values.avatar instanceof File) {
         const file = values.avatar;
-        const storagePath = ref(storage, `avatars/${user.uid}/${file.name}`);
-        await uploadBytes(storagePath, file);
-        avatarUrl = await getDownloadURL(storagePath);
+        const path = ref(storage, `avatars/${user.uid}/${file.name}`);
+        await uploadBytes(path, file);
+        avatarUrl = await getDownloadURL(path);
       }
 
-      const userRef = doc(db, "users", user.uid);
-      const updateData = {
-        name: values.name,
-        email: values.email,
-        plan: values.plan || "",
-        subscription: values.subscription || "",
-        avatarUrl,
-      };
-
-      await updateDoc(userRef, updateData);
-
-      if (values.newPassword && values.newPassword.length > 0) {
-        await updatePassword(user, values.newPassword);
-      }
-
-      toast.success("Perfil actualizado", {
-        description: "Tus datos se han guardado correctamente.",
-      });
-
-      setCurrentAvatarUrl(avatarUrl);
-
-      reset({
+      await updateDoc(doc(db, "users", user.uid), {
         name: values.name,
         email: values.email,
         plan: values.plan,
         subscription: values.subscription,
+        avatarUrl,
+      });
+
+      if (values.newPassword) await updatePassword(user, values.newPassword);
+
+      setCurrentAvatarUrl(avatarUrl);
+      setSuccess(true);
+      setEditMode(false);
+      setTimeout(() => setSuccess(false), 5000);
+
+      reset({
+        ...values,
         avatar: null,
         newPassword: "",
         confirmPassword: "",
       });
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Error al actualizar", {
-        description: "Hubo un error: " + error.message,
-      });
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
   }
 
   async function handleRemoveAvatar() {
-    try {
-      const user = auth.currentUser;
-      if (!user || !currentAvatarUrl) return;
-
-      const fileRef = storageRef(storage, currentAvatarUrl);
-      await deleteObject(fileRef);
-
-      await updateDoc(doc(db, "users", user.uid), { avatarUrl: "" });
-      setCurrentAvatarUrl("");
-      toast("Avatar removido");
-    } catch (error) {
-      console.error("Error al remover avatar:", error);
-      toast.error("No se pudo remover el avatar");
-    }
+    const user = auth.currentUser;
+    if (!user || !currentAvatarUrl) return;
+    await deleteObject(ref(storage, currentAvatarUrl));
+    await updateDoc(doc(db, "users", user.uid), { avatarUrl: "" });
+    setCurrentAvatarUrl("");
   }
 
   return (
-    <div className="mx-auto mt-8 w-full max-w-7xl px-4">
-      <div className="flex flex-col gap-6 md:flex-row">
-        <div className="md:w-1/3 bg-white p-6 shadow rounded">
-          <h3 className="mb-4 text-xl font-bold">Profile</h3>
-          <div className="flex flex-col items-center">
-            {currentAvatarUrl ? (
-              <img
-                src={currentAvatarUrl}
-                alt="Avatar actual"
-                className="mb-4 h-32 w-32 rounded-full object-cover"
-              />
-            ) : (
-              <div className="mb-4 h-32 w-32 rounded-full bg-gray-200" />
-            )}
-            {currentAvatarUrl ? (
-              <Button variant="destructive" onClick={handleRemoveAvatar}>
-                Quitar Avatar
-              </Button>
-            ) : (
-              <p className="text-sm text-gray-500">No tienes avatar.</p>
-            )}
+    <div className="flex flex-col gap-6 px-6 md:px-16 py-10">
+      <div className="flex justify-between items-start">
+        <div className="flex items-center gap-4">
+          <img
+            src={currentAvatarUrl || "/default-avatar.png"}
+            className="w-14 h-14 rounded-full object-cover"
+            alt="avatar"
+          />
+          <div>
+            <p className="text-sm font-medium">{form.getValues("name")}</p>
+            <p className="text-sm text-muted-foreground">{form.getValues("email")}</p>
           </div>
         </div>
 
-        <div className="md:w-2/3 bg-white p-6 shadow rounded">
-          <h3 className="text-xl font-bold mb-4">Edit Details</h3>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nombre</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Tu nombre" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="correo@ejemplo.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+        {!editMode ? (
+          <Button variant="outline" size="sm" onClick={() => setEditMode(true)}>
+            <PencilIcon className="w-4 h-4 mr-2" /> Editar
+          </Button>
+        ) : (
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setEditMode(false)}>
+              Cancelar
+            </Button>
+            <Button size="sm" disabled={loading} onClick={form.handleSubmit(onSubmit)}>
+              {loading ? <Loader2Icon className="w-4 h-4 animate-spin" /> : "Guardar"}
+            </Button>
+          </div>
+        )}
+      </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="plan"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Plan Actual</FormLabel>
-                      <FormControl>
-                        <Input disabled {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="subscription"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Suscripción</FormLabel>
-                      <FormControl>
-                        <Input disabled {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+      {success && (
+        <Alert variant="success">
+          <AlertTitle>Perfil actualizado</AlertTitle>
+          <AlertDescription>Tus datos se han guardado correctamente.</AlertDescription>
+        </Alert>
+      )}
 
+      <Form {...form}>
+        <div className="flex flex-col gap-6">
+          <Separator />
+          <FormField
+            name="name"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nombre</FormLabel>
+                {editMode ? (
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                ) : (
+                  <p className="text-sm text-muted-foreground">{field.value}</p>
+                )}
+              </FormItem>
+            )}
+          />
+
+          <Separator />
+          <FormField
+            name="email"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                {editMode ? (
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                ) : (
+                  <p className="text-sm text-muted-foreground">{field.value}</p>
+                )}
+              </FormItem>
+            )}
+          />
+
+          <Separator />
+          <FormField
+            name="avatar"
+            control={form.control}
+            render={({ field }) => (
+              editMode && (
+                <FormItem>
+                  <FormLabel>Avatar</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) field.onChange(file);
+                      }}
+                    />
+                  </FormControl>
+                </FormItem>
+              )
+            )}
+          />
+
+          <Separator />
+          {editMode && (
+            <>
               <FormField
+                name="newPassword"
                 control={form.control}
-                name="avatar"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nuevo Avatar</FormLabel>
+                    <FormLabel>Nueva Contraseña</FormLabel>
                     <FormControl>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) field.onChange(file);
-                        }}
-                      />
+                      <Input type="password" {...field} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
-
-              <h4 className="mt-6 text-lg font-semibold">Change Password</h4>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="newPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nueva Contraseña</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Dejar vacío para no cambiar" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirmar Contraseña</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Repite la nueva contraseña" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="pt-4">
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Guardando..." : "Guardar Cambios"}
-                </Button>
-              </div>
-            </form>
-          </Form>
+              <FormField
+                name="confirmPassword"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar Contraseña</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <Separator />
+            </>
+          )}
         </div>
-      </div>
+      </Form>
     </div>
   );
 }
