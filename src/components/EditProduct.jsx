@@ -39,7 +39,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
-import Loader from "@/components/Loader";
+import { toast } from "sonner"; 
 
 export default function EditProduct() {
   const { user } = useUser();
@@ -144,6 +144,7 @@ export default function EditProduct() {
   const handleDelete = async () => {
     await deleteDoc(doc(db, "products", product.id));
     setProducts((prev) => prev.filter((p) => p.id !== product.id));
+    toast.success("Producto eliminado correctamente");
   };
 
   return (
@@ -169,14 +170,16 @@ export default function EditProduct() {
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <button
-            className="absolute top-2 right-2 text-gray-400 hover:text-red-600 cursor-pointer"
+            className="absolute top-2 right-2 text-gray-400 hover:text-red-600"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
             }}
           >
             <Trash2 size={18} />
           </button>
         </AlertDialogTrigger>
+
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
@@ -186,7 +189,13 @@ export default function EditProduct() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleDelete();
+              }}
+            >
               Confirmar
             </AlertDialogAction>
           </AlertDialogFooter>
