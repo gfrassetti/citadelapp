@@ -11,6 +11,8 @@ import { updatePassword } from "firebase/auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import UserInfoActions from "@/components/UserInfoActions";
+
 import {
   Form,
   FormField,
@@ -131,35 +133,13 @@ export default function Profile() {
 
   return (
     <div className="flex flex-col gap-6 px-6 md:px-16 py-10">
-      <div className="flex justify-between items-start">
-        <div className="flex items-center gap-4">
-          <img
-            src={currentAvatarUrl || "/default-avatar.png"}
-            className="w-14 h-14 rounded-full object-cover"
-            alt="avatar"
-          />
-          <div>
-            <p className="text-sm font-medium">{form.getValues("name")}</p>
-            <p className="text-sm text-muted-foreground">{form.getValues("email")}</p>
-          </div>
-        </div>
-
-        {!editMode ? (
-          <Button variant="outline" size="sm" onClick={() => setEditMode(true)}>
-            <PencilIcon className="w-4 h-4 mr-2" /> Editar
-          </Button>
-        ) : (
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setEditMode(false)}>
-              Cancelar
-            </Button>
-            <Button size="sm" disabled={loading} onClick={form.handleSubmit(onSubmit)}>
-              {loading ? <Loader2Icon className="w-4 h-4 animate-spin" /> : "Guardar"}
-            </Button>
-          </div>
-        )}
-      </div>
-
+      <UserInfoActions
+        editMode={editMode}
+        loading={loading}
+        onEdit={() => setEditMode(true)}
+        onCancel={() => setEditMode(false)}
+        onSave={form.handleSubmit(onSubmit)}
+      />
       {success && (
         <Alert variant="success">
           <AlertTitle>Perfil actualizado</AlertTitle>

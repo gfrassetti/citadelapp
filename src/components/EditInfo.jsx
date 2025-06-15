@@ -8,9 +8,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useUser } from "@/context/AuthContext";
 import { db } from "@/lib/db/db";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2Icon, PencilIcon } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import {
   Form,
   FormField,
@@ -19,6 +17,8 @@ import {
   FormMessage,
   FormControl,
 } from "@/components/ui/form";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import UserInfoActions from "@/components/UserInfoActions";
 
 const schema = z.object({
   companyName: z.string().min(2),
@@ -35,8 +35,8 @@ export default function EditCompanyInfoForm() {
   const { user } = useUser();
   const [loadingData, setLoadingData] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const form = useForm({
@@ -79,40 +79,34 @@ export default function EditCompanyInfoForm() {
     fetchData();
   }, [user, form]);
 
-  const onSubmit = async (data) => {
-    if (!user?.uid) return;
-    setIsSaving(true);
-    const userSnap = await getDoc(doc(db, "users", user.uid));
-    const userData = userSnap.data();
-    const empresaRef = doc(db, "empresas", userData.empresaId);
-    await setDoc(empresaRef, data, { merge: true });
-    setIsSaving(false);
-    setIsEditing(false);
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 5000);
-  };
-
   if (loadingData) return <p className="text-sm text-gray-500">Cargando...</p>;
   if (notFound) return <p className="text-sm text-red-500">Empresa no encontrada.</p>;
 
   return (
     <div className="flex flex-col gap-6 px-6 md:px-16 py-10">
-      <div className="flex justify-between items-start">
-        <h2 className="text-2xl font-semibold">Datos de la Empresa</h2>
-        {!isEditing ? (
-          <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-            <PencilIcon className="w-4 h-4 mr-2" /> Editar
-          </Button>
-        ) : (
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
-              Cancelar
-            </Button>
-            <Button size="sm" disabled={isSaving} onClick={form.handleSubmit(onSubmit)}>
-              {isSaving ? <Loader2Icon className="w-4 h-4 animate-spin" /> : "Guardar"}
-            </Button>
-          </div>
-        )}
+      <div className="flex justify-end">
+        <UserInfoActions
+          editMode={editMode}
+          loading={loading}
+          onEdit={() => setEditMode(true)}
+          onCancel={() => setEditMode(false)}
+          onSave={form.handleSubmit(async (data) => {
+            setLoading(true);
+            try {
+              const userSnap = await getDoc(doc(db, "users", user.uid));
+              const userData = userSnap.data();
+              const empresaRef = doc(db, "empresas", userData.empresaId);
+              await setDoc(empresaRef, data, { merge: true });
+              setEditMode(false);
+              setSuccess(true);
+              setTimeout(() => setSuccess(false), 5000);
+            } catch (error) {
+              console.error(error);
+            } finally {
+              setLoading(false);
+            }
+          })}
+        />
       </div>
 
       {success && (
@@ -123,28 +117,30 @@ export default function EditCompanyInfoForm() {
       )}
 
       <Form {...form}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {["companyName", "address", "cuit", "postalCode", "website", "phone", "email", "whatsapp"].map((key) => (
-            <FormField
-              key={key}
-              name={key}
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm text-gray-600 capitalize">{key}</FormLabel>
-                  {isEditing ? (
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                  ) : (
-                    <p className="text-sm text-gray-900 dark:text-white mt-1">
-                      {field.value || "-"}
-                    </p>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <div className="flex flex-col gap-6">
+          {["companyName", "address", "cuit", "postalCode", "website", "phone", "email", "whatsapp"].map((key, idx) => (
+            <div key={key}>
+              {idx > 0 && <Separator />}
+              <FormField
+                name={key}
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm text-gray-600 capitalize">{key}</FormLabel>
+                    {editMode ? (
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                    ) : (
+                      <p className="text-sm text-gray-900 dark:text-white mt-1">
+                        {field.value || "-"}
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           ))}
         </div>
       </Form>
