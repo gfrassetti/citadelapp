@@ -11,7 +11,7 @@ export default function UserInfoActions({ editMode, loading, onEdit, onCancel, o
           <PencilIcon className="w-4 h-4 mr-2" /> Editar
         </Button>
       ) : (
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-end">
           <Button variant="outline" size="sm" onClick={onCancel}>
             Cancelar
           </Button>

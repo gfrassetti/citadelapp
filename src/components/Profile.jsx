@@ -11,8 +11,6 @@ import { updatePassword } from "firebase/auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import UserInfoActions from "@/components/UserInfoActions";
-
 import {
   Form,
   FormField,
@@ -21,8 +19,9 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader2Icon, PencilIcon } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import UserInfoActions from "@/components/UserInfoActions";
 
 const formSchema = z.object({
   name: z.string().min(2),
@@ -123,33 +122,41 @@ export default function Profile() {
     }
   }
 
-  async function handleRemoveAvatar() {
-    const user = auth.currentUser;
-    if (!user || !currentAvatarUrl) return;
-    await deleteObject(ref(storage, currentAvatarUrl));
-    await updateDoc(doc(db, "users", user.uid), { avatarUrl: "" });
-    setCurrentAvatarUrl("");
-  }
-
   return (
     <div className="flex flex-col gap-6 px-6 md:px-16 py-10">
-      <UserInfoActions
-        editMode={editMode}
-        loading={loading}
-        onEdit={() => setEditMode(true)}
-        onCancel={() => setEditMode(false)}
-        onSave={form.handleSubmit(onSubmit)}
-      />
-      {success && (
-        <Alert variant="success">
-          <AlertTitle>Perfil actualizado</AlertTitle>
-          <AlertDescription>Tus datos se han guardado correctamente.</AlertDescription>
-        </Alert>
-      )}
+      <h2 className="text-2xl font-bold">Datos personales</h2>
+      <h3 className="text-base font-semibold text-muted-foreground">Usuario</h3>
 
+      <div className="flex justify-between items-start">
+      <div className="flex items-center gap-4">
+        <img
+          src={currentAvatarUrl || "/default-avatar.png"}
+          className="w-14 h-14 rounded-full object-cover border"
+          alt="avatar"
+        />
+
+        {editMode && (
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) form.setValue("avatar", file);
+            }}
+            className="w-64 text-sm"
+          />
+        )}
+      </div>
+        <UserInfoActions
+          editMode={editMode}
+          loading={loading}
+          onEdit={() => setEditMode(true)}
+          onCancel={() => setEditMode(false)}
+          onSave={form.handleSubmit(onSubmit)}
+        />
+      </div>
       <Form {...form}>
         <div className="flex flex-col gap-6">
-          <Separator />
           <FormField
             name="name"
             control={form.control}
@@ -168,6 +175,7 @@ export default function Profile() {
           />
 
           <Separator />
+
           <FormField
             name="email"
             control={form.control}
@@ -184,60 +192,12 @@ export default function Profile() {
               </FormItem>
             )}
           />
-
-          <Separator />
-          <FormField
-            name="avatar"
-            control={form.control}
-            render={({ field }) => (
-              editMode && (
-                <FormItem>
-                  <FormLabel>Avatar</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) field.onChange(file);
-                      }}
-                    />
-                  </FormControl>
-                </FormItem>
-              )
-            )}
-          />
-
-          <Separator />
-          {editMode && (
-            <>
-              <FormField
-                name="newPassword"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nueva Contraseña</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="confirmPassword"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirmar Contraseña</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <Separator />
-            </>
-          )}
+         {success && (
+          <Alert variant="success">
+            <AlertTitle>Perfil actualizado</AlertTitle>
+            <AlertDescription>Tus datos se han guardado correctamente.</AlertDescription>
+          </Alert>
+        )}
         </div>
       </Form>
     </div>
