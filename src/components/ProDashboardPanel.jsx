@@ -6,6 +6,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/db/db";
 import { useUserData } from "@/context/UserDataContext";
 import { useSubscription } from "@/context/SubscriptionContext";
+import BillingPanel from "@/components/BillingPanel";
 
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -197,6 +198,10 @@ export function ProDashboardPanel() {
             </Card>
           ))}
         </div>
+      </div>
+      <Separator />
+      <div>
+        <BillingPanel />
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { uploadCompanyData } from "@/lib/db/handleUploadInfo";
@@ -13,6 +14,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/AuthContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Image from "next/image";
 
 export default function UploadInfo() {
   const form = useForm({
@@ -26,24 +31,24 @@ export default function UploadInfo() {
       image: null,
       cuit: "",
       postalCode: "",
-    },    
+    },
   });
 
   const [uploading, setUploading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [createdEmpresaId, setCreatedEmpresaId] = useState(null);
-  const { user } = useUser(); // user.uid
+  const [preview, setPreview] = useState(null);
+  const { user } = useUser();
 
   const onSubmit = async (data) => {
     setUploading(true);
     try {
       const newEmpresaId = await uploadCompanyData(data, user.uid);
       setCreatedEmpresaId(newEmpresaId);
-
       setSuccessMessage("¡Subida exitosa!");
       form.reset();
-
-      setTimeout(() => setSuccessMessage(""), 2000);
+      setPreview(null);
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
       console.error("Error al subir datos:", error);
     } finally {
@@ -52,152 +57,87 @@ export default function UploadInfo() {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 shadow-lg bg-white rounded-lg">
-      <h1 className="text-2xl font-bold mb-4">Sube la información de tu empresa</h1>
+    <div className="w-full max-w-5xl mx-auto py-8 px-4">
+      <Card className="border border-gray-200 shadow-sm">
+        <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <CardTitle className="text-xl font-bold">Información de la Empresa</CardTitle>
+            <p className="text-muted-foreground text-sm">Carga los datos principales de tu negocio</p>
+          </div>
+          {preview && (
+            <div className="w-20 h-20 rounded-full overflow-hidden border">
+              <Image src={preview} alt="Preview" width={80} height={80} className="object-cover" />
+            </div>
+          )}
+        </CardHeader>
+        <Separator />
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            name="companyName"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre de la Empresa</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="Mi Empresa S.A." />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {["companyName", "address", "phone", "whatsapp", "email", "website", "cuit", "postalCode"].map((fieldKey) => (
+                <FormField
+                  key={fieldKey}
+                  name={fieldKey}
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="capitalize">{fieldKey}</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
 
-          <FormField
-            name="address"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Dirección</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="Calle Falsa 123" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <div className="md:col-span-2">
+                <FormField
+                  name="image"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Logo o Imagen</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              form.setValue("image", file);
+                              const reader = new FileReader();
+                              reader.onloadend = () => setPreview(reader.result);
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-          <FormField
-            name="phone"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Teléfono</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="Ej: +54 9 11 1234 5678" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <div className="md:col-span-2">
+                <Button type="submit" className="w-full bg-blue-600" disabled={uploading}>
+                  {uploading ? "Subiendo..." : "Enviar Información"}
+                </Button>
+              </div>
+            </form>
+          </Form>
 
-          <FormField
-            name="whatsapp"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>WhatsApp</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="Ej: +54 9 11 9876 5432" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            name="email"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input type="email" {...field} placeholder="ejemplo@email.com" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            name="website"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Website</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="https://ejemplo.com" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            name="image"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Imagen</FormLabel>
-                <FormControl>
-                  <Input
-                    type="file"
-                    onChange={(e) => field.onChange(e.target.files[0])}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            name="cuit"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>CUIT</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="30-12345678-9" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            name="postalCode"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Código Postal</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="1000" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Button type="submit" className="w-full bg-blue-600" disabled={uploading}>
-            {uploading ? "Subiendo..." : "Enviar Información"}
-          </Button>
-        </form>
-      </Form>
-
-      {successMessage && (
-        <div className="mt-4 p-2 bg-green-100 text-green-800 rounded">
-          {successMessage} <br />
-          {createdEmpresaId && <p>ID creado: {createdEmpresaId}</p>}
-        </div>
-      )}
+          {successMessage && (
+            <Alert variant="success" className="mt-6">
+              <AlertTitle>{successMessage}</AlertTitle>
+              <AlertDescription>
+                {createdEmpresaId && <p>ID creado: {createdEmpresaId}</p>}
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
