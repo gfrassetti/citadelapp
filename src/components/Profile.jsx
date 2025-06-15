@@ -129,24 +129,47 @@ export default function Profile() {
 
       <div className="flex justify-between items-start">
       <div className="flex items-center gap-4">
-        <img
-          src={currentAvatarUrl || "/default-avatar.png"}
-          className="w-14 h-14 rounded-full object-cover border"
-          alt="avatar"
-        />
+  <img
+    src={currentAvatarUrl || "/default-avatar.png"}
+    className="w-14 h-14 rounded-full object-cover border"
+    alt="avatar"
+  />
 
-        {editMode && (
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) form.setValue("avatar", file);
-            }}
-            className="w-64 text-sm"
-          />
-        )}
-      </div>
+  {editMode && (
+    <div className="flex flex-col gap-2">
+      <Input
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) form.setValue("avatar", file);
+        }}
+        className="w-64 text-sm"
+      />
+
+      {currentAvatarUrl && (
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+            try {
+              await deleteObject(ref(storage, currentAvatarUrl));
+              await updateDoc(doc(db, "users", user.uid), { avatarUrl: "" });
+              setCurrentAvatarUrl("");
+            } catch (err) {
+              console.error("Error al eliminar avatar:", err);
+            }
+          }}
+        >
+          Quitar avatar
+        </Button>
+      )}
+    </div>
+  )}
+</div>
+
         <UserInfoActions
           editMode={editMode}
           loading={loading}

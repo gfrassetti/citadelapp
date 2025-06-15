@@ -2,9 +2,10 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { collection, query, where, getDocs, Timestamp } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/db/db";
 import { useUserData } from "@/context/UserDataContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -20,8 +21,6 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-
-
 import {
   BarChart,
   Bar,
@@ -31,15 +30,11 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-
-
-
 export function ProDashboardPanel() {
   const { theme } = useTheme();
-  const { empresaId, email } = useUserData() || {};
+  const { empresaId } = useUserData() || {};
+  const { subscription } = useSubscription();
   const [products, setProducts] = useState([]);
-  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
-  const [nextBilling, setNextBilling] = useState(null);
 
   useEffect(() => {
     if (!empresaId) return;
@@ -54,25 +49,6 @@ export function ProDashboardPanel() {
     fetchUserProducts();
   }, [empresaId]);
 
-  useEffect(() => {
-    if (!email) return;
-
-    const fetchSubscription = async () => {
-      const res = await fetch("/api/mercadopago/subscription-info", {
-        headers: { "x-user-email": email },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const status = data?.subscription?.status;
-        setSubscriptionStatus(status === "authorized" ? "active" : status || null);
-        setNextBilling(data?.subscription?.next_payment_date || null);
-      }
-    };
-
-    fetchSubscription();
-  }, [email]);
-
   const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
@@ -80,9 +56,9 @@ export function ProDashboardPanel() {
       0: "Jan", 1: "Feb", 2: "Mar", 3: "Apr", 4: "May", 5: "Jun",
       6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec",
     };
-  
+
     const countByMonth = {};
-  
+
     products.forEach((p) => {
       if (p.createdAt?.toDate) {
         const date = p.createdAt.toDate();
@@ -91,7 +67,7 @@ export function ProDashboardPanel() {
         countByMonth[label] = (countByMonth[label] || 0) + 1;
       }
     });
-  
+
     const formatted = Object.keys(monthsMap).map((i) => {
       const label = monthsMap[i];
       return {
@@ -99,10 +75,9 @@ export function ProDashboardPanel() {
         total: countByMonth[label] || 0,
       };
     });
-  
+
     setChartData(formatted);
   }, [products]);
-  
 
   const isDark = theme === "dark";
 
@@ -110,8 +85,17 @@ export function ProDashboardPanel() {
     if (!createdAt || !createdAt.toDate) return false;
     const now = new Date();
     const diff = now - createdAt.toDate();
-    return diff < 7 * 24 * 60 * 60 * 1000; // 7 days
+    return diff < 7 * 24 * 60 * 60 * 1000;
   };
+
+  const subscriptionStatus = subscription?.status ?? "-";
+  const nextBilling = subscription?.current_period_end
+    ? new Date(subscription.current_period_end * 1000).toLocaleDateString("es-AR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "-";
 
   return (
     <div className="w-full px-4 md:px-8 py-6 space-y-8">
@@ -140,7 +124,7 @@ export function ProDashboardPanel() {
             <CardDescription>Current status</CardDescription>
           </CardHeader>
           <CardContent>
-            <Badge variant="default">{subscriptionStatus || "-"}</Badge>
+            <Badge variant="default">{subscriptionStatus}</Badge>
           </CardContent>
         </Card>
 
@@ -160,9 +144,7 @@ export function ProDashboardPanel() {
             <CardDescription>Auto-renewal date</CardDescription>
           </CardHeader>
           <CardContent>
-            <span className="text-sm">
-              {nextBilling ? new Date(nextBilling).toLocaleDateString() : "-"}
-            </span>
+            <span className="text-sm">{nextBilling}</span>
           </CardContent>
         </Card>
       </div>
@@ -190,7 +172,7 @@ export function ProDashboardPanel() {
               radius={[4, 4, 0, 0]}
             />
           </BarChart>
-    </ChartContainer>
+        </ChartContainer>
       </div>
 
       <Separator />
