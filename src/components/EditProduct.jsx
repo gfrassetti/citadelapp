@@ -15,7 +15,7 @@ import { db } from "@/lib/db/db";
 import { toast } from "sonner";
 import ProductEditForm from "@/components/ProductEditForm";
 import { DataTable } from "@/components/ui/data-table";
-import { columns } from "@/lib/columns";
+import { columns as baseColumns } from "@/lib/columns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useTheme } from "next-themes";
@@ -120,6 +120,14 @@ export default function EditProduct() {
 
   const theme = useTheme().theme;
 
+  const columns = baseColumns({
+    onSelect: onSelectProduct,
+    showImage: true,
+    disableLink: true,
+    rowClickable: true,
+    enableSelection: true,
+  });
+
   return (
     <div className="p-4">
       {!selectedProduct ? (
@@ -130,11 +138,7 @@ export default function EditProduct() {
             <Skeleton className="w-full h-[300px] rounded-md" />
           ) : (
             <DataTable
-              columns={columns({
-                onSelect: onSelectProduct,
-                showImage: true,
-                disableLink: true,
-              })}
+              columns={columns}
               data={products}
             />
           )}
