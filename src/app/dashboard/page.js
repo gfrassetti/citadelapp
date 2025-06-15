@@ -127,27 +127,31 @@ export default function Dashboard() {
           <main className="flex-1 p-4 pt-0">
             {activeComponent && (
               <div className="mb-4">
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    <BreadcrumbItem>
-                      <BreadcrumbLink
-                        className="text-black cursor-pointer"
-                        onClick={() => setActiveComponent(null)}
-                      >
-                        Mi Cuenta
-                      </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                      <span className="capitalize text-blue-600">
-                        {componentLabels[activeComponent?.trim()] ?? activeComponent}
-                      </span>
-                    </BreadcrumbItem>
-                  </BreadcrumbList>
-                </Breadcrumb>
-              </div>
+                {activeComponent !== "ProDashboard" && (
+                  <div className="mb-4">
+                    <Breadcrumb>
+                      <BreadcrumbList>
+                        <BreadcrumbItem>
+                          <BreadcrumbLink
+                            className="text-black cursor-pointer"
+                            onClick={() => setActiveComponent(null)}
+                          >
+                            Mi Cuenta
+                          </BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                          <span className="capitalize text-blue-600">
+                            {componentLabels[activeComponent]?.trim() ?? activeComponent}
+                          </span>
+                        </BreadcrumbItem>
+                      </BreadcrumbList>
+                    </Breadcrumb>
+                  </div>
+                )}
+                              </div>
             )}
-
+            {activeComponent === "ProDashboard" && <ProDashboardPanel />}
             {activeComponent === "UploadInfo" && <UploadInfo />}
             {activeComponent === "UploadProduct" && (
               <UploadProduct empresaId={userData?.empresaId} />

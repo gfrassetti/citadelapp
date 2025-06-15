@@ -40,6 +40,12 @@ export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
           setActiveComponent={handleItemClick}
           projects={[
             {
+              name: "Dashboard",
+              icon: PieChart,
+              component: "ProDashboard", // este es el nombre que deberías usar en tu router interno
+              disabled: !isProUser,
+            },
+            {
               name: "Sube Tu Informacion",
               icon: PieChart,
               component: "UploadInfo",
