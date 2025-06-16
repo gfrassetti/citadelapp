@@ -96,7 +96,13 @@ export default function EditCompanyInfoForm() {
               const userSnap = await getDoc(doc(db, "users", user.uid));
               const userData = userSnap.data();
               const empresaRef = doc(db, "empresas", userData.empresaId);
-              await setDoc(empresaRef, data, { merge: true });
+          
+              const cleanedData = Object.fromEntries(
+                Object.entries(data).filter(([_, value]) => value !== undefined)
+              );
+          
+              await setDoc(empresaRef, cleanedData, { merge: true });
+          
               setEditMode(false);
               setSuccess(true);
               setTimeout(() => setSuccess(false), 5000);
@@ -105,7 +111,7 @@ export default function EditCompanyInfoForm() {
             } finally {
               setLoading(false);
             }
-          })}
+          })}          
         />
       </div>
 
