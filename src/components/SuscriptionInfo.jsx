@@ -174,7 +174,7 @@ export default function SubscriptionInfo() {
         {subscription.status !== "canceled" && (
           <button
             onClick={() => mutationCancel.mutate(subscription.id)}
-            className="bg-red-600 text-white px-4 py-2 rounded"
+            className="btn-secondary"
           >
             Cancelar Suscripción
           </button>

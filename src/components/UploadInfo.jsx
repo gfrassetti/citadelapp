@@ -84,7 +84,7 @@ export default function UploadInfo() {
                     <FormItem>
                       <FormLabel className="capitalize">{fieldKey}</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} required />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -103,6 +103,7 @@ export default function UploadInfo() {
                         <Input
                           type="file"
                           accept="image/*"
+                          required
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
@@ -121,7 +122,7 @@ export default function UploadInfo() {
               </div>
 
               <div className="md:col-span-2">
-                <Button type="submit" className="w-full bg-blue-600" disabled={uploading}>
+                <Button type="submit" className="btn" disabled={uploading}>
                   {uploading ? "Subiendo..." : "Enviar Información"}
                 </Button>
               </div>
