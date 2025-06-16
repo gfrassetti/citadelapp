@@ -84,7 +84,7 @@ export default function EditCompanyInfoForm() {
   if (notFound) return <p className="text-sm text-red-500">Empresa no encontrada.</p>;
 
   return (
-    <div className="flex flex-col gap-6 px-6 md:px-16">
+    <div className="flex flex-col gap-6 px-6 md:px-16 mx-auto max-w-4xl">
       <div className="flex justify-end">
         <UserInfoActions
           editMode={editMode}
