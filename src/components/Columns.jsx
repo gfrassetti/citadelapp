@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@/components/ui/checkbox"
 
 export function columns({ selected, setSelected }) {
   return [
@@ -46,15 +46,15 @@ export function columns({ selected, setSelected }) {
         const id = row.original.id;
         const name = row.original.productName;
         return (
-          <a
-          href={`/product/${id}`}
-          className="text-blue-600 hover:underline"
+          <button
+            onClick={() => setSelected(`EditProductForm:${id}`)}
+            className="text-blue-600 hover:underline"
           >
             {name}
-          </a>
+          </button>
         );
       },
-    },    
+    },
     {
       accessorKey: "price",
       header: "Precio",
@@ -72,6 +72,5 @@ export function columns({ selected, setSelected }) {
         return ts?.toDate ? ts.toDate().toLocaleDateString() : "-";
       },
     },
-    
   ];
 }

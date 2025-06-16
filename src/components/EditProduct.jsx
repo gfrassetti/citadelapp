@@ -33,7 +33,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 
-export default function EditProduct() {
+export default function EditProduct({setActiveComponent }) {
   const { user } = useUser();
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -199,13 +199,16 @@ export default function EditProduct() {
                   </AlertDialog>
                 </div>
               )}
+          <DataTable
+            columns={columns}
+            data={products}
+            rowSelection={rowSelection}
+            onRowSelectionChange={setRowSelection}
+            onRowClick={(product) =>
+              setActiveComponent(`EditProductForm:${product.id}`)
+            }
+          />
 
-              <DataTable
-                columns={columns}
-                data={products}
-                rowSelection={rowSelection}
-                onRowSelectionChange={setRowSelection}
-              />
             </>
           )}
         </div>

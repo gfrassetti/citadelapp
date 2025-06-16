@@ -20,9 +20,9 @@ import {
 export function DataTable({
   columns,
   data,
-  onRowClick,
   rowSelection,
   onRowSelectionChange,
+  onRowClick
 }) {
   const table = useReactTable({
     data,

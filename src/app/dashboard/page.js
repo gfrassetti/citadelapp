@@ -31,6 +31,7 @@ import SuscriptionInfo from "@/components/SuscriptionInfo";
 import EditInfo from "@/components/EditInfo";
 import EditProduct from "@/components/EditProduct";
 import { useHandleUpgrade } from "@/hooks/useHandleUpgrade";
+import ProductEditForm from "@/components/ProductEditForm"
 import ReactivateBanner from "@/components/ReactivateBanner";
 
 import {
@@ -49,7 +50,21 @@ export default function Dashboard() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeComponent, setActiveComponent] = useState(null);
+  const [products, setProducts] = useState([])
 
+  useEffect(() => {
+    if (!user?.empresaId) return;
+    async function fetchProducts() {
+      const q = query(
+        collection(db, "products"),
+        where("empresaId", "==", user.empresaId)
+      );
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setProducts(data);
+    }
+    fetchProducts();
+  }, [user]);
 
   useEffect(() => {
     setPersistence(auth, browserSessionPersistence).then(() => {
@@ -81,13 +96,21 @@ export default function Dashboard() {
   const handleUpgrade = useHandleUpgrade(user);
 
   const componentLabels = {
-    UploadProduct: "Subir Producto",
+    ProDashboard: "Inicio",
+    UploadProduct: "Sube tus productos",
+    EditInfo: "Mi Empresa",
     EditProduct: "Editar Productos",
-    EditInfo: "Editar Empresa",
     Profile: "Perfil",
-    SuscriptionInfo: "Suscripción",
-    ProDashboard: "Dashboard",
-  };
+  }
+  
+  const isEditingProduct = activeComponent?.startsWith("EditProductForm:")
+  const productId = isEditingProduct ? activeComponent.split(":")[1] : null
+  const editingProduct = productId ? products.find(p => p.id === productId) : null
+  
+  const breadcrumbLabel = isEditingProduct
+    ? editingProduct?.productName ?? "Editar producto"
+    : componentLabels[activeComponent] ?? activeComponent
+  
   
 
   if (loading || !authUser?.plan || !userData) return <Loader text="" />;
@@ -141,9 +164,9 @@ export default function Dashboard() {
                         </BreadcrumbItem>
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>
-                          <span className="capitalize text-blue-600">
-                            {componentLabels[activeComponent]?.trim() ?? activeComponent}
-                          </span>
+                        <span className="capitalize text-blue-600">
+  {breadcrumbLabel}
+</span>
                         </BreadcrumbItem>
                       </BreadcrumbList>
                     </Breadcrumb>
@@ -156,7 +179,17 @@ export default function Dashboard() {
               <UploadProduct empresaId={userData?.empresaId} />
             )}
             {activeComponent === "EditInfo" && <EditInfo />}
-            {activeComponent === "EditProduct" && <EditProduct />}
+            {activeComponent === "EditProduct" && (
+              <EditProduct setActiveComponent={setActiveComponent} />
+            )}
+
+            {activeComponent?.startsWith("EditProductForm:") && (
+              <ProductEditForm
+                productId={activeComponent.split(":")[1]}
+                setActiveComponent={setActiveComponent}
+              />
+            )}
+
             {activeComponent === "Profile" && <Profile />}
             {activeComponent === "SuscriptionInfo" && <SuscriptionInfo />}
 

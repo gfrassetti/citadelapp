@@ -31,7 +31,7 @@ import { doc, deleteDoc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/db/db";
 import { useRouter } from "next/navigation";
 
-export default function ProductEditForm({ productId }) {
+export default function ProductEditForm({ productId, setActiveComponent }) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null);
   const router = useRouter();
@@ -89,7 +89,7 @@ export default function ProductEditForm({ productId }) {
 
   return (
     <div className="max-w-md mx-auto space-y-4 p-4">
-      <Button variant="outline" className="text-sm" onClick={() => router.back()}>
+      <Button variant="outline" onClick={() => setActiveComponent("EditProduct")}>
         ← Volver
       </Button>
 
