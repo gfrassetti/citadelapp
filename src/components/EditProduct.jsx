@@ -174,7 +174,7 @@ export default function EditProduct() {
           ) : (
             <>
               {selectedRowIds.length > 0 && (
-                <div className="flex justify-end">
+                <div className="flex justify-end mb-4">
                   <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive">Eliminar seleccionados</Button>

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React from "react"
 import {
   useReactTable,
   getCoreRowModel,
@@ -17,9 +17,13 @@ import {
   TableRow
 } from "@/components/ui/table"
 
-export function DataTable({ columns, data, onRowClick }) {
-  const [rowSelection, setRowSelection] = useState({})
-
+export function DataTable({
+  columns,
+  data,
+  onRowClick,
+  rowSelection,
+  onRowSelectionChange,
+}) {
   const table = useReactTable({
     data,
     columns,
@@ -27,10 +31,10 @@ export function DataTable({ columns, data, onRowClick }) {
     getPaginationRowModel: getPaginationRowModel(),
     getRowId: (row) => row.id,
     enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
     state: {
       rowSelection,
     },
+    onRowSelectionChange,
   })
 
   return (
