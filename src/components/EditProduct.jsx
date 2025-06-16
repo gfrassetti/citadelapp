@@ -37,11 +37,14 @@ export default function EditProduct() {
   const { user } = useUser();
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [selectedRowIds, setSelectedRowIds] = useState([]);
+  const [rowSelection, setRowSelection] = useState({});
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
+  const selectedRowIds = Object.keys(rowSelection);
 
   const form = useForm({
     defaultValues: {
@@ -133,16 +136,20 @@ export default function EditProduct() {
   };
 
   const handleBulkDelete = async () => {
+    setBulkDeleting(true);
     try {
       await Promise.all(
         selectedRowIds.map((id) => deleteDoc(doc(db, "products", id)))
       );
       setProducts((prev) => prev.filter((p) => !selectedRowIds.includes(p.id)));
-      setSelectedRowIds([]);
+      setRowSelection({});
       toast.success("Productos eliminados correctamente");
     } catch (error) {
       console.error("Error eliminando múltiples productos:", error);
       toast.error("No se pudieron eliminar los productos");
+    } finally {
+      setBulkDeleting(false);
+      setShowConfirm(false);
     }
   };
 
@@ -181,8 +188,11 @@ export default function EditProduct() {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleBulkDelete}>
-                          Confirmar
+                        <AlertDialogAction
+                          onClick={handleBulkDelete}
+                          disabled={bulkDeleting}
+                        >
+                          {bulkDeleting ? "Eliminando..." : "Confirmar"}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -193,8 +203,8 @@ export default function EditProduct() {
               <DataTable
                 columns={columns}
                 data={products}
-                selectedRowIds={selectedRowIds}
-                setSelectedRowIds={setSelectedRowIds}
+                rowSelection={rowSelection}
+                onRowSelectionChange={setRowSelection}
               />
             </>
           )}
