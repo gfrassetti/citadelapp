@@ -15,7 +15,7 @@ import { db } from "@/lib/db/db";
 import { toast } from "sonner";
 import ProductEditForm from "@/components/ProductEditForm";
 import { DataTable } from "@/components/ui/data-table";
-import { columns as baseColumns } from "@/lib/columns";
+import { columns as baseColumns } from "@/components/Columns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useTheme } from "next-themes";

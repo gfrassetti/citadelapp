@@ -1,7 +1,6 @@
 "use client";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
 
 export function columns({ selected, setSelected }) {
   return [
@@ -35,7 +34,7 @@ export function columns({ selected, setSelected }) {
           <img
             src={src}
             alt=""
-            className="w-14 h-14 object-cover rounded"
+            className="w-24 h-24 object-cover rounded"
           />
         );
       },
