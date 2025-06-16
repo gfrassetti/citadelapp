@@ -46,12 +46,6 @@ export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
               disabled: !isProUser,
             },
             {
-              name: "Sube Tu Informacion",
-              icon: PieChart,
-              component: "UploadInfo",
-              disabled: !isProUser,
-            },
-            {
               name: "Sube tus Productos",
               icon: Map,
               component: "UploadProduct",
@@ -64,7 +58,7 @@ export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
               disabled: !isProUser,
             },
             {
-              name: "Edita Informacion de tu empresas",
+              name: "Mi Empresa",
               icon: Map,
               component: "EditInfo",
               disabled: !isProUser,

@@ -21,15 +21,16 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import UserInfoActions from "@/components/UserInfoActions";
 
 const schema = z.object({
-  companyName: z.string().min(2),
-  address: z.string().optional(),
-  cuit: z.string().optional(),
-  postalCode: z.string().optional(),
+  companyName: z.string().min(1, "Requerido"),
+  address: z.string().min(1, "Requerido"),
+  cuit: z.string().min(1, "Requerido"),
+  postalCode: z.string().min(1, "Requerido"),
   website: z.string().optional(),
   phone: z.string().optional(),
   email: z.string().optional(),
   whatsapp: z.string().optional(),
 });
+
 
 export default function EditCompanyInfoForm() {
   const { user } = useUser();

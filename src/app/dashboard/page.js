@@ -23,7 +23,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProDashboardPanel } from "@/components/ProDashboardPanel";
 import { useUser } from "@/context/AuthContext";
-import UploadInfo from "@/components/UploadInfo";
 import UploadProduct from "@/components/UploadProduct";
 import Profile from "@/components/Profile";
 import { doc, onSnapshot } from "firebase/firestore";
@@ -82,7 +81,6 @@ export default function Dashboard() {
   const handleUpgrade = useHandleUpgrade(user);
 
   const componentLabels = {
-    UploadInfo: "Subir Información",
     UploadProduct: "Subir Producto",
     EditProduct: "Editar Productos",
     EditInfo: "Editar Empresa",
@@ -154,7 +152,6 @@ export default function Dashboard() {
                               </div>
             )}
             {activeComponent === "ProDashboard" && <ProDashboardPanel />}
-            {activeComponent === "UploadInfo" && <UploadInfo />}
             {activeComponent === "UploadProduct" && (
               <UploadProduct empresaId={userData?.empresaId} />
             )}
