@@ -133,7 +133,12 @@ export default function EditCompanyInfoForm() {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm text-gray-600 capitalize">{key}</FormLabel>
+                    <FormLabel className="text-sm text-gray-600 capitalize">
+                      {key}
+                      {["companyName", "address", "cuit", "postalCode"].includes(key) && (
+                        <span className="text-red-500 ml-1">*</span>
+                      )}
+                    </FormLabel>
                     {editMode ? (
                       <FormControl>
                         <Input {...field} />
