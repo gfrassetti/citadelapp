@@ -1,9 +1,11 @@
 "use client"
 
+import React, { useState } from "react"
 import {
   useReactTable,
   getCoreRowModel,
-  flexRender
+  flexRender,
+  getPaginationRowModel,
 } from "@tanstack/react-table"
 
 import {
@@ -15,32 +17,29 @@ import {
   TableRow
 } from "@/components/ui/table"
 
-export function DataTable({ columns, data, selectedRowIds = [], setSelectedRowIds = () => {} }) {
+export function DataTable({ columns, data, onRowClick }) {
+  const [rowSelection, setRowSelection] = useState({})
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    state: {
-      rowSelection: selectedRowIds.reduce((acc, id) => {
-        acc[id] = true
-        return acc
-      }, {})
-    },
-    onRowSelectionChange: (updater) => {
-      const selected = typeof updater === "function" ? updater(table.getState().rowSelection) : updater
-      const selectedIds = Object.keys(selected).filter((id) => selected[id])
-      setSelectedRowIds(selectedIds)
-    },
+    getPaginationRowModel: getPaginationRowModel(),
+    getRowId: (row) => row.id,
     enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      rowSelection,
+    },
   })
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
-          {table.getHeaderGroups().map(headerGroup => (
+          {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
+              {headerGroup.headers.map((header) => (
                 <TableHead key={header.id}>
                   {header.isPlaceholder
                     ? null
@@ -56,12 +55,16 @@ export function DataTable({ columns, data, selectedRowIds = [], setSelectedRowId
 
         <TableBody>
           {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map(row => (
+            table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
-                data-state={row.getIsSelected() ? "selected" : undefined}
+                data-state={row.getIsSelected() && "selected"}
+                onClick={() => {
+                  if (onRowClick) onRowClick(row.original)
+                }}
+                className="cursor-pointer hover:bg-muted transition"
               >
-                {row.getVisibleCells().map(cell => (
+                {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

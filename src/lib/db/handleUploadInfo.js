@@ -1,11 +1,11 @@
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/db/db";
-import { addDoc, doc, collection, updateDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
 
 export async function uploadCompanyData(data, userId) {
   try {
     let imageUrl = "";
-    let folder = "company-logo";
+    const folder = "company-logo";
 
     if (data.image) {
       const uniqueFileName = `${Date.now()}-${data.image.name}`;
@@ -14,22 +14,31 @@ export async function uploadCompanyData(data, userId) {
       imageUrl = await getDownloadURL(storageRef);
     }
 
-    const docRef = await addDoc(collection(db, "empresas"), {
-      companyName: data.companyName,
-      address: data.address,
-      website: data.website,
-      imageUrl,
-      cuit: data.cuit,
-      postalCode: data.postalCode,
-      tags: data.tags || [], // Nueva propiedad para buscar por rubro
-    });
+    const empresaId = userId; // usamos el userId como empresaId
+    const empresaRef = doc(db, "empresas", empresaId);
 
+    const cleanData = {
+      companyName: data.companyName || "",
+      address: data.address || "",
+      website: data.website || "",
+      imageUrl,
+      cuit: data.cuit || "",
+      postalCode: data.postalCode || "",
+      tags: data.tags || [],
+      phone: data.phone || "",
+      email: data.email || "",
+      whatsapp: data.whatsapp || "",
+    };
+
+    await setDoc(empresaRef, cleanData, { merge: true });
+
+    // actualizar empresaId del usuario si no lo tenía
     if (userId) {
       const userRef = doc(db, "users", userId);
-      await updateDoc(userRef, { empresaId: docRef.id });
+      await updateDoc(userRef, { empresaId });
     }
 
-    return docRef.id;
+    return empresaId;
   } catch (error) {
     console.error("Error al subir datos de empresa:", error);
     throw error;

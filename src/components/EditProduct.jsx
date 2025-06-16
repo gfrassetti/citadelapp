@@ -20,14 +20,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useTheme } from "next-themes";
 import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 export default function EditProduct() {
   const { user } = useUser();
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -118,6 +132,20 @@ export default function EditProduct() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    try {
+      await Promise.all(
+        selectedRowIds.map((id) => deleteDoc(doc(db, "products", id)))
+      );
+      setProducts((prev) => prev.filter((p) => !selectedRowIds.includes(p.id)));
+      setSelectedRowIds([]);
+      toast.success("Productos eliminados correctamente");
+    } catch (error) {
+      console.error("Error eliminando múltiples productos:", error);
+      toast.error("No se pudieron eliminar los productos");
+    }
+  };
+
   const theme = useTheme().theme;
 
   const columns = baseColumns({
@@ -137,10 +165,38 @@ export default function EditProduct() {
           {initialLoading ? (
             <Skeleton className="w-full h-[300px] rounded-md" />
           ) : (
-            <DataTable
-              columns={columns}
-              data={products}
-            />
+            <>
+              {selectedRowIds.length > 0 && (
+                <div className="flex justify-end">
+                  <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive">Eliminar seleccionados</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Eliminar productos seleccionados?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta acción eliminará los productos seleccionados permanentemente.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleBulkDelete}>
+                          Confirmar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              )}
+
+              <DataTable
+                columns={columns}
+                data={products}
+                selectedRowIds={selectedRowIds}
+                setSelectedRowIds={setSelectedRowIds}
+              />
+            </>
           )}
         </div>
       ) : (
