@@ -94,7 +94,7 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
     }
   };
 
-  if (!empresaId) return <p className="text-center">Cargando empresa...</p>;
+  if (!empresaId) return <p className="text-center">Cargando...</p>;
 
   return (
     <div className="w-full max-w-4xl mx-auto py-10 px-4">

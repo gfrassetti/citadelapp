@@ -159,7 +159,7 @@ export default function ProDashboardPanel() {
           config={{
             total: {
               label: "Total",
-              color: isDark ? "#60a5fa" : "#2563eb",
+              color: isDark ? "#60a5fa" : "#8038e9",
             },
           }}
         >
