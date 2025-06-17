@@ -19,16 +19,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const checkSubscriptionStatus = async (userEmail, userId) => {
+  const checkStripeSubscriptionStatus = async (uid) => {
     try {
-      const response = await fetch("/api/mercadopago/subscription-info", {
-        headers: { "x-user-email": userEmail },
+      const response = await fetch("/api/stripe/subscription-info", {
+        headers: { "x-user-id": uid },
       });
 
-      if (!response.ok) {
-        console.warn("❗ No se pudo obtener la suscripción. Status:", response.status);
-        return;
-      }
+      if (!response.ok) return;
 
       const data = await response.json();
       const subscription = data.subscription;
@@ -36,17 +33,17 @@ export const AuthProvider = ({ children }) => {
       if (!subscription) return;
 
       const now = new Date();
-      const endDate = subscription.auto_recurring?.end_date
-        ? new Date(subscription.auto_recurring.end_date)
+      const endDate = subscription.cancel_at
+        ? new Date(subscription.cancel_at * 1000)
         : null;
 
-      if (subscription.status === "cancelled" && endDate && now >= endDate) {
-        console.log("La suscripción ha expirado, cambiando el plan a Free.");
-        await updateDoc(doc(db, "users", userId), { plan: "free" });
+      if (subscription.status === "canceled" && endDate && now >= endDate) {
+        const userRef = doc(db, "users", uid);
+        await updateDoc(userRef, { plan: "free" });
         setUser((prev) => ({ ...prev, plan: "free" }));
       }
     } catch (error) {
-      console.error("Error al verificar la suscripción:", error);
+      console.error("Error al verificar la suscripción de Stripe:", error);
     }
   };
 
@@ -68,9 +65,7 @@ export const AuthProvider = ({ children }) => {
             ...snap.data(),
           };
           setUser(userData);
-
-          // 🔥 Llamamos a la API de MercadoPago al iniciar sesión
-          await checkSubscriptionStatus(userData.email, userData.uid);
+          await checkStripeSubscriptionStatus(userData.uid);
         } else {
           setUser({
             uid: firebaseUser.uid,
