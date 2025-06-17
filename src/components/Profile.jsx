@@ -20,8 +20,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Loader2Icon } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import UserInfoActions from "@/components/UserInfoActions";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   name: z.string().min(2),
@@ -37,7 +37,6 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState("");
-  const [success, setSuccess] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -102,12 +101,12 @@ export default function Profile() {
         avatarUrl,
       });
 
+      // CAMBIA EL PASSWORD EN FIREBASE AUTH
       if (values.newPassword) await updatePassword(user, values.newPassword);
 
       setCurrentAvatarUrl(avatarUrl);
-      setSuccess(true);
       setEditMode(false);
-      setTimeout(() => setSuccess(false), 5000);
+      toast.success("Perfil actualizado correctamente.");
 
       reset({
         ...values,
@@ -116,6 +115,7 @@ export default function Profile() {
         confirmPassword: "",
       });
     } catch (err) {
+      toast.error(err.message || "Hubo un error al guardar los datos.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -128,47 +128,47 @@ export default function Profile() {
       <h3 className="text-base font-semibold text-muted-foreground">Usuario</h3>
 
       <div className="flex justify-between items-start">
-      <div className="flex items-center gap-4">
-  <img
-    src={currentAvatarUrl || "/default-avatar.png"}
-    className="w-14 h-14 rounded-full object-cover border"
-    alt="avatar"
-  />
+        <div className="flex items-center gap-4">
+          <img
+            src={currentAvatarUrl || "/default-avatar.png"}
+            className="w-14 h-14 rounded-full object-cover border"
+            alt="avatar"
+          />
 
-  {editMode && (
-    <div className="flex flex-col gap-2">
-      <Input
-        type="file"
-        accept="image/*"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) form.setValue("avatar", file);
-        }}
-        className="w-64 text-sm"
-      />
+          {editMode && (
+            <div className="flex flex-col gap-2">
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) form.setValue("avatar", file);
+                }}
+                className="w-64 text-sm"
+              />
 
-      {currentAvatarUrl && (
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={async () => {
-            const user = auth.currentUser;
-            if (!user) return;
-            try {
-              await deleteObject(ref(storage, currentAvatarUrl));
-              await updateDoc(doc(db, "users", user.uid), { avatarUrl: "" });
-              setCurrentAvatarUrl("");
-            } catch (err) {
-              console.error("Error al eliminar avatar:", err);
-            }
-          }}
-        >
-          Quitar avatar
-        </Button>
-      )}
-    </div>
-  )}
-</div>
+              {currentAvatarUrl && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={async () => {
+                    const user = auth.currentUser;
+                    if (!user) return;
+                    try {
+                      await deleteObject(ref(storage, currentAvatarUrl));
+                      await updateDoc(doc(db, "users", user.uid), { avatarUrl: "" });
+                      setCurrentAvatarUrl("");
+                    } catch (err) {
+                      console.error("Error al eliminar avatar:", err);
+                    }
+                  }}
+                >
+                  Quitar avatar
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
 
         <UserInfoActions
           editMode={editMode}
@@ -215,12 +215,39 @@ export default function Profile() {
               </FormItem>
             )}
           />
-         {success && (
-          <Alert variant="success">
-            <AlertTitle>Perfil actualizado</AlertTitle>
-            <AlertDescription>Tus datos se han guardado correctamente.</AlertDescription>
-          </Alert>
-        )}
+
+          <Separator />
+          <FormLabel>Contraseña</FormLabel>
+
+          {editMode && (
+            <>
+              <div className="font-semibold mb-2">Contraseña</div>
+              <FormField
+                name="newPassword"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nueva contraseña</FormLabel>
+                    <FormControl>
+                      <Input type="password" autoComplete="new-password" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="confirmPassword"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar contraseña</FormLabel>
+                    <FormControl>
+                      <Input type="password" autoComplete="new-password" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
         </div>
       </Form>
     </div>
