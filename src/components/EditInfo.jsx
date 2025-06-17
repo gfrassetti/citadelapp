@@ -17,8 +17,8 @@ import {
   FormMessage,
   FormControl,
 } from "@/components/ui/form";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import UserInfoActions from "@/components/UserInfoActions";
+import { toast } from "sonner";
 
 const schema = z.object({
   companyName: z.string().min(1, "Requerido"),
@@ -31,14 +31,12 @@ const schema = z.object({
   whatsapp: z.string().optional(),
 });
 
-
 export default function EditCompanyInfoForm() {
   const { user } = useUser();
   const [loadingData, setLoadingData] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -97,31 +95,24 @@ export default function EditCompanyInfoForm() {
               const userSnap = await getDoc(doc(db, "users", user.uid));
               const userData = userSnap.data();
               const empresaRef = doc(db, "empresas", userData.empresaId);
-          
+
               const cleanedData = Object.fromEntries(
                 Object.entries(data).filter(([_, value]) => value !== undefined)
               );
-          
+
               await setDoc(empresaRef, cleanedData, { merge: true });
-          
+
               setEditMode(false);
-              setSuccess(true);
-              setTimeout(() => setSuccess(false), 5000);
+              toast.success("La información fue actualizada correctamente.");
             } catch (error) {
+              toast.error("Hubo un error al guardar los datos.");
               console.error(error);
             } finally {
               setLoading(false);
             }
-          })}          
+          })}
         />
       </div>
-
-      {success && (
-        <Alert variant="success">
-          <AlertTitle>¡Éxito!</AlertTitle>
-          <AlertDescription>La información fue actualizada correctamente.</AlertDescription>
-        </Alert>
-      )}
 
       <Form {...form}>
         <div className="flex flex-col gap-6">
