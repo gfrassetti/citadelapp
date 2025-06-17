@@ -1,8 +1,10 @@
 "use client"
 
 import { Checkbox } from "@/components/ui/checkbox"
+import { useRouter } from "next/navigation"
 
-export function columns({ selected, setSelected }) {
+export function columns() {
+  const router = useRouter();
   return [
     {
       id: "select",
@@ -47,7 +49,7 @@ export function columns({ selected, setSelected }) {
         const name = row.original.productName;
         return (
           <button
-            onClick={() => setSelected(`EditProductForm:${id}`)}
+            onClick={() => router.push(`/dashboard/product/${id}`)}
             className="text-blue-600 hover:underline"
           >
             {name}

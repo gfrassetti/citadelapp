@@ -1,11 +1,11 @@
-import ProDashboardPanel from "@/components/ProDashboardPanel";
+import SuscriptionInfo from "@/components/SuscriptionInfo";
 import { DashboardBreadcrumb } from "@/components/DashboardBreadcrumb";
 
-export default function DashboardHome() {
+export default function SuscriptionPage() {
   return (
     <>
       <DashboardBreadcrumb />
-      <ProDashboardPanel />
+      <SuscriptionInfo />
     </>
   );
 }

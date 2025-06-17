@@ -8,26 +8,14 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-
 import { Map, PieChart } from "lucide-react";
-
-import {useUser}  from "@/context/AuthContext";
-import NavUser  from "@/components/NavUser";
+import { useUser } from "@/context/AuthContext";
+import NavUser from "@/components/NavUser";
 import NavProjects from "@/components/NavProjects";
 
-export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
+export function AppSidebar() {
   const { user } = useUser();
   const isProUser = user?.plan === "pro";
-
-  const {
-    setOpenMobile,
-    isMobile,
-  } = useSidebar();
-
-  const handleItemClick = (component) => {
-    setActiveComponent(component);
-    if (isMobile) setOpenMobile(false);
-  };
 
   return (
     <Sidebar collapsible="icon" className="w-full sm:w-64">
@@ -37,30 +25,29 @@ export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
 
       <SidebarContent>
         <NavProjects
-          setActiveComponent={handleItemClick}
           projects={[
             {
               name: "Dashboard",
               icon: PieChart,
-              component: "ProDashboard", // este es el nombre que deberías usar en tu router interno
+              href: "/dashboard",
               disabled: !isProUser,
             },
             {
               name: "Sube tus Productos",
               icon: Map,
-              component: "UploadProduct",
+              href: "/dashboard/upload-products",
               disabled: !isProUser,
             },
             {
               name: "Edita tus productos",
               icon: Map,
-              component: "EditProduct",
+              href: "/dashboard/edit-products",
               disabled: !isProUser,
             },
             {
               name: "Mi Empresa",
               icon: Map,
-              component: "EditInfo",
+              href: "/dashboard/edit-info",
               disabled: !isProUser,
             },
           ]}
@@ -70,10 +57,9 @@ export function AppSidebar({ setShowUpgrade, setActiveComponent }) {
       <SidebarFooter>
         {user ? (
           <NavUser
-            setActiveComponent={handleItemClick}
             projects={[
-              { name: "Account", component: "Profile" },
-              { name: "My Suscription", component: "SuscriptionInfo" },
+              { name: "Account", href: "/dashboard/profile" },
+              { name: "Subscription", href: "/dashboard/subscription" },
             ]}
             user={{
               name: user.name || user.displayName || "Usuario",

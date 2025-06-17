@@ -163,7 +163,7 @@ export default function SubscriptionInfo() {
         {subscription.status === "active" && !isPaused && (
           <button
             onClick={() => mutationPause.mutate(subscription.id)}
-            className="bg-yellow-500 text-white px-4 py-2 rounded"
+            className="bg-yellow-500 hover:bg-violet-500 transition-colors text-white px-4 py-2 rounded"
           >
             Pausar Suscripción
           </button>

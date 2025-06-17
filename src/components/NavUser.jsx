@@ -37,7 +37,6 @@ import { useUserData } from "@/context/UserDataContext";
 import { useUser } from "@/context/AuthContext";
 import { useHandleUpgrade } from "@/hooks/useHandleUpgrade";
 
-
 // Función para obtener iniciales
 function getInitials(name) {
   if (!name) return "";
@@ -46,7 +45,7 @@ function getInitials(name) {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
-export default function NavUser({ projects, setActiveComponent }) {
+export default function NavUser({ projects }) {
   const userData = useUserData();
   const { isMobile } = useSidebar();
   const router = useRouter();
@@ -115,7 +114,6 @@ export default function NavUser({ projects, setActiveComponent }) {
                       "Upgrade to Pro"
                     )}
                   </DropdownMenuItem>
-
               )}
             </DropdownMenuGroup>
 
@@ -125,7 +123,7 @@ export default function NavUser({ projects, setActiveComponent }) {
               {projects.map((project, index) => (
                 <DropdownMenuItem
                   key={index}
-                  onClick={() => setActiveComponent(project.component)}
+                  onClick={() => router.push(project.href)}
                 >
                   <BadgeCheck className="mr-2" />
                   {project.name}
@@ -134,9 +132,12 @@ export default function NavUser({ projects, setActiveComponent }) {
             </DropdownMenuGroup>
 
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut className="mr-2" />
-              <button onClick={() => signOut(auth).then(() => router.push("/login"))}>
+            <DropdownMenuItem asChild>
+              <button
+                className="flex items-center gap-2 w-full text-left"
+                onClick={() => signOut(auth).then(() => router.push("/login"))}
+              >
+                <LogOut className="mr-2" />
                 Cerrar sesión
               </button>
             </DropdownMenuItem>

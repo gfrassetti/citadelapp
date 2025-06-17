@@ -1,11 +1,11 @@
-import ProDashboardPanel from "@/components/ProDashboardPanel";
+import EditProduct from "@/components/EditProduct";
 import { DashboardBreadcrumb } from "@/components/DashboardBreadcrumb";
 
-export default function DashboardHome() {
+export default function EditProductsPage() {
   return (
     <>
       <DashboardBreadcrumb />
-      <ProDashboardPanel />
+      <EditProduct />
     </>
   );
 }

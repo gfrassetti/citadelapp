@@ -1,11 +1,11 @@
-import ProDashboardPanel from "@/components/ProDashboardPanel";
+import Profile from "@/components/Profile";
 import { DashboardBreadcrumb } from "@/components/DashboardBreadcrumb";
 
-export default function DashboardHome() {
+export default function ProfilePage() {
   return (
     <>
       <DashboardBreadcrumb />
-      <ProDashboardPanel />
+      <Profile />
     </>
   );
 }

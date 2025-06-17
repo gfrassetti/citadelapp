@@ -31,7 +31,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-export function ProDashboardPanel() {
+export default function ProDashboardPanel() {
   const { theme } = useTheme();
   const { empresaId } = useUserData() || {};
   const { subscription } = useSubscription();

@@ -1,11 +1,11 @@
-import ProDashboardPanel from "@/components/ProDashboardPanel";
+import EditInfo from "@/components/EditInfo";
 import { DashboardBreadcrumb } from "@/components/DashboardBreadcrumb";
 
-export default function DashboardHome() {
+export default function EditInfoPage() {
   return (
     <>
       <DashboardBreadcrumb />
-      <ProDashboardPanel />
+      <EditInfo />
     </>
   );
 }

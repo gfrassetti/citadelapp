@@ -31,7 +31,7 @@ import { doc, deleteDoc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/db/db";
 import { useRouter } from "next/navigation";
 
-export default function ProductEditForm({ productId, setActiveComponent }) {
+export default function ProductEditForm({ productId }) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null);
   const router = useRouter();
@@ -84,12 +84,12 @@ export default function ProductEditForm({ productId, setActiveComponent }) {
 
   const handleDelete = async () => {
     await deleteDoc(doc(db, "products", productId));
-    router.push("/dashboard");
+    router.push("/dashboard/edit-products");
   };
 
   return (
     <div className="max-w-md mx-auto space-y-4 p-4">
-      <Button variant="outline" onClick={() => setActiveComponent("EditProduct")}>
+      <Button variant="outline" type="button" onClick={() => router.push("/dashboard/edit-products")}>
         ← Volver
       </Button>
 
