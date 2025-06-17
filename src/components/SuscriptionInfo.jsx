@@ -97,12 +97,19 @@ export default function SubscriptionInfo() {
   const subscription = data?.subscription;
   const customer = data?.customer;
 
-  if (isLoading || !subscription) return <Loader text="Cargando Suscripción..." />;
+  if (isLoading) return <Loader text="Cargando Suscripción..." />;
 
   if (isError)
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-red-600 font-semibold">Error: {error.message}</p>
+      </div>
+    );
+
+  if (!subscription)
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-center">
+        <p className="text-gray-700 text-lg">No tenés una suscripción activa.</p>
       </div>
     );
 
