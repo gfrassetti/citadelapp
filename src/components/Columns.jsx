@@ -15,18 +15,21 @@ export function columns() {
             table.toggleAllRowsSelected(!!value)
           }
           aria-label="Seleccionar todo"
+          onClick={e => e.stopPropagation()}
         />
       ),
       cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          onCheckedChange={value => row.toggleSelected(!!value)}
           aria-label="Seleccionar fila"
+          onClick={e => e.stopPropagation()}
         />
       ),
       enableSorting: false,
       enableHiding: false,
     },
+    ,
     {
       accessorKey: "imageUrl",
       header: "Imagen",
