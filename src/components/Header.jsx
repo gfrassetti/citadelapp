@@ -35,10 +35,10 @@ export default function Header() {
         </div>
 
         {/* Botón INGRESAR solo escritorio */}
-        <div>
+        <div class="block justify-items-center">
           <div className="hidden sm:flex flex-col items-end gap-2 mt-2">
             <Link href="/login" className="flex flex-col items-center">
-              <div className="bg-[#fd6d71] px-4 py-3 rounded-lg flex flex-col items-center gap-3 shadow font-bold text-white text-[1.05rem] relative">
+              <div className="bg-[#c646a2] hover:bg-[#131029] transition-colors px-4 py-3 rounded-lg flex flex-col items-center gap-3 shadow font-bold text-white text-[1.05rem] relative">
                 <span className="relative text-sm font-normal text-white/90">
                   ¿Ya eres cliente?
                 </span>
@@ -49,7 +49,7 @@ export default function Header() {
               </div>
             </Link>
           </div>
-          <div className="relative w-10 block mt-4">
+          <div className="relative w-10 block mt-0 sm:mt-4">
             <ThemeToggle />
           </div>
         </div>
@@ -98,7 +98,7 @@ export default function Header() {
                   <Link
                     href="/login"
                     onClick={() => setOpen(false)}
-                    className="mt-4 font-bold flex items-center gap-2 bg-[#fd6d71] px-4 py-3 rounded-lg"
+                    className="mt-4 font-bold flex items-center gap-2 bg-[#8038e9] px-4 py-3 rounded-lg"
                   >
                     <FaSignInAlt className="inline-block mr-2 text-xl -ml-4" />
                     INGRESAR
@@ -112,24 +112,24 @@ export default function Header() {
 
       {/* Menú nav horizontal */}
       <nav className="w-full bg-transparent mt-4 mb-0 hidden sm:flex">
-        <ul className="flex flex-row gap-8 px-4 py-0 max-w-screen-xl mx-auto font-semibold text-sm sm:text-base tracking-wide">
+        <ul className="flex flex-row gap-8 px-8 py-0 max-w-screen-xl font-semibold text-sm sm:text-base tracking-wide">
           <li>
-            <Link href="/">Home</Link>
+            <Link  className="hover:text-green-400 transition-colors cursor-pointer font-medium" href="/">Home</Link>
           </li>
           <li>
-            <Link href="#">Quiénes somos</Link>
+            <Link  className="hover:text-green-400 transition-colors cursor-pointer font-medium" href="#">Quiénes somos</Link>
           </li>
           <li>
-            <Link href="#">Novedades</Link>
+            <Link  className="hover:text-green-400 transition-colors cursor-pointer font-medium" href="#">Novedades</Link>
           </li>
           <li>
-            <Link href="#">Contacto</Link>
+            <Link  className="hover:text-green-400 transition-colors cursor-pointer font-medium" href="#">Contacto</Link>
           </li>
           <li>
-            <Link href="#">Cómo comprar</Link>
+            <Link  className="hover:text-green-400 transition-colors cursor-pointer font-medium" href="#">FAQs</Link>
           </li>
           <li>
-            <Link href="#">Informar pago</Link>
+            <Link className="hover:text-green-400 transition-colors cursor-pointer font-medium"  href="/register">Sos Mayorista? Registrate <strong>acá</strong></Link>
           </li>
         </ul>
       </nav>
