@@ -18,7 +18,7 @@ export default function Header() {
     <header
       className={clsx(
         "w-full text-white shadow-sm flex flex-col items-center px-0 pt-4 pb-2",
-        theme === "dark" ? "bg-[#1f1b34]" : "bg-[#2953D4]"
+        theme === "dark" ? "bg-[#1f1b34]" : "bg-primary-dark"
       )}
     >      <div className="flex w-full mx-auto justify-between items-start px-6 relative">
         {/* Logo + claim */}
