@@ -16,7 +16,7 @@ export default function Header() {
 
   return (
     <header className="w-full bg-[#2953D4] text-white shadow-sm flex flex-col items-center px-0 pt-4 pb-2">
-      <div className="flex w-full max-w-screen-xl mx-auto justify-between items-start px-6 relative">
+      <div className="flex w-full mx-auto justify-between items-start px-6 relative">
         {/* Logo + claim */}
         <div className="flex flex-col items-start gap-0">
           <div className="flex items-center gap-4">
@@ -111,7 +111,7 @@ export default function Header() {
       </div>
 
       {/* Menú nav horizontal */}
-      <nav className="w-full bg-transparent mt-4 mb-0 hidden sm:flex">
+      <nav className="w-3/4 mx-auto bg-transparent justify-between mt-4 mb-0 hidden sm:flex">
         <ul className="flex flex-row gap-8 px-8 py-0 max-w-screen-xl font-semibold text-sm sm:text-base tracking-wide">
           <li>
             <Link  className="hover:text-green-400 transition-colors cursor-pointer font-medium" href="/">Home</Link>
@@ -128,10 +128,8 @@ export default function Header() {
           <li>
             <Link  className="hover:text-green-400 transition-colors cursor-pointer font-medium" href="#">FAQs</Link>
           </li>
-          <li>
-            <Link className="hover:text-green-400 transition-colors cursor-pointer font-medium"  href="/register">Sos Mayorista? Registrate <strong>acá</strong></Link>
-          </li>
         </ul>
+          <Link className="hover:text-green-400 transition-colors cursor-pointer font-medium pr-8"  href="/register">Sos Mayorista? Registrate <strong>acá</strong></Link>
       </nav>
     </header>
   );
