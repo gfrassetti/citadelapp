@@ -2,12 +2,28 @@
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { useTheme } from "next-themes";
+import clsx from "clsx";
 
 export default function Filters({ selectedFilter, setSelectedFilter }) {
+  const { theme } = useTheme();
+
   return (
-    <div className="w-full md:w-1/4 bg-gray-50 p-6 rounded-lg shadow-md border">
-      <h3 className="text-lg font-bold mb-4 text-gray-800">Filtros</h3>
-      <p className="text-sm text-muted-foreground mb-2">Mostrar resultados para:</p>
+    <div
+      className={clsx(
+        "w-full md:w-1/4 p-6 rounded-lg shadow-md border",
+        theme === "dark"
+          ? "bg-gray-800 text-white"
+          : "bg-gray-50 text-gray-800"
+      )}
+    >
+      <h3 className="text-lg font-bold mb-4">Filtros</h3>
+      <p className={clsx(
+        "text-sm mb-2",
+        theme === "dark" ? "text-gray-300" : "text-muted-foreground"
+      )}>
+        Mostrar resultados para:
+      </p>
 
       <RadioGroup
         value={selectedFilter}

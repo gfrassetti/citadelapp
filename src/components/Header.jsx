@@ -15,8 +15,12 @@ export default function Header() {
   const { theme } = useTheme();
 
   return (
-    <header className="w-full bg-[#2953D4] text-white shadow-sm flex flex-col items-center px-0 pt-4 pb-2">
-      <div className="flex w-full mx-auto justify-between items-start px-6 relative">
+    <header
+      className={clsx(
+        "w-full text-white shadow-sm flex flex-col items-center px-0 pt-4 pb-2",
+        theme === "dark" ? "bg-[#1f1b34]" : "bg-[#2953D4]"
+      )}
+    >      <div className="flex w-full mx-auto justify-between items-start px-6 relative">
         {/* Logo + claim */}
         <div className="flex flex-col items-start gap-0">
           <div className="flex items-center gap-4">
@@ -111,7 +115,7 @@ export default function Header() {
       </div>
 
       {/* Menú nav horizontal */}
-      <nav className="w-3/4 mx-auto bg-transparent justify-between mt-4 mb-0 hidden sm:flex">
+      <nav className="w-[90%] mx-auto bg-transparent justify-between mt-4 mb-0 hidden sm:flex">
         <ul className="flex flex-row gap-8 px-8 py-0 max-w-screen-xl font-semibold text-sm sm:text-base tracking-wide">
           <li>
             <Link  className="hover:text-green-400 transition-colors cursor-pointer font-medium" href="/">Home</Link>
