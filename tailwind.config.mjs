@@ -11,7 +11,7 @@ export default {
   		colors: {
 			"primary-dark": "#292554",
 			"primary-darker": "#131029",
-			"white": "#ffffff",
+			"omalmd": "#eeedf8",
 			"gray-light": "#a89aef",
 			"accent-blue": "#8038e9",
 			"background-light": "#eeedf8",

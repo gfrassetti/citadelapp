@@ -14,13 +14,22 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const { theme } = useTheme();
 
+  // Helpers para clases globales y por tema
+  const isDark = theme === "dark";
+  const textMain = isDark ? "text-white" : "text-black";
+  const textSecondary = isDark ? "text-gray-300" : "text-gray-700";
+  const navHover = isDark ? "hover:text-green-400" : "hover:text-primary-dark";
+  const bgMain = isDark ? "bg-[#1f1b34]" : "bg-omalmd";
+
   return (
     <header
       className={clsx(
-        "w-full text-white shadow-sm flex flex-col items-center px-0 pt-4 pb-2",
-        theme === "dark" ? "bg-[#1f1b34]" : "bg-primary-dark"
+        "w-full shadow-sm flex flex-col items-center px-0 pt-4 pb-2",
+        bgMain,
+        textMain
       )}
-    >      <div className="flex w-full mx-auto justify-between items-start px-6 relative">
+    >
+      <div className="flex w-full mx-auto justify-between items-start px-6 relative">
         {/* Logo + claim */}
         <div className="flex flex-col items-start gap-0">
           <div className="flex items-center gap-4">
@@ -33,13 +42,13 @@ export default function Header() {
               priority
             />
           </div>
-          <span className="text-xs font-semibold mt-0 ml-2 tracking-wide">
+          <span className={clsx("text-xs font-semibold mt-0 ml-2 tracking-wide", textSecondary)}>
             TODO LO QUE NECESITÁS, EN UN SOLO LUGAR.
           </span>
         </div>
 
         {/* Botón INGRESAR solo escritorio */}
-        <div class="block justify-items-center">
+        <div className="block justify-items-center">
           <div className="hidden sm:flex flex-col items-end gap-2 mt-2">
             <Link href="/login" className="flex flex-col items-center">
               <div className="bg-[#c646a2] hover:bg-[#131029] transition-colors px-4 py-3 rounded-lg flex flex-col items-center gap-3 shadow font-bold text-white text-[1.05rem] relative">
@@ -60,41 +69,44 @@ export default function Header() {
         {/* Menú hamburguesa solo mobile */}
         <div className="flex sm:hidden items-center gap-3">
           <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger className="ml-2 p-2 rounded-md bg-[#fd6d71]">
-              <Menu className="h-6 w-6 text-white" />
+            <SheetTrigger className={clsx("ml-2 p-2 rounded-md", isDark ? "bg-[#8038e9]" : "bg-[#fd6d71]")}>
+              <Menu className={clsx("h-6 w-6", textMain)} />
             </SheetTrigger>
             <SheetContent
               side="left"
-              className="pt-10 bg-[#2953D4] text-white"
+              className={clsx(
+                "pt-10",
+                isDark ? "bg-[#1f1b34] text-white" : "bg-[#2953D4] text-black"
+              )}
             >
               <ul className="flex flex-col gap-4 text-lg px-4">
                 <li>
-                  <Link href="/" onClick={() => setOpen(false)}>
+                  <Link href="/" onClick={() => setOpen(false)} className={clsx(textMain, navHover)}>
                     Home
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" onClick={() => setOpen(false)}>
+                  <Link href="#" onClick={() => setOpen(false)} className={clsx(textMain, navHover)}>
                     Quiénes somos
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" onClick={() => setOpen(false)}>
+                  <Link href="#" onClick={() => setOpen(false)} className={clsx(textMain, navHover)}>
                     Novedades
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" onClick={() => setOpen(false)}>
+                  <Link href="#" onClick={() => setOpen(false)} className={clsx(textMain, navHover)}>
                     Contacto
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" onClick={() => setOpen(false)}>
+                  <Link href="#" onClick={() => setOpen(false)} className={clsx(textMain, navHover)}>
                     Cómo comprar
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" onClick={() => setOpen(false)}>
+                  <Link href="#" onClick={() => setOpen(false)} className={clsx(textMain, navHover)}>
                     Informar pago
                   </Link>
                 </li>
@@ -102,7 +114,10 @@ export default function Header() {
                   <Link
                     href="/login"
                     onClick={() => setOpen(false)}
-                    className="mt-4 font-bold flex items-center gap-2 bg-[#8038e9] px-4 py-3 rounded-lg"
+                    className={clsx(
+                      "mt-4 font-bold flex items-center gap-2 px-4 py-3 rounded-lg",
+                      isDark ? "bg-[#c646a2] text-white" : "bg-[#8038e9] text-white"
+                    )}
                   >
                     <FaSignInAlt className="inline-block mr-2 text-xl -ml-4" />
                     INGRESAR
@@ -115,25 +130,30 @@ export default function Header() {
       </div>
 
       {/* Menú nav horizontal */}
-      <nav className="w-[90%] mx-auto bg-transparent justify-between mt-4 mb-0 hidden sm:flex">
+      <nav className={clsx("w-[90%] mx-auto bg-transparent justify-between mt-4 mb-0 hidden sm:flex desktop-menu", textMain)}>
         <ul className="flex flex-row gap-8 px-8 py-0 max-w-screen-xl font-semibold text-sm sm:text-base tracking-wide">
           <li>
-            <Link  className="hover:text-green-400 transition-colors cursor-pointer font-medium" href="/">Home</Link>
+            <Link className={clsx("transition-colors cursor-pointer font-medium", navHover, textMain)} href="/">Home</Link>
           </li>
           <li>
-            <Link  className="hover:text-green-400 transition-colors cursor-pointer font-medium" href="#">Quiénes somos</Link>
+            <Link className={clsx("transition-colors cursor-pointer font-medium", navHover, textMain)} href="#">Quiénes somos</Link>
           </li>
           <li>
-            <Link  className="hover:text-green-400 transition-colors cursor-pointer font-medium" href="#">Novedades</Link>
+            <Link className={clsx("transition-colors cursor-pointer font-medium", navHover, textMain)} href="#">Novedades</Link>
           </li>
           <li>
-            <Link  className="hover:text-green-400 transition-colors cursor-pointer font-medium" href="#">Contacto</Link>
+            <Link className={clsx("transition-colors cursor-pointer font-medium", navHover, textMain)} href="#">Contacto</Link>
           </li>
           <li>
-            <Link  className="hover:text-green-400 transition-colors cursor-pointer font-medium" href="#">FAQs</Link>
+            <Link className={clsx("transition-colors cursor-pointer font-medium", navHover, textMain)} href="#">FAQs</Link>
           </li>
         </ul>
-          <Link className="hover:text-green-400 transition-colors cursor-pointer font-medium pr-8"  href="/register">Sos Mayorista? Registrate <strong>acá</strong></Link>
+        <Link
+          className={clsx("transition-colors cursor-pointer font-medium pr-8", navHover, textMain)}
+          href="/register"
+        >
+          Sos Mayorista? Registrate <strong>acá</strong>
+        </Link>
       </nav>
     </header>
   );
