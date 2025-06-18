@@ -8,83 +8,131 @@ import ThemeToggle from "@/components/ThemeToggle";
 import Image from "next/image";
 import clsx from "clsx";
 import Link from "next/link";
+import { FaSignInAlt } from "react-icons/fa";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
   const { theme } = useTheme();
 
   return (
-    <header
-      className={clsx(
-        "fixed top-0 inset-x-0 z-50 h-[80px] flex items-center justify-between px-6 transition-colors",
-        theme === "dark" ? "bg-[#292554] text-white" : "bg-gray-300 text-black"
-      )}
-    >
-      {/* Logo + Marca */}
-      <div className="flex items-center gap-3">
-        <Image
-          src="/assets/logo.png"
-          alt="Logo"
-          width={50}
-          height={50}
-          className="rounded-full"
-        />
-        <span className="text-xl font-semibold tracking-tight">La Citadel</span>
+    <header className="w-full bg-[#2953D4] text-white shadow-sm flex flex-col items-center px-0 pt-4 pb-2">
+      <div className="flex w-full max-w-screen-xl mx-auto justify-between items-start px-6 relative">
+        {/* Logo + claim */}
+        <div className="flex flex-col items-start gap-0">
+          <div className="flex items-center gap-4">
+            <Image
+              src="/assets/logo.png"
+              alt="Logo"
+              width={130}
+              height={64}
+              className="h-[100px] w-auto"
+              priority
+            />
+          </div>
+          <span className="text-xs font-semibold mt-0 ml-2 tracking-wide">
+            TODO LO QUE NECESITÁS, EN UN SOLO LUGAR.
+          </span>
+        </div>
+
+        {/* Botón INGRESAR solo escritorio */}
+        <div>
+          <div className="hidden sm:flex flex-col items-end gap-2 mt-2">
+            <Link href="/login" className="flex flex-col items-center">
+              <div className="bg-[#fd6d71] px-4 py-3 rounded-lg flex flex-col items-center gap-3 shadow font-bold text-white text-[1.05rem] relative">
+                <span className="relative text-sm font-normal text-white/90">
+                  ¿Ya eres cliente?
+                </span>
+                <span className="pl-7">
+                  <FaSignInAlt className="inline-block mr-2 text-xl -ml-4" />
+                  INGRESAR
+                </span>
+              </div>
+            </Link>
+          </div>
+          <div className="relative w-10 block mt-4">
+            <ThemeToggle />
+          </div>
+        </div>
+        {/* Menú hamburguesa solo mobile */}
+        <div className="flex sm:hidden items-center gap-3">
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger className="ml-2 p-2 rounded-md bg-[#fd6d71]">
+              <Menu className="h-6 w-6 text-white" />
+            </SheetTrigger>
+            <SheetContent
+              side="left"
+              className="pt-10 bg-[#2953D4] text-white"
+            >
+              <ul className="flex flex-col gap-4 text-lg px-4">
+                <li>
+                  <Link href="/" onClick={() => setOpen(false)}>
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" onClick={() => setOpen(false)}>
+                    Quiénes somos
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" onClick={() => setOpen(false)}>
+                    Novedades
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" onClick={() => setOpen(false)}>
+                    Contacto
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" onClick={() => setOpen(false)}>
+                    Cómo comprar
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" onClick={() => setOpen(false)}>
+                    Informar pago
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/login"
+                    onClick={() => setOpen(false)}
+                    className="mt-4 font-bold flex items-center gap-2 bg-[#fd6d71] px-4 py-3 rounded-lg"
+                  >
+                    <FaSignInAlt className="inline-block mr-2 text-xl -ml-4" />
+                    INGRESAR
+                  </Link>
+                </li>
+              </ul>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
 
-      {/* Navegación escritorio */}
-      <nav className="hidden sm:flex items-center gap-6 text-sm font-medium">
-        <Link
-          href="/login"
-          className={clsx(
-            "hover:underline",
-            theme === "dark" ? "text-[#06f388]" : "text-[#292554]"
-          )}
-        >
-          Ingresa
-        </Link>
-        <Link
-          href="/register"
-          className={clsx(
-            "hover:underline",
-            theme === "dark" ? "text-[#06f388]" : "text-[#292554]"
-          )}
-        >
-          Si sos Mayorista, Crea tu cuenta
-        </Link>
-        <Link
-          href="#"
-          className={clsx(
-            "hover:underline",
-            theme === "dark" ? "text-[#06f388]" : "text-[#292554]"
-          )}
-        >
-          Link
-        </Link>
+      {/* Menú nav horizontal */}
+      <nav className="w-full bg-transparent mt-4 mb-0 hidden sm:flex">
+        <ul className="flex flex-row gap-8 px-4 py-0 max-w-screen-xl mx-auto font-semibold text-sm sm:text-base tracking-wide">
+          <li>
+            <Link href="/">Home</Link>
+          </li>
+          <li>
+            <Link href="#">Quiénes somos</Link>
+          </li>
+          <li>
+            <Link href="#">Novedades</Link>
+          </li>
+          <li>
+            <Link href="#">Contacto</Link>
+          </li>
+          <li>
+            <Link href="#">Cómo comprar</Link>
+          </li>
+          <li>
+            <Link href="#">Informar pago</Link>
+          </li>
+        </ul>
       </nav>
-
-      {/* Toggle + Menú móvil */}
-      <div className="flex items-center gap-3">
-        <ThemeToggle />
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger className="block sm:hidden p-2 rounded-md bg-gray-200 dark:bg-gray-600">
-            <Menu className="h-6 w-6 text-black dark:text-white" />
-          </SheetTrigger>
-          <SheetContent
-            side="left"
-            className={clsx(
-              "pt-10",
-              theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
-            )}
-          >
-            <ul className="flex flex-col gap-4 text-lg px-4">
-              <li><Link href="/" onClick={() => setOpen(false)}>Inicio</Link></li>
-              <li><Link href="/register" onClick={() => setOpen(false)}>Crear cuenta</Link></li>
-              <li><Link href="/login" onClick={() => setOpen(false)}>Ingresar</Link></li>
-            </ul>
-          </SheetContent>
-        </Sheet>
-      </div>
     </header>
   );
 }
