@@ -104,3 +104,7 @@ html, body {
 .marketplace-card {
   @apply  rounded-xl flex flex-col items-center justify-around hover:shadow-lg transition bg-white dark:bg-gray-900  min-h-[340px] h-full p-2;
 }
+
+div.min-h-svh{
+  width: auto;
+}

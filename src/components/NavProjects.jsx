@@ -20,13 +20,15 @@ export default function NavProjects({ projects }) {
           <SidebarMenuButton
             key={item.name}
             asChild
+            isActive={pathname === item.href}
             className={`
               ${item.disabled ? "opacity-50 pointer-events-none" : ""}
-              ${pathname === item.href ? "font-bold text-blue-600" : ""}
             `}
+            tooltip={item.name} // Tooltip en modo collapsed
           >
             <Link href={item.disabled ? "#" : item.href}>
-              {item.name}
+              <item.icon className="mr-2" />
+              <span>{item.name}</span>
             </Link>
           </SidebarMenuButton>
         ))}
