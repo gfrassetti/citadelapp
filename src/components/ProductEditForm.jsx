@@ -28,12 +28,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { doc, deleteDoc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/db/db";
+import { db, storage } from "@/lib/db/db";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useRouter } from "next/navigation";
 
 export default function ProductEditForm({ productId }) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState("");
+  const [newImageFile, setNewImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
   const router = useRouter();
 
   const form = useForm({
@@ -51,12 +55,14 @@ export default function ProductEditForm({ productId }) {
       const snap = await getDoc(doc(db, "products", productId));
       if (snap.exists()) {
         const data = snap.data();
+        setCurrentImageUrl(data.imageUrl || "");
+        setImagePreview(data.imageUrl || "");
         form.reset({
           productName: data.productName || "",
           description: data.description || "",
           price: data.price || "",
           tags: data.tags?.join(", ") || "",
-          imageUrl: data.imageUrl || "",
+          imageUrl: "",
         });
       }
     }
@@ -66,15 +72,28 @@ export default function ProductEditForm({ productId }) {
   const onSubmit = async (values) => {
     setLoading(true);
     setStatus(null);
+
+    let imageUrlToSave = currentImageUrl;
+
+    // Si se seleccionó una nueva imagen, subí primero y obtené el URL
+    if (newImageFile) {
+      const storageRef = ref(storage, `products/${productId}/${newImageFile.name}`);
+      await uploadBytes(storageRef, newImageFile);
+      imageUrlToSave = await getDownloadURL(storageRef);
+    }
+
     try {
       await updateDoc(doc(db, "products", productId), {
         productName: values.productName,
         description: values.description,
         price: values.price,
         tags: values.tags.split(",").map((t) => t.trim()),
-        imageUrl: values.imageUrl,
+        imageUrl: imageUrlToSave,
       });
       setStatus({ type: "success", message: "Producto actualizado correctamente." });
+      setCurrentImageUrl(imageUrlToSave);
+      setImagePreview(imageUrlToSave);
+      setNewImageFile(null);
     } catch (error) {
       setStatus({ type: "error", message: "Error al actualizar el producto." });
     } finally {
@@ -85,6 +104,15 @@ export default function ProductEditForm({ productId }) {
   const handleDelete = async () => {
     await deleteDoc(doc(db, "products", productId));
     router.push("/dashboard/edit-products");
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setNewImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      form.setValue("imageUrl", file.name); // Solo para validación, pero no se guarda el texto
+    }
   };
 
   return (
@@ -135,16 +163,19 @@ export default function ProductEditForm({ productId }) {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="imageUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>URL de la Imagen</FormLabel>
-                <FormControl><Input {...field} /></FormControl>
-              </FormItem>
+          <FormItem>
+            <FormLabel>Imagen del Producto</FormLabel>
+            <FormControl>
+              <Input type="file" accept="image/*" onChange={handleImageChange} />
+            </FormControl>
+            {(imagePreview || currentImageUrl) && (
+              <img
+                src={imagePreview || currentImageUrl}
+                alt="Imagen del producto"
+                className="w-32 h-32 object-cover rounded mt-2 border"
+              />
             )}
-          />
+          </FormItem>
 
           <div className="flex items-center gap-2">
             <Button type="submit">{loading ? "Guardando..." : "Guardar Cambios"}</Button>

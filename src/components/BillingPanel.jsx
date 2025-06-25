@@ -37,48 +37,68 @@ export default function BillingPanel() {
                subscription.items[0]?.price?.product?.name ||
                "Plan name not available";
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Billing Details</CardTitle>
-        <CardDescription>Stripe subscription info</CardDescription>
-      </CardHeader>
+// Fragmento para el panel de facturación
+const isCanceled = subscription.status === "canceled";
+const isExpired =
+  isCanceled && subscription.current_period_end * 1000 < Date.now();
 
-      <CardContent className="space-y-4 text-sm">
-        <div className="flex justify-between">
-          <span>Status</span>
-          <Badge variant="outline">{status}</Badge>
-        </div>
+const nextBilling = !isExpired && subscription.current_period_end
+  ? new Date(subscription.current_period_end * 1000).toLocaleDateString("es-AR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  : "-";
 
-        <Separator />
+const renewal = isCanceled
+  ? isExpired
+    ? "Suscripción terminada"
+    : "Cancelada, válido hasta el " + nextBilling
+  : cancelAtPeriodEnd
+    ? "Cancelada, válido hasta el " + nextBilling
+    : "Renovación automática activada";
 
-        <div className="flex justify-between">
-          <span>Plan</span>
-          <span>{plan}</span>
-        </div>
+return (
+  <Card>
+    <CardHeader>
+      <CardTitle>Billing Details</CardTitle>
+      <CardDescription>Stripe subscription info</CardDescription>
+    </CardHeader>
 
-        <div className="flex justify-between">
-          <span>Next billing</span>
-          <span>{nextBilling}</span>
-        </div>
+    <CardContent className="space-y-4 text-sm">
+      <div className="flex justify-between">
+        <span>Status</span>
+        <Badge variant={isCanceled ? "destructive" : "outline"}>{status}</Badge>
+      </div>
 
-        <div className="flex justify-between">
-          <span>Renewal</span>
-          <span>{renewal}</span>
-        </div>
+      <Separator />
 
-        <Separator />
+      <div className="flex justify-between">
+        <span>Plan</span>
+        <span>{plan}</span>
+      </div>
 
-        <div className="flex justify-between">
-          <span>Payment method</span>
-          <span>{cardInfo}</span>
-        </div>
+      <div className="flex justify-between">
+        <span>Next billing</span>
+        <span>{isExpired ? "-" : nextBilling}</span>
+      </div>
 
-        <div className="flex justify-between">
-          <span>Customer email</span>
-          <span>{customer?.email || "-"}</span>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+      <div className="flex justify-between">
+        <span>Renewal</span>
+        <span>{renewal}</span>
+      </div>
+
+      <Separator />
+
+      <div className="flex justify-between">
+        <span>Payment method</span>
+        <span>{cardInfo}</span>
+      </div>
+
+      <div className="flex justify-between">
+        <span>Customer email</span>
+        <span>{customer?.email || "-"}</span>
+      </div>
+    </CardContent>
+  </Card>
+)
