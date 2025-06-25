@@ -100,3 +100,7 @@ html, body {
 .btn-secondary {
   @apply bg-[#292554] hover:bg-violet-600 transition-colors text-white w-48 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200;
 }
+
+.marketplace-card {
+  @apply  rounded-xl flex flex-col items-center justify-around hover:shadow-lg transition bg-white dark:bg-gray-900  min-h-[340px] h-full p-2;
+}

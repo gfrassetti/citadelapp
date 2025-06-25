@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import clsx from "clsx";
 import Loader from "@/components/Loader";
 import Filters from "@/components/Filters";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 export default function HomeSearch() {
   const router = useRouter();
@@ -18,6 +19,9 @@ export default function HomeSearch() {
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [showModal, setShowModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
   useEffect(() => {
     const query = searchParams.get("query") || "";
     const filter = searchParams.get("filter") || "all";
@@ -26,6 +30,7 @@ export default function HomeSearch() {
       setSelectedFilter(filter);
       fetchResults(query, filter);
     }
+    // eslint-disable-next-line
   }, []);
 
   const fetchResults = async (queryValue, filterValue) => {
@@ -58,14 +63,25 @@ export default function HomeSearch() {
     }
   };
 
+  // Abrir modal solo para productos
+  const handleContact = (item) => {
+    setSelectedProduct(item);
+    setShowModal(true);
+  };
+  
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedProduct(null);
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-4 w-full h-max pt-[80px]">
-      <h1 className="text-center text-2xl font-bold mb-6"></h1>
-
+      {/* Barra de búsqueda */}
       <div className="flex flex-col md:flex-row gap-6">
         <Filters selectedFilter={selectedFilter} setSelectedFilter={setSelectedFilter} />
-        <div className="flex-1">
-          <div className="flex gap-2 mb-4">
+        <div className="flex-1 bg-[#f4f4f4] p-4">
+          <div className="flex gap-2 mb-6">
             <input
               type="text"
               className="border p-2 rounded w-full"
@@ -82,7 +98,14 @@ export default function HomeSearch() {
             </button>
           </div>
 
-          <div className="space-y-4">
+          {/* Grid de resultados tipo marketplace */}
+          <div className={clsx(
+            "grid gap-6",
+            "grid-cols-1",
+            "sm:grid-cols-2",
+            "md:grid-cols-3",
+            "xl:grid-cols-4"
+          )}>
             {loading ? (
               <Loader text="Cargando..." />
             ) : searched ? (
@@ -91,67 +114,122 @@ export default function HomeSearch() {
                   <div
                     key={item.id}
                     className={clsx(
-                      "border p-4 rounded shadow cursor-pointer hover:shadow-md transition",
-                      theme === "dark"
-                        ? "bg-gray-800 text-white border-[#06f388]"
-                        : "bg-white text-black border-gray-200"
+                      "marketplace-card",
+                      theme === "dark" ? "dark" : ""
                     )}
-                    onClick={() =>
-                      item.type === "empresa"
-                        ? router.push(`/company?id=${item.id}`)
-                        : router.push(`/product?id=${item.id}`)
-                    }
                   >
                     {item.type === "empresa" ? (
                       <>
-                        <div className="flex items-center gap-4 mb-2">
+                        <div className="flex items-center gap-4 mb-3">
                           {item.imageUrl ? (
                             <img
                               src={item.imageUrl}
                               alt={item.companyName}
-                              className="h-10 w-10 rounded-full object-cover"
+                              className="h-12 w-12 rounded-full object-cover border"
                             />
                           ) : (
-                            <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center font-bold text-white">
+                            <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center font-bold text-xl text-gray-600 dark:bg-gray-700 dark:text-white">
                               {item.companyName?.[0]}
                             </div>
                           )}
-                          <h3 className="font-bold">{item.companyName}</h3>
+                          <div>
+                            <h3 className="font-bold text-lg">{item.companyName}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-300">{item.address}</p>
+                          </div>
                         </div>
-                        <p>{item.address}</p>
-                        <p>Tel: {item.phone || "No disponible"}</p>
+                        <div className="text-sm mb-3">
+                          <div>Tel: <span className="font-medium">{item.phone || "-"}</span></div>
+                          <div>Email: <span className="font-medium">{item.email || "-"}</span></div>
+                          {item.minOrder && (
+                            <div className="text-xs mt-2 text-blue-600 font-bold">
+                              Orden mínima: {item.minOrder}
+                            </div>
+                          )}
+                        </div>
                       </>
                     ) : (
                       <>
-                        <h3 className="font-bold">{item.productName}</h3>
                         {item.imageUrl && (
                           <img
                             src={item.imageUrl}
                             alt={item.productName}
-                            className="h-32 object-contain my-2"
+                            className="h-40 w-full object-contain mb-3 rounded-lg bg-gray-50"
                           />
                         )}
-                        <p>{item.description}</p>
-                        <p className="font-semibold text-green-600">
+                        <h3 className="font-bold text-lg mb-1">{item.productName}</h3>
+                        <p className="text-gray-500 dark:text-gray-300 text-sm mb-2">{item.description}</p>
+                        <div className="font-bold text-green-600 mb-1">
                           Precio: ${item.price}
-                        </p>
+                        </div>
+                        <div className="text-xs text-blue-700 dark:text-blue-300 mb-2">
+                          Orden mínima: {item.minOrder || "1 unidad"}
+                        </div>
+                        <button
+                          onClick={() => handleContact(item)}
+                          className="btn-secondary"
+                        >
+                          Contactar al vendedor
+                        </button>
+
                       </>
                     )}
                   </div>
                 ))
               ) : (
-                <p className="text-center text-gray-600">
+                <p className="text-center text-gray-600 col-span-full">
                   No se encontraron resultados.
                 </p>
               )
             ) : (
-              <p className="text-center text-gray-600">
+              <p className="text-center text-gray-600 col-span-full">
                 Realiza una búsqueda para ver resultados.
               </p>
             )}
           </div>
         </div>
       </div>
+
+      {/* Modal para contactar al vendedor (solo productos) */}
+      {showModal && selectedProduct && (
+        <Dialog open={showModal} onOpenChange={handleCloseModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                Contactar al vendedor
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2">
+              <div>
+                <strong>Producto:</strong> {selectedProduct.productName}
+              </div>
+              <div>
+                <strong>Precio:</strong> ${selectedProduct.price}
+              </div>
+              <div>
+                <strong>Orden mínima:</strong> {selectedProduct.minOrder || "1 unidad"}
+              </div>
+              {/* Agregá más info según tu modelo */}
+              <div>
+                <strong>Descripción:</strong> {selectedProduct.description}
+              </div>
+              <div>
+                <strong>Email:</strong> {selectedProduct.email || "-"}
+              </div>
+              <div>
+                <strong>Teléfono:</strong> {selectedProduct.phone || "-"}
+              </div>
+            </div>
+            <DialogFooter>
+              <button
+                className="bg-blue-600 text-white px-4 py-2 rounded"
+                onClick={handleCloseModal}
+              >
+                Cerrar
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
