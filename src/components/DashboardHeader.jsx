@@ -12,7 +12,7 @@ export default function DashboardHeader() {
   const router = useRouter();
 
   return (
-    <header className="flex items-center justify-between sm:justify-end px-4 py-4 border-b">
+    <header className="flex items-center justify-between sm:justify-end px-4 py-3 border-b">
        <SidebarTrigger className="inline sm:hidden" />
       <div className="flex items-center gap-2">
         <span>

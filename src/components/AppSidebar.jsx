@@ -40,7 +40,7 @@ export function AppSidebar() {
   return (
       <Sidebar collapsible="icon" className="w-full sm:w-64">
         {/* Trigger visible siempre en desktop */}
-        <div className="flex items-center h-12 px-2 border-b border-sidebar-border">
+        <div className="flex items-center h-12 px-2 py-6 border-b border-sidebar-border">
           <SidebarTrigger />
         </div>
         <SidebarContent>
