@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  BadgeCheck,
-  ChevronsUpDown,
-  LogOut,
-  Sparkles,
-} from "lucide-react";
-
+import { BadgeCheck, Sparkles, CreditCard, LogOut, ChevronsUpDown } from "lucide-react";
 import {
   Avatar,
   AvatarFallback,
@@ -37,7 +31,8 @@ import { useUserData } from "@/context/UserDataContext";
 import { useUser } from "@/context/AuthContext";
 import { useHandleUpgrade } from "@/hooks/useHandleUpgrade";
 
-// Función para obtener iniciales
+// ...mismos imports que ya tienes
+
 function getInitials(name) {
   if (!name) return "";
   const parts = name.trim().split(" ");
@@ -45,7 +40,7 @@ function getInitials(name) {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
-export default function NavUser({ projects }) {
+export default function NavUser() {
   const userData = useUserData();
   const { isMobile } = useSidebar();
   const router = useRouter();
@@ -98,9 +93,10 @@ export default function NavUser({ projects }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
 
-            <DropdownMenuGroup>
-              {userPlan === "free" && (
-                <DropdownMenuItem
+            {userPlan === "free" && (
+              <>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
                     onClick={() => handleUpgrade.mutate()}
                     disabled={handleUpgrade.isPending}
                   >
@@ -114,21 +110,24 @@ export default function NavUser({ projects }) {
                       "Upgrade to Pro"
                     )}
                   </DropdownMenuItem>
-              )}
-            </DropdownMenuGroup>
-
-            {userPlan === "free" && <DropdownMenuSeparator />}
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+              </>
+            )}
 
             <DropdownMenuGroup>
-              {projects.map((project, index) => (
-                <DropdownMenuItem
-                  key={index}
-                  onClick={() => router.push(project.href)}
-                >
-                  <BadgeCheck className="mr-2" />
-                  {project.name}
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuItem onClick={() => router.push("/dashboard/profile")}>
+                <BadgeCheck className="mr-2 h-4 w-4" />
+                Perfil
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/dashboard/subscription")}>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Suscripción
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/dashboard/billing")}>
+                <CreditCard className="mr-2 h-4 w-4" />
+                Billing
+              </DropdownMenuItem>
             </DropdownMenuGroup>
 
             <DropdownMenuSeparator />
@@ -137,7 +136,7 @@ export default function NavUser({ projects }) {
                 className="flex items-center gap-2 w-full text-left"
                 onClick={() => signOut(auth).then(() => router.push("/login"))}
               >
-                <LogOut className="mr-2" />
+                <LogOut className="mr-2 h-4 w-4" />
                 Cerrar sesión
               </button>
             </DropdownMenuItem>

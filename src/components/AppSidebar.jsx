@@ -1,7 +1,16 @@
 "use client";
 
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarProvider, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { Map, PieChart, Building2, Boxes } from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+  useSidebar
+} from "@/components/ui/sidebar";
+import { LayoutDashboard, UploadCloud, PencilLine, Building2 } from "lucide-react";
 import { useUser } from "@/context/AuthContext";
 import NavUser from "@/components/NavUser";
 import NavProjects from "@/components/NavProjects";
@@ -13,19 +22,19 @@ export function AppSidebar() {
   const projects = [
     {
       name: "Dashboard",
-      icon: PieChart,
+      icon: LayoutDashboard,
       href: "/dashboard",
       disabled: !isProUser,
     },
     {
       name: "Sube tus Productos",
-      icon: Boxes,
+      icon: UploadCloud,
       href: "/dashboard/upload-products",
       disabled: !isProUser,
     },
     {
       name: "Edita tus productos",
-      icon: Boxes,
+      icon: PencilLine,
       href: "/dashboard/edit-products",
       disabled: !isProUser,
     },
@@ -40,7 +49,6 @@ export function AppSidebar() {
   return (
     <SidebarProvider>
       <Sidebar collapsible="icon" className="w-full sm:w-64">
-        {/* Trigger visible siempre en desktop */}
         <div className="flex items-center h-12 px-2 border-b border-sidebar-border">
           <SidebarTrigger />
         </div>
@@ -49,21 +57,11 @@ export function AppSidebar() {
         </SidebarContent>
         <SidebarFooter>
           {user ? (
-            <NavUser
-              projects={[
-                { name: "Account", href: "/dashboard/profile" },
-                { name: "Subscription", href: "/dashboard/subscription" },
-              ]}
-              user={{
-                name: user.name || user.displayName || "Usuario",
-                email: user.email || "",
-              }}
-            />
+            <NavUser />
           ) : (
             <p className="text-muted">No autenticado</p>
           )}
         </SidebarFooter>
-        {/* Rail: barra clickable para abrir/cerrar cuando está colapsado */}
         <SidebarRail />
       </Sidebar>
     </SidebarProvider>
