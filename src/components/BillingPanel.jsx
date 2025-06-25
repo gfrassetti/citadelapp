@@ -17,8 +17,12 @@ export default function BillingPanel() {
   }
 
   const status = subscription.status;
-  const nextBilling = subscription.current_period_end
-    ? new Date(subscription.current_period_end * 1000).toLocaleDateString("es-AR", {
+  const isCanceled = status === "canceled";
+  const currentPeriodEndMs = subscription.current_period_end * 1000;
+  const isExpired = isCanceled && currentPeriodEndMs < Date.now();
+
+  const nextBilling = !isExpired && subscription.current_period_end
+    ? new Date(currentPeriodEndMs).toLocaleDateString("es-AR", {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -26,79 +30,62 @@ export default function BillingPanel() {
     : "-";
 
   const cancelAtPeriodEnd = subscription.cancel_at_period_end;
-  const renewal = cancelAtPeriodEnd ? "Will cancel at period end" : "Auto-renewal enabled";
+  const plan = subscription.items[0]?.price?.nickname ||
+               subscription.items[0]?.price?.product?.name ||
+               "Plan name not available";
 
   const method = subscription.default_payment_method;
   const cardInfo = method?.card
     ? `${method.card.brand.toUpperCase()} •••• ${method.card.last4}`
     : "No payment method";
 
-  const plan = subscription.items[0]?.price?.nickname ||
-               subscription.items[0]?.price?.product?.name ||
-               "Plan name not available";
+  // Renovación lógica y mensajes
+  let renewal;
+  if (isCanceled) {
+    renewal = isExpired
+      ? "Suscripción terminada"
+      : "Cancelada, válido hasta el " + nextBilling;
+  } else if (cancelAtPeriodEnd) {
+    renewal = "Cancelada, válido hasta el " + nextBilling;
+  } else {
+    renewal = "Renovación automática activada";
+  }
 
-// Fragmento para el panel de facturación
-const isCanceled = subscription.status === "canceled";
-const isExpired =
-  isCanceled && subscription.current_period_end * 1000 < Date.now();
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Billing Details</CardTitle>
+        <CardDescription>Stripe subscription info</CardDescription>
+      </CardHeader>
 
-const nextBilling = !isExpired && subscription.current_period_end
-  ? new Date(subscription.current_period_end * 1000).toLocaleDateString("es-AR", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  : "-";
-
-const renewal = isCanceled
-  ? isExpired
-    ? "Suscripción terminada"
-    : "Cancelada, válido hasta el " + nextBilling
-  : cancelAtPeriodEnd
-    ? "Cancelada, válido hasta el " + nextBilling
-    : "Renovación automática activada";
-
-return (
-  <Card>
-    <CardHeader>
-      <CardTitle>Billing Details</CardTitle>
-      <CardDescription>Stripe subscription info</CardDescription>
-    </CardHeader>
-
-    <CardContent className="space-y-4 text-sm">
-      <div className="flex justify-between">
-        <span>Status</span>
-        <Badge variant={isCanceled ? "destructive" : "outline"}>{status}</Badge>
-      </div>
-
-      <Separator />
-
-      <div className="flex justify-between">
-        <span>Plan</span>
-        <span>{plan}</span>
-      </div>
-
-      <div className="flex justify-between">
-        <span>Next billing</span>
-        <span>{isExpired ? "-" : nextBilling}</span>
-      </div>
-
-      <div className="flex justify-between">
-        <span>Renewal</span>
-        <span>{renewal}</span>
-      </div>
-
-      <Separator />
-
-      <div className="flex justify-between">
-        <span>Payment method</span>
-        <span>{cardInfo}</span>
-      </div>
-
-      <div className="flex justify-between">
-        <span>Customer email</span>
-        <span>{customer?.email || "-"}</span>
-      </div>
-    </CardContent>
-  </Card>
-)
+      <CardContent className="space-y-4 text-sm">
+        <div className="flex justify-between">
+          <span>Status</span>
+          <Badge variant={isCanceled ? "destructive" : "outline"}>{status}</Badge>
+        </div>
+        <Separator />
+        <div className="flex justify-between">
+          <span>Plan</span>
+          <span>{plan}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Next billing</span>
+          <span>{isExpired ? "-" : nextBilling}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Renewal</span>
+          <span>{renewal}</span>
+        </div>
+        <Separator />
+        <div className="flex justify-between">
+          <span>Payment method</span>
+          <span>{cardInfo}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Customer email</span>
+          <span>{customer?.email || "-"}</span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
