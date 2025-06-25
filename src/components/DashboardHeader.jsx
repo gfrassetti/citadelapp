@@ -4,14 +4,16 @@ import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/db/db";
 import { Badge } from "@/components/ui/badge";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+
 
 export default function DashboardHeader() {
   const { user } = useUser();
   const router = useRouter();
 
   return (
-    <header className="flex items-center justify-between px-4 py-4 border-b">
-      <div />
+    <header className="flex items-center justify-between sm:justify-end px-4 py-4 border-b">
+       <SidebarTrigger className="inline sm:hidden" />
       <div className="flex items-center gap-2">
         <span>
           Bienvenido,{" "}
