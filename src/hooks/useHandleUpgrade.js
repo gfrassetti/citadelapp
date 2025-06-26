@@ -1,14 +1,22 @@
 import { useMutation } from "@tanstack/react-query";
+import { getAuth } from "firebase/auth";
 
-export function useHandleUpgrade(user) {
+export function useHandleUpgrade() {
   return useMutation({
     mutationFn: async () => {
-      if (!user?.uid || !user?.email) throw new Error("Faltan datos del usuario");
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      if (!user) throw new Error("Usuario no autenticado");
+
+      const token = await user.getIdToken();
 
       const response = await fetch("/api/stripe/create-subscription", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uid: user.uid, email: user.email }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {

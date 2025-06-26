@@ -8,10 +8,17 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 export async function POST(req) {
   try {
-    const { email, uid } = await req.json();
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
 
-    if (!email || !uid) {
-      return NextResponse.json({ error: "Faltan datos" }, { status: 400 });
+    const idToken = authHeader.split("Bearer ")[1];
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    const { uid, email } = decoded;
+
+    if (!uid || !email) {
+      return NextResponse.json({ error: "Token inválido" }, { status: 401 });
     }
 
     const customer = await stripe.customers.create({
