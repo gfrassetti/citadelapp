@@ -1,10 +1,11 @@
-"use client";
-import ProDashboardPanel from "@/components/ProDashboardPanel";
-import FreeDashboardPanel from "@/components/FreeDashboardPanel";
-import { DashboardBreadcrumb } from "@/components/DashboardBreadcrumb";
-import { useUser } from "@/context/AuthContext";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@/context/AuthContext';
+import ProDashboardPanel from '@/components/ProDashboardPanel';
+import FreeDashboardPanel from '@/components/FreeDashboardPanel';
+import {DashboardBreadcrumb} from '@/components/DashboardBreadcrumb';
 
 export default function DashboardHome() {
   const { user, loading } = useUser();
@@ -12,16 +13,17 @@ export default function DashboardHome() {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.replace("/login");
+      console.log('Redirigiendo al login...');
+      router.replace('/login');
     }
   }, [loading, user]);
 
-  if (loading || !user) return null;
+  if (loading || !user) return <div>Loading...</div>;
 
   return (
     <>
       <DashboardBreadcrumb />
-      {user.plan === "free" ? <FreeDashboardPanel /> : <ProDashboardPanel />}
+      {user.plan === 'free' ? <FreeDashboardPanel /> : <ProDashboardPanel />}
     </>
   );
 }
