@@ -46,7 +46,6 @@ export const AuthProvider = ({ children }) => {
       console.error("Error al verificar la suscripción de Stripe:", error);
     }
   };
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
@@ -54,7 +53,7 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
         return;
       }
-
+  
       const userRef = doc(db, "users", firebaseUser.uid);
       const unsubSnapshot = onSnapshot(userRef, async (snap) => {
         if (snap.exists()) {
@@ -75,12 +74,14 @@ export const AuthProvider = ({ children }) => {
         }
         setLoading(false);
       });
-
+  
+      // devolvés solo si el user existe
       return () => unsubSnapshot();
     });
-
+  
     return () => unsubscribe();
   }, []);
+  
 
   return (
     <AuthContext.Provider value={{ user, loading, updateUserPlan }}>
