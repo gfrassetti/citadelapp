@@ -15,6 +15,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { SubscriptionProvider } from "@/context/SubscriptionContext";
 
 
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -39,9 +40,14 @@ export default function RootLayout({ children }) {
   };
 
   const isDashboard = pathname.startsWith("/dashboard");
-  const { header, footer } = isDashboard
+  const hideLayout =
+  typeof window !== "undefined" &&
+  (pathname === "/dashboard" || pathname.startsWith("/dashboard/"));
+
+  const { header, footer } = hideLayout
     ? { header: null, footer: null }
     : layouts[pathname] || { header: <Header />, footer: <Footer /> };
+
   
   return (
     <QueryClientProvider client={queryClient}>
