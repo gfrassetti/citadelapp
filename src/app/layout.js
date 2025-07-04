@@ -39,14 +39,11 @@ export default function RootLayout({ children }) {
     "/company": { header: <Header />, footer:  <Footer /> },
   };
 
-  const isDashboard = pathname.startsWith("/dashboard");
-  const hideLayout =
-  typeof window !== "undefined" &&
-  (pathname === "/dashboard" || pathname.startsWith("/dashboard/"));
-
-  const { header, footer } = hideLayout
+  const isDashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  const { header, footer } = isDashboard
     ? { header: null, footer: null }
     : layouts[pathname] || { header: <Header />, footer: <Footer /> };
+  
 
   
   return (
