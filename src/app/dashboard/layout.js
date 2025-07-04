@@ -1,9 +1,9 @@
 "use client";
 
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import {AppSidebar} from "@/components/AppSidebar";
+import AppSidebar from "@/components/AppSidebar";
 import DashboardHeader from "@/components/DashboardHeader";
-import { useUser } from "@/context/AuthContext";
+import useUser from "@/context/AuthContext";
 import Loader from "@/components/Loader";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";

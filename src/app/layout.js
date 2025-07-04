@@ -14,8 +14,6 @@ import { UserDataProvider } from "@/context/UserDataContext";
 import { Toaster } from "@/components/ui/sonner";
 import { SubscriptionProvider } from "@/context/SubscriptionContext";
 
-
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -26,26 +24,22 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function RootLayout({ children }) {
+export default function Layout({ children }) {
   const pathname = usePathname();
   const [queryClient] = useState(() => new QueryClient());
 
+  // Asignación de header/footer para rutas especiales:
   const layouts = {
     "/": { header: <Header />, footer: <Footer /> },
     "/login": { header: <AuthHeader />, footer: <Footer /> },
     "/register": { header: <AuthHeader />, footer: <Footer /> },
-    "/dashboard": { header: null, footer: null },
-    "/product": { header: <Header />, footer:  <Footer /> },
-    "/company": { header: <Header />, footer:  <Footer /> },
+    "/product": { header: <Header />, footer: <Footer /> },
+    "/company": { header: <Header />, footer: <Footer /> },
   };
 
-  const isDashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
-  const { header, footer } = isDashboard
-    ? { header: null, footer: null }
-    : layouts[pathname] || { header: <Header />, footer: <Footer /> };
-  
+  // Elige el layout para la ruta actual, por defecto Header/Footer normales
+  const { header, footer } = layouts[pathname] || { header: <Header />, footer: <Footer /> };
 
-  
   return (
     <QueryClientProvider client={queryClient}>
       <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
@@ -54,10 +48,10 @@ export default function RootLayout({ children }) {
             <AuthProvider>
               <UserDataProvider>
                 <SubscriptionProvider>
-                {header}
-                <main className="flex-1 w-full mx-auto">{children}</main>
-                <Toaster /> {/* ✅ Agregado aquí */}
-                {footer}
+                  {header}
+                  <main className="flex-1 w-full mx-auto">{children}</main>
+                  <Toaster />
+                  {footer}
                 </SubscriptionProvider>
               </UserDataProvider>
             </AuthProvider>
@@ -67,4 +61,3 @@ export default function RootLayout({ children }) {
     </QueryClientProvider>
   );
 }
-
