@@ -38,10 +38,10 @@ export default function RootLayout({ children }) {
     "/company": { header: <Header />, footer:  <Footer /> },
   };
 
-  const isDashboard = pathname.startsWith("/dashboard");
-  const { header, footer } = isDashboard
-    ? { header: null, footer: null }
-    : layouts[pathname] || { header: <Header />, footer: <Footer /> };
+  const { header, footer } = layouts[pathname] || {
+    header: <Header />,
+    footer: <Footer />,
+  };
   
   return (
     <QueryClientProvider client={queryClient}>
