@@ -9,12 +9,10 @@ import Footer from "@/components/Footer";
 import AuthHeader from "@/components/AuthHeader";
 import { usePathname } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UserDataProvider } from "@/context/UserDataContext";
 import { Toaster } from "@/components/ui/sonner";
 import { SubscriptionProvider } from "@/context/SubscriptionContext";
-
-
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,20 +27,27 @@ const geistMono = Geist_Mono({
 export default function RootLayout({ children }) {
   const pathname = usePathname();
   const [queryClient] = useState(() => new QueryClient());
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  if (!hydrated) return null;
 
   const layouts = {
     "/": { header: <Header />, footer: <Footer /> },
     "/login": { header: <AuthHeader />, footer: <Footer /> },
     "/register": { header: <AuthHeader />, footer: <Footer /> },
-    "/dashboard": { header: null, footer: null },
-    "/product": { header: <Header />, footer:  <Footer /> },
-    "/company": { header: <Header />, footer:  <Footer /> },
+    "/product": { header: <Header />, footer: <Footer /> },
+    "/company": { header: <Header />, footer: <Footer /> },
   };
 
-  const { header, footer } = layouts[pathname] || { header: <Header />, footer: <Footer /> };
+  const isDashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  const { header, footer } = isDashboard
+    ? { header: null, footer: null }
+    : layouts[pathname] || { header: <Header />, footer: <Footer /> };
 
-
-  
   return (
     <QueryClientProvider client={queryClient}>
       <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
@@ -51,10 +56,10 @@ export default function RootLayout({ children }) {
             <AuthProvider>
               <UserDataProvider>
                 <SubscriptionProvider>
-                {header}
-                <main className="flex-1 w-full mx-auto">{children}</main>
-                <Toaster /> {/* ✅ Agregado aquí */}
-                {footer}
+                  {header}
+                  <main className="flex-1 w-full mx-auto">{children}</main>
+                  <Toaster />
+                  {footer}
                 </SubscriptionProvider>
               </UserDataProvider>
             </AuthProvider>
@@ -64,4 +69,3 @@ export default function RootLayout({ children }) {
     </QueryClientProvider>
   );
 }
-
