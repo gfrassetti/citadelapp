@@ -97,7 +97,7 @@ export default function SubscriptionInfo() {
   const subscription = data?.subscription;
   const customer = data?.customer;
 
-  if (isLoading) return <Loader text="Cargando Suscripción..." />;
+  /* if (isLoading) return <Loader text="Cargando Suscripción..." />; */
 
   if (isError)
     return (
