@@ -17,7 +17,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
-import Loader from "@/components/Loader";
+import FullScreenLoader from "@/components/FullScreenLoader";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -106,7 +106,7 @@ export default function LoginForm() {
     }
   };
 
-  if (loading) return <Loader text="" />;
+  if (loading) return <FullScreenLoader />;
 
   return (
     <div className={`flex flex-col items-center h-screen w-full px-4 ${theme === "dark" ? "bg-gray-600" : "bg-gray-100"}`}>
