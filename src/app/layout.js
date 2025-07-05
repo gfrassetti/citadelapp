@@ -31,17 +31,17 @@ export default function RootLayout({ children }) {
 
   const layouts = {
     "/": { header: <Header />, footer: <Footer /> },
-    "/login": { header: <AuthHeader />, footer: <Footer /> },
+    "/login": { header: <Header />, footer: <Footer /> },
     "/register": { header: <AuthHeader />, footer: <Footer /> },
     "/dashboard": { header: null, footer: null },
     "/product": { header: <Header />, footer:  <Footer /> },
     "/company": { header: <Header />, footer:  <Footer /> },
   };
 
-  const { header, footer } = layouts[pathname] || {
-    header: <Header />,
-    footer: <Footer />,
-  };
+  const isDashboard = pathname.startsWith("/dashboard");
+  const { header, footer } = isDashboard
+    ? { header: null, footer: null }
+    : layouts[pathname] || { header: <Header />, footer: <Footer /> };
   
   return (
     <QueryClientProvider client={queryClient}>
