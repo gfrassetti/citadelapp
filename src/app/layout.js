@@ -2,7 +2,7 @@
 
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/context/ThemeProvider";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider, useUser } from "@/context/AuthContext";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -24,16 +24,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function RootLayout({ children }) {
+function LayoutContent({ children }) {
   const pathname = usePathname();
-  const [queryClient] = useState(() => new QueryClient());
+  const { loading: userLoading } = useUser();
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     setHydrated(true);
   }, []);
 
-  if (!hydrated) return null;
+  const isDashboard = pathname?.startsWith("/dashboard");
+
+  if (isDashboard && (!hydrated || userLoading)) return null;
 
   const layouts = {
     "/": { header: <Header />, footer: <Footer /> },
@@ -43,10 +45,22 @@ export default function RootLayout({ children }) {
     "/company": { header: <Header />, footer: <Footer /> },
   };
 
-  const isDashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
   const { header, footer } = isDashboard
     ? { header: null, footer: null }
     : layouts[pathname] || { header: <Header />, footer: <Footer /> };
+
+  return (
+    <>
+      {header}
+      <main className="flex-1 w-full mx-auto">{children}</main>
+      <Toaster />
+      {footer}
+    </>
+  );
+}
+
+export default function RootLayout({ children }) {
+  const [queryClient] = useState(() => new QueryClient());
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -56,10 +70,7 @@ export default function RootLayout({ children }) {
             <AuthProvider>
               <UserDataProvider>
                 <SubscriptionProvider>
-                  {header}
-                  <main className="flex-1 w-full mx-auto">{children}</main>
-                  <Toaster />
-                  {footer}
+                  <LayoutContent>{children}</LayoutContent>
                 </SubscriptionProvider>
               </UserDataProvider>
             </AuthProvider>
