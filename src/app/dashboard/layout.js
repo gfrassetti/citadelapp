@@ -19,7 +19,7 @@ export default function DashboardLayout({ children }) {
     }
   }, [loading, user]);
 
-  if (loading || !user) return <FullScreenLoader />;
+  if (loading || !user || !user.plan) return <FullScreenLoader />;
 
   return (
     <SidebarProvider>
