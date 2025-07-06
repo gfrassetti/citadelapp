@@ -153,9 +153,9 @@ export default function ProDashboardPanel() {
       <Separator />
 
       <div>
-        <h3 className="text-lg font-bold mb-4">Monthly activity</h3>
+        <h3 className="text-lg font-bold mb-16">Monthly activity</h3>
         <ChartContainer
-          className="w-full aspect-[2/1]"
+          className="mx-auto w-3/4 aspect-[3/1]"
           config={{
             total: {
               label: "Total",
