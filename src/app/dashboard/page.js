@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/AuthContext';
 import ProDashboardPanel from '@/components/ProDashboardPanel';
 import FreeDashboardPanel from '@/components/FreeDashboardPanel';
-import { DashboardBreadcrumb } from '@/components/DashboardBreadcrumb';
+import {DashboardBreadcrumb} from '@/components/DashboardBreadcrumb';
 import FullScreenLoader from '@/components/FullScreenLoader';
 
 export default function DashboardHome() {
@@ -14,11 +14,12 @@ export default function DashboardHome() {
 
   useEffect(() => {
     if (!loading && !user) {
+      console.log('Redirigiendo al login...');
       router.replace('/login');
     }
   }, [loading, user]);
 
-  if (loading || !user || !user.plan) return <FullScreenLoader />;
+  if (loading || !user) return <FullScreenLoader />;
 
   return (
     <>
