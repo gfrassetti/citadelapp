@@ -9,10 +9,11 @@ import Footer from "@/components/Footer";
 import AuthHeader from "@/components/AuthHeader";
 import { usePathname } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { UserDataProvider } from "@/context/UserDataContext";
 import { Toaster } from "@/components/ui/sonner";
 import { SubscriptionProvider } from "@/context/SubscriptionContext";
+import FullScreenLoader from "@/components/FullScreenLoader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,16 +27,9 @@ const geistMono = Geist_Mono({
 
 function LayoutContent({ children }) {
   const pathname = usePathname();
-  const { loading: userLoading } = useUser();
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
+  const { loading, user } = useUser();
 
   const isDashboard = pathname?.startsWith("/dashboard");
-
-  if (isDashboard && (!hydrated || userLoading)) return null;
 
   const layouts = {
     "/": { header: <Header />, footer: <Footer /> },
@@ -44,6 +38,11 @@ function LayoutContent({ children }) {
     "/product": { header: <Header />, footer: <Footer /> },
     "/company": { header: <Header />, footer: <Footer /> },
   };
+
+  // 🔒 Esperar user en rutas privadas
+  if (isDashboard && (loading || !user || !user.plan)) {
+    return <FullScreenLoader />;
+  }
 
   const { header, footer } = isDashboard
     ? { header: null, footer: null }

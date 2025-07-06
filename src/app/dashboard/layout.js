@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import {AppSidebar} from "@/components/AppSidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 import DashboardHeader from "@/components/DashboardHeader";
-import {useUser} from "@/context/AuthContext";
+import { useUser } from "@/context/AuthContext";
 import FullScreenLoader from "@/components/FullScreenLoader";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -13,13 +13,15 @@ export default function DashboardLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
 
+  const isValid = user && user.plan;
+
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/login");
     }
   }, [loading, user]);
 
-  /* if (loading || !user || !user.plan) return <FullScreenLoader />; */
+  if (loading || !isValid) return <FullScreenLoader />;
 
   return (
     <SidebarProvider>

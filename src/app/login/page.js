@@ -106,7 +106,7 @@ export default function LoginForm() {
     }
   };
 
-  /* if (loading) return <FullScreenLoader />; */
+  if (loading) return <FullScreenLoader />;
 
   return (
     <div className={`flex flex-col items-center h-screen w-full px-4 ${theme === "dark" ? "bg-gray-600" : "bg-gray-100"}`}>
