@@ -11,7 +11,7 @@ export default function Filters({ selectedFilter, setSelectedFilter }) {
   return (
     <div
       className={clsx(
-        "w-full md:w-1/4 p-6 rounded-lg shadow-md border",
+        "w-full md:w-[12%] p-6 rounded-lg shadow-md border",
         theme === "dark"
           ? "bg-gray-800 text-white"
           : "bg-gray-50 text-gray-800"

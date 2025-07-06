@@ -74,7 +74,7 @@ export default function HomeSearch() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 w-full h-max pt-[80px]">
+    <div className="w-full mx-auto p-4 h-max pt-[80px]">
       <div className="flex flex-col md:flex-row gap-6">
         <Filters selectedFilter={selectedFilter} setSelectedFilter={setSelectedFilter} />
         <div className="flex-1 bg-[#f4f4f4] p-4">
