@@ -40,10 +40,13 @@ function LayoutContent({ children }) {
   };
 
   // 🔒 Esperar user en rutas privadas
-  if (isDashboard && (loading || !user || !user.plan)) {
+/*   if (isDashboard && (loading || !user || !user.plan)) {
     return <FullScreenLoader />;
-  }
-
+  } */
+    if (isDashboard && loading) {
+      return <FullScreenLoader />;
+    }
+    
   const { header, footer } = isDashboard
     ? { header: null, footer: null }
     : layouts[pathname] || { header: <Header />, footer: <Footer /> };

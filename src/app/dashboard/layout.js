@@ -12,18 +12,19 @@ export default function DashboardLayout({ children }) {
   const { user, loading } = useUser();
   const pathname = usePathname();
   const router = useRouter();
-
-  const [shouldRender, setShouldRender] = useState(false);
+  const [canRender, setCanRender] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/login");
-    } else if (!loading && user) {
-      setShouldRender(true);
     }
-  }, [loading, user, router]);
 
-  if (!shouldRender) return <FullScreenLoader />;
+    if (!loading && user) {
+      setCanRender(true);
+    }
+  }, [loading, user]);
+
+  if (!canRender) return <FullScreenLoader />;
 
   return (
     <SidebarProvider>
