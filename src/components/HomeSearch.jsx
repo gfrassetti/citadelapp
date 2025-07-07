@@ -7,6 +7,7 @@ import clsx from "clsx";
 import Loader from "@/components/Loader";
 import Filters from "@/components/Filters";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import ContactVendorModal from "@/components/ContactVendorModal";
 
 export default function HomeSearch() {
   const router = useRouter();
@@ -137,17 +138,17 @@ export default function HomeSearch() {
                             )}
                             <div>
                               <h3 className="font-bold text-lg">{item.companyName}</h3>
-                              <p className="text-sm text-gray-500 dark:text-gray-300">{item.address}</p>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                              {(item.tags || []).map((tag, index) => (
+                                <span
+                                  key={index}
+                                  className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-100 px-2 py-0.5 rounded-full"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
                             </div>
-                          </div>
-                          <div className="text-sm mb-3">
-                            <div>Tel: <span className="font-medium">{item.phone || "-"}</span></div>
-                            <div>Email: <span className="font-medium">{item.email || "-"}</span></div>
-                            {item.minOrder && (
-                              <div className="text-xs mt-2 text-blue-600 font-bold">
-                                Orden mínima: {item.minOrder}
-                              </div>
-                            )}
+                            </div>
                           </div>
                         </>
                       ) : (
@@ -168,11 +169,14 @@ export default function HomeSearch() {
                             Orden mínima: {item.minOrder || "1 unidad"}
                           </div>
                           <button
-                            onClick={() => handleContact(item)}
-                            className="btn-secondary"
-                          >
-                            Contactar al vendedor
-                          </button>
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContact(item);
+                          }}
+                          className="btn-secondary"
+                        >
+                          Contactar al vendedor
+                        </button>
                         </>
                       )}
                     </div>
@@ -193,29 +197,11 @@ export default function HomeSearch() {
       </div>
 
       {showModal && selectedProduct && (
-        <Dialog open={showModal} onOpenChange={handleCloseModal}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Contactar al vendedor</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-2">
-              <div><strong>Producto:</strong> {selectedProduct.productName}</div>
-              <div><strong>Precio:</strong> ${selectedProduct.price}</div>
-              <div><strong>Orden mínima:</strong> {selectedProduct.minOrder || "1 unidad"}</div>
-              <div><strong>Descripción:</strong> {selectedProduct.description}</div>
-              <div><strong>Email:</strong> {selectedProduct.email || "-"}</div>
-              <div><strong>Teléfono:</strong> {selectedProduct.phone || "-"}</div>
-            </div>
-            <DialogFooter>
-              <button
-                className="bg-blue-600 text-white px-4 py-2 rounded"
-                onClick={handleCloseModal}
-              >
-                Cerrar
-              </button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <ContactVendorModal
+        open={showModal}
+        onClose={handleCloseModal}
+        product={selectedProduct}
+      />
       )}
     </div>
   );
