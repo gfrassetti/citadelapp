@@ -11,6 +11,13 @@ import FullScreenLoader from '@/components/FullScreenLoader';
 export default function DashboardHome() {
   const { user, loading } = useUser();
 
+  useEffect(() => {
+    if (!loading && !user) {
+      console.log('Redirigiendo al login...');
+      router.replace('/login');
+    }
+  }, [loading, user]);
+
   if (loading || !user) return <FullScreenLoader />;
 
   return (

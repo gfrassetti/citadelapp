@@ -6,22 +6,24 @@ import DashboardHeader from "@/components/DashboardHeader";
 import { useUser } from "@/context/AuthContext";
 import FullScreenLoader from "@/components/FullScreenLoader";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function DashboardLayout({ children }) {
   const { user, loading } = useUser();
   const pathname = usePathname();
   const router = useRouter();
 
-  const isValid = user && user.plan;
+  const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/login");
+    } else if (!loading && user) {
+      setShouldRender(true);
     }
-  }, [loading, user]);
+  }, [loading, user, router]);
 
-  if (loading || !isValid) return <FullScreenLoader />;
+  if (!shouldRender) return <FullScreenLoader />;
 
   return (
     <SidebarProvider>
