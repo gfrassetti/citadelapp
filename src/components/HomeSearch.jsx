@@ -30,7 +30,6 @@ export default function HomeSearch() {
       setSelectedFilter(filter);
       fetchResults(query, filter);
     }
-    // eslint-disable-next-line
   }, []);
 
   const fetchResults = async (queryValue, filterValue) => {
@@ -41,14 +40,18 @@ export default function HomeSearch() {
         : `filter=${filterValue}`;
       const res = await fetch(`/api/search?${queryParam}`);
       const data = await res.json();
+  
+      console.log("🟢 Resultados recibidos de /api/search:", data.results);
+  
       setResults(data.results || []);
     } catch (err) {
-      console.error("Error al buscar:", err);
+      console.error("🔴 Error al buscar:", err);
     } finally {
       setLoading(false);
       setSearched(true);
     }
   };
+  
 
   const handleSearch = () => {
     setSearched(true);
@@ -64,7 +67,14 @@ export default function HomeSearch() {
   };
 
   const handleContact = (item) => {
-    setSelectedProduct(item);
+    const empresa = item.empresa || {};
+    setSelectedProduct({
+      companyName: empresa.companyName || item.companyName || "el vendedor",
+      email: empresa.email || item.email || "",
+      phone: empresa.phone || item.phone || "",
+      whatsapp: empresa.whatsapp || item.whatsapp || "",
+    });
+    console.log("📨 Contacto seteado en modal:", selected);
     setShowModal(true);
   };
 
@@ -72,6 +82,7 @@ export default function HomeSearch() {
     setShowModal(false);
     setSelectedProduct(null);
   };
+  console.log("📊 selectedProduct (modal):", selectedProduct);
 
   return (
     <div className="w-full mx-auto p-4 h-max pt-[80px]">
@@ -110,7 +121,7 @@ export default function HomeSearch() {
               {searched ? (
                 results.length > 0 ? (
                   results.map((item) => (
-                  <div
+                    <div
                     key={item.id}
                     className={clsx(
                       "marketplace-card cursor-pointer",
@@ -120,8 +131,9 @@ export default function HomeSearch() {
                       const base = item.type === "empresa" ? "company" : "product";
                       router.push(`/${base}?id=${item.id}&query=${term}&filter=${selectedFilter}`);
                     }}
-                  >
-                                        {item.type === "empresa" ? (
+                    >
+                      console.log("📦 Renderizando item:", item);
+                      {item.type === "empresa" ? (
                         <>
                           <div className="flex items-center gap-4 mb-3">
                             {item.imageUrl ? (
@@ -138,16 +150,20 @@ export default function HomeSearch() {
                             <div>
                               <h3 className="font-bold text-lg">{item.companyName}</h3>
                               <div className="flex flex-wrap gap-1 mt-1">
-                          {(item.tags || []).map((tag, index) => (
-                            <span
-                              key={index}
-                              className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-100 px-2 py-0.5 rounded-full"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
+                                {(item.tags || []).map((tag, index) => (
+                                  <span
+                                    key={index}
+                                    className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-100 px-2 py-0.5 rounded-full"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
+                          </div>
+                          <div className="text-sm mb-3">
+                            <div>Tel: <span className="font-medium">{item.phone || "-"}</span></div>
+                            <div>Email: <span className="font-medium">{item.email || "-"}</span></div>
                           </div>
                         </>
                       ) : (
@@ -196,60 +212,53 @@ export default function HomeSearch() {
       </div>
 
       {showModal && selectedProduct && (
-  <Dialog open={showModal} onOpenChange={handleCloseModal}>
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>
-          Contactar a {selectedProduct.companyName || "el vendedor"}
-        </DialogTitle>
-      </DialogHeader>
-
-      <div className="space-y-3 text-sm">
-        {selectedProduct.whatsapp && (
-          <div className="flex items-center gap-2">
-            <img src="/whatsapp-icon.svg" alt="WhatsApp" width={20} height={20} />
-            <a
-              href={`https://wa.me/${selectedProduct.whatsapp}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 underline"
-            >
-              {selectedProduct.whatsapp}
-            </a>
-          </div>
-        )}
-
-        {selectedProduct.email && (
-          <div>
-            <strong>Email:</strong>{" "}
-            <a href={`mailto:${selectedProduct.email}`} className="text-blue-600 underline">
-              {selectedProduct.email}
-            </a>
-          </div>
-        )}
-
-        {selectedProduct.phone && (
-          <div>
-            <strong>Teléfono:</strong>{" "}
-            <a href={`tel:${selectedProduct.phone}`} className="text-blue-600 underline">
-              {selectedProduct.phone}
-            </a>
-          </div>
-        )}
-      </div>
-
-      <DialogFooter>
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-          onClick={handleCloseModal}
-        >
-          Cerrar
-        </button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-)}
-
+        <Dialog open={showModal} onOpenChange={handleCloseModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Contactar a {selectedProduct.companyName}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 text-sm">
+              {selectedProduct.whatsapp && (
+                <div className="flex items-center gap-2">
+                  <img src="/whatsapp-icon.svg" alt="WhatsApp" width={20} height={20} />
+                  <a
+                    href={`https://wa.me/${selectedProduct.whatsapp.replace("+", "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline"
+                  >
+                    {selectedProduct.whatsapp}
+                  </a>
+                </div>
+              )}
+              {selectedProduct.email && (
+                <div>
+                  <strong>Email:</strong>{" "}
+                  <a href={`mailto:${selectedProduct.email}`} className="text-blue-600 underline">
+                    {selectedProduct.email}
+                  </a>
+                </div>
+              )}
+              {selectedProduct.phone && (
+                <div>
+                  <strong>Teléfono:</strong>{" "}
+                  <a href={`tel:${selectedProduct.phone}`} className="text-blue-600 underline">
+                    {selectedProduct.phone}
+                  </a>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <button
+                className="bg-blue-600 text-white px-4 py-2 rounded"
+                onClick={handleCloseModal}
+              >
+                Cerrar
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
