@@ -54,36 +54,45 @@ export const AuthProvider = ({ children }) => {
         return;
       }
   
-      const userRef = doc(db, "users", firebaseUser.uid);
-      const unsubSnapshot = onSnapshot(userRef, async (snap) => {
-        if (snap.exists()) {
-          const userData = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            plan: snap.data().plan || "free",
-            ...snap.data(),
-          };
-          setUser(userData);
-          await checkStripeSubscriptionStatus(userData.uid);
-        } else {
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            plan: "free",
-          });
-        }
-        setLoading(false);
-      });
+      try {
+        const userRef = doc(db, "users", firebaseUser.uid);
+        const unsubSnapshot = onSnapshot(userRef, async (snap) => {
+          if (snap.exists()) {
+            const userData = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              plan: snap.data().plan || "free",
+              ...snap.data(),
+            };
+            setUser(userData);
+            await checkStripeSubscriptionStatus(userData.uid);
+          } else {
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              plan: "free",
+            });
+          }
+          setLoading(false);
+        }, (error) => {
+          console.error("Error en onSnapshot:", error);
+          setUser(null);
+          setLoading(false);
+        });
   
-      // devolvés solo si el user existe
-      return () => unsubSnapshot();
+        // asegurate que loading no se quede colgado
+        return () => unsubSnapshot();
+      } catch (error) {
+        console.error("Error al obtener snapshot del usuario:", error);
+        setUser(null);
+        setLoading(false);
+      }
     });
   
     return () => unsubscribe();
   }, []);
   
   
-
   return (
     <AuthContext.Provider value={{ user, loading, updateUserPlan }}>
       {children}
