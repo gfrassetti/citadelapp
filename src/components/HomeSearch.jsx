@@ -7,7 +7,6 @@ import clsx from "clsx";
 import Loader from "@/components/Loader";
 import Filters from "@/components/Filters";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import ContactVendorModal from "@/components/ContactVendorModal";
 
 export default function HomeSearch() {
   const router = useRouter();
@@ -139,15 +138,15 @@ export default function HomeSearch() {
                             <div>
                               <h3 className="font-bold text-lg">{item.companyName}</h3>
                               <div className="flex flex-wrap gap-1 mt-1">
-                              {(item.tags || []).map((tag, index) => (
-                                <span
-                                  key={index}
-                                  className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-100 px-2 py-0.5 rounded-full"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
+                          {(item.tags || []).map((tag, index) => (
+                            <span
+                              key={index}
+                              className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-100 px-2 py-0.5 rounded-full"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
                             </div>
                           </div>
                         </>
@@ -169,14 +168,14 @@ export default function HomeSearch() {
                             Orden mínima: {item.minOrder || "1 unidad"}
                           </div>
                           <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleContact(item);
-                          }}
-                          className="btn-secondary"
-                        >
-                          Contactar al vendedor
-                        </button>
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleContact(item);
+                            }}
+                            className="btn-secondary"
+                          >
+                            Contactar al vendedor
+                          </button>
                         </>
                       )}
                     </div>
@@ -197,12 +196,60 @@ export default function HomeSearch() {
       </div>
 
       {showModal && selectedProduct && (
-        <ContactVendorModal
-        open={showModal}
-        onClose={handleCloseModal}
-        product={selectedProduct}
-      />
-      )}
+  <Dialog open={showModal} onOpenChange={handleCloseModal}>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>
+          Contactar a {selectedProduct.companyName || "el vendedor"}
+        </DialogTitle>
+      </DialogHeader>
+
+      <div className="space-y-3 text-sm">
+        {selectedProduct.whatsapp && (
+          <div className="flex items-center gap-2">
+            <img src="/whatsapp-icon.svg" alt="WhatsApp" width={20} height={20} />
+            <a
+              href={`https://wa.me/${selectedProduct.whatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
+              {selectedProduct.whatsapp}
+            </a>
+          </div>
+        )}
+
+        {selectedProduct.email && (
+          <div>
+            <strong>Email:</strong>{" "}
+            <a href={`mailto:${selectedProduct.email}`} className="text-blue-600 underline">
+              {selectedProduct.email}
+            </a>
+          </div>
+        )}
+
+        {selectedProduct.phone && (
+          <div>
+            <strong>Teléfono:</strong>{" "}
+            <a href={`tel:${selectedProduct.phone}`} className="text-blue-600 underline">
+              {selectedProduct.phone}
+            </a>
+          </div>
+        )}
+      </div>
+
+      <DialogFooter>
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+          onClick={handleCloseModal}
+        >
+          Cerrar
+        </button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+)}
+
     </div>
   );
 }
