@@ -6,6 +6,9 @@ import { db } from "@/lib/db/db";
 import { doc, getDoc } from "firebase/firestore";
 import Loader from "@/components/Loader";
 import Link from "next/link";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export default function ProductPageContent() {
   const searchParams = useSearchParams();
@@ -13,7 +16,6 @@ export default function ProductPageContent() {
 
   const [product, setProduct] = useState(null);
   const [company, setCompany] = useState(null);
-
 
   useEffect(() => {
     if (!id) return;
@@ -43,46 +45,66 @@ export default function ProductPageContent() {
   }
 
   return (
-        <div className="max-w-3xl mx-auto p-6 mt-[6rem]">
-        <Link
-          href={`/?query=${searchParams.get("query") || ""}&filter=${searchParams.get("filter") || "all"}`}
-          className="text-sm"
-        >
-          <button className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded text-sm border border-gray-300">
-            ← Volver al inicio
-          </button>
-        </Link>
-      <div className="border p-6 rounded shadow">
-        <h1 className="text-2xl font-bold mb-4">{product.productName}</h1>
+    <div className="max-w-4xl mx-auto p-6 mt-24">
+      <Link
+        href={`/?query=${searchParams.get("query") || ""}&filter=${searchParams.get("filter") || "all"}`}
+      >
+        <Button variant="outline" className="mb-6">
+          ← Volver al inicio
+        </Button>
+      </Link>
 
-        {product.imageUrl && (
-          <img
-            src={product.imageUrl}
-            alt={product.productName}
-            className="w-full max-h-64 object-contain mb-4"
-          />
-        )}
+      <Card className="shadow-lg border border-muted">
+        <CardHeader>
+          <h1 className="text-3xl font-bold">{product.productName}</h1>
+        </CardHeader>
 
-        <p>
-          <strong className="text-black">Descripción:</strong> {product.description}
-        </p>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          {product.imageUrl ? (
+            <img
+              src={product.imageUrl}
+              alt={product.productName}
+              className="w-full max-h-72 object-contain rounded"
+            />
+          ) : (
+            <div className="w-full h-72 bg-gray-100 flex items-center justify-center rounded text-gray-500">
+              Sin imagen
+            </div>
+          )}
 
-        <p className="text-green-600 font-semibold">
-          Precio: ${product.price}
-        </p>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              <strong className="text-foreground">Descripción:</strong>{" "}
+              {product.description}
+            </p>
 
-        {company && (
-          <p className="mt-4 font-semibold text-blue-700">
-            Este producto se vende en:{" "}
-            <a
-              href={`/company?id=${company.id}`}
-              className="underline"
-            >
-              {company.companyName}
-            </a>
-          </p>
-        )}
-      </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">Orden mínima: {product.minOrder || "1 unidad"}</Badge>
+              <Badge className="bg-green-100 text-green-700 border-green-300">
+                Precio: ${product.price}
+              </Badge>
+            </div>
+
+            {company && (
+              <div className="text-sm text-muted-foreground mt-4">
+                <span className="text-foreground font-medium">
+                  Este producto se vende en:{" "}
+                </span>
+                <Link
+                  href={`/company?id=${company.id}`}
+                  className="underline text-blue-600 hover:text-blue-800"
+                >
+                  {company.companyName}
+                </Link>
+              </div>
+            )}
+          </div>
+        </CardContent>
+
+        <CardFooter className="mt-6">
+          {/* futuro CTA o contacto */}
+        </CardFooter>
+      </Card>
     </div>
   );
 }
