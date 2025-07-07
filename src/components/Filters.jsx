@@ -19,7 +19,7 @@ export default function Filters({ selectedFilter, setSelectedFilter }) {
     >
       <h3 className="text-lg font-bold mb-4">Filtros</h3>
       <p className={clsx(
-        "text-sm mb-2",
+        "text-sm text-left mb-2",
         theme === "dark" ? "text-gray-300" : "text-muted-foreground"
       )}>
         Mostrar resultados para:

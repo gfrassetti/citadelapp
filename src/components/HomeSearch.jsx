@@ -110,14 +110,18 @@ export default function HomeSearch() {
               {searched ? (
                 results.length > 0 ? (
                   results.map((item) => (
-                    <div
-                      key={item.id}
-                      className={clsx(
-                        "marketplace-card",
-                        theme === "dark" ? "dark" : ""
-                      )}
-                    >
-                      {item.type === "empresa" ? (
+                  <div
+                    key={item.id}
+                    className={clsx(
+                      "marketplace-card cursor-pointer",
+                      theme === "dark" ? "dark" : ""
+                    )}
+                    onClick={() => {
+                      const base = item.type === "empresa" ? "company" : "product";
+                      router.push(`/${base}?id=${item.id}&query=${term}&filter=${selectedFilter}`);
+                    }}
+                  >
+                                        {item.type === "empresa" ? (
                         <>
                           <div className="flex items-center gap-4 mb-3">
                             {item.imageUrl ? (

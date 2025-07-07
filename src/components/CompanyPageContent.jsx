@@ -40,7 +40,7 @@ export default function CompanyPageContent() {
   if (!empresa) return <Loader text="Cargando empresa..." />;
 
   return (
-    <div className="max-w-7xl mx-auto p-6 mt-[6rem]">
+    <div className="max-w-7xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
           <nav className="text-sm text-muted-foreground mb-1">
@@ -54,13 +54,15 @@ export default function CompanyPageContent() {
               <li className="text-gray-900">Empresa</li>
             </ol>
           </nav>
-          <h2 className="text-xl font-semibold">Productos</h2>
         </div>
-        <Link href="/" className="text-sm">
-          <button className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded text-sm border border-gray-300">
-            ← Volver al inicio
-          </button>
-        </Link>
+        <Link
+  href={`/?query=${searchParams.get("query") || ""}&filter=${searchParams.get("filter") || "all"}`}
+  className="text-sm"
+>
+  <button className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded text-sm border border-gray-300">
+    ← Volver al inicio
+  </button>
+</Link>
       </div>
 
       <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -92,6 +94,8 @@ export default function CompanyPageContent() {
           {productos.length === 0 ? (
             <p className="text-gray-500 italic">No hay productos asociados a esta empresa.</p>
           ) : (
+            <>
+            <h2 className="pb-8">Productos en {empresa.companyName}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {productos.map((prod) => (
                 <Link
@@ -112,6 +116,7 @@ export default function CompanyPageContent() {
                 </Link>
               ))}
             </div>
+            </>
           )}
         </div>
       </div>

@@ -5,14 +5,15 @@ import { useEffect, useState } from "react";
 import { db } from "@/lib/db/db";
 import { doc, getDoc } from "firebase/firestore";
 import Loader from "@/components/Loader";
+import Link from "next/link";
 
 export default function ProductPageContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const id = searchParams.get("id");
 
   const [product, setProduct] = useState(null);
   const [company, setCompany] = useState(null);
+
 
   useEffect(() => {
     if (!id) return;
@@ -42,14 +43,15 @@ export default function ProductPageContent() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 mt-[6rem]">
-      <button
-        className="mb-4 px-4 py-2 bg-gray-200 rounded"
-        onClick={() => router.back()}
-      >
-        Volver
-      </button>
-
+        <div className="max-w-3xl mx-auto p-6 mt-[6rem]">
+        <Link
+          href={`/?query=${searchParams.get("query") || ""}&filter=${searchParams.get("filter") || "all"}`}
+          className="text-sm"
+        >
+          <button className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded text-sm border border-gray-300">
+            ← Volver al inicio
+          </button>
+        </Link>
       <div className="border p-6 rounded shadow">
         <h1 className="text-2xl font-bold mb-4">{product.productName}</h1>
 

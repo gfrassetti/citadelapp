@@ -1,6 +1,7 @@
 "use client";
 
-import { Geist, Geist_Mono } from "next/font/google";
+/* import { Geist, Geist_Mono } from "next/font/google"; */
+import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { AuthProvider, useUser } from "@/context/AuthContext";
 import "./globals.css";
@@ -15,14 +16,9 @@ import { Toaster } from "@/components/ui/sonner";
 import { SubscriptionProvider } from "@/context/SubscriptionContext";
 import FullScreenLoader from "@/components/FullScreenLoader";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 function LayoutContent({ children }) {
@@ -73,7 +69,7 @@ export default function RootLayout({ children }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <html lang="en" className={inter.variable}>
         <body className="min-h-screen flex flex-col">
           <ThemeProvider>
             <AuthProvider>
