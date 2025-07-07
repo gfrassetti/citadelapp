@@ -27,10 +27,9 @@ const geistMono = Geist_Mono({
 
 function LayoutContent({ children }) {
   const pathname = usePathname();
-  const { loading, user } = useUser();
-
   const isDashboard = pathname?.startsWith("/dashboard");
-
+  const { loading, user } = useUser();
+  
   const layouts = {
     "/": { header: <Header />, footer: <Footer /> },
     "/login": { header: <AuthHeader />, footer: <Footer /> },
@@ -39,12 +38,20 @@ function LayoutContent({ children }) {
     "/company": { header: <Header />, footer: <Footer /> },
   };
 
-  // 🔒 Esperar user en rutas privadas
 /*   if (isDashboard && (loading || !user || !user.plan)) {
     return <FullScreenLoader />;
   } */
-    if (isDashboard && loading) {
-      return <FullScreenLoader />;
+    if (isDashboard) {
+      if (loading) {
+        return <FullScreenLoader />;
+      }
+
+      if (!user) {
+        if (typeof window !== 'undefined') {
+          window.location.href = "/login"; // redirección real, no reactiva
+        }
+        return null;
+      }
     }
     
   const { header, footer } = isDashboard
