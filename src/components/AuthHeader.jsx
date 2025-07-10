@@ -8,7 +8,6 @@ import Link from "next/link";
 export default function AuthHeader() {
   const { theme } = useTheme();
   const srcLogo = theme === "dark" ? "/assets/logo-white.png" : "/assets/logo.png"
-s
 
   return (
     <header
