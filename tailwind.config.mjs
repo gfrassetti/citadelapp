@@ -17,7 +17,7 @@ export default {
 			"background-light": "#eeedf8",
 			"teal-bright": "#0d0a8a",
 			"mint": "#5deb5a",
-			"purple-medium": "#c646a2",
+			"pink-medium": "#c646a2",
 			"blue-medium": "#664acb",
 			"accent-cyan": "#06f388",
   			background: 'hsl(var(--background))',
