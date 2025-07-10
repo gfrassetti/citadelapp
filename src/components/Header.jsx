@@ -21,7 +21,7 @@ export default function Header() {
   const navHover = isDark ? "hover:text-green-400" : "hover:text-primary-dark";
   const bgMain = isDark ? "bg-[#1f1b34]" : "bg-omalmd";
 
-  const srcLogo = theme === "dark" ? "/assets/logo-white.png" : "/assets/logo.png"
+  const srcLogo = theme === "dark" ? "/assets/logo_white.png" : "/assets/logo.png"
 
   return (
     <header
