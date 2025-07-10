@@ -21,6 +21,8 @@ export default function Header() {
   const navHover = isDark ? "hover:text-green-400" : "hover:text-primary-dark";
   const bgMain = isDark ? "bg-[#1f1b34]" : "bg-omalmd";
 
+  const srcLogo = theme === "dark" ? "/assets/logo-white.png" : "/assets/logo.png"
+
   return (
     <header
       className={clsx(
@@ -34,7 +36,7 @@ export default function Header() {
         <div className="flex flex-col items-start gap-0">
           <div className="flex items-center gap-4">
           <Image
-            src={theme === "dark" ? "/assets/logo-white.png" : "/assets/logo.png"}
+            src={srcLogo}
             alt="Logo"
             width={170}
             height={85}
