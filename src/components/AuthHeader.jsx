@@ -7,7 +7,9 @@ import Link from "next/link";
 
 export default function AuthHeader() {
   const { theme } = useTheme();
+  const isDark = theme === "dark";
   const srcLogo = theme === "dark" ? "/assets/logo_white.png" : "/assets/logo.png"
+  const textSecondary = isDark ? "text-gray-300" : "text-gray-700";
 
   return (
     <header
@@ -16,7 +18,7 @@ export default function AuthHeader() {
         theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-800"
       )}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col-reverse items-center gap-4">
         <Link href="/">
           <button
             className={clsx(
@@ -27,6 +29,9 @@ export default function AuthHeader() {
             ← Volver al inicio
           </button>
         </Link>
+          <span className={clsx("text-xs font-semibold mt-0 ml-2 tracking-wide",textSecondary)}>
+            TODO LO QUE NECESITÁS, EN UN SOLO LUGAR.
+          </span>
         <Image
           src={srcLogo}
           alt="Logo"
