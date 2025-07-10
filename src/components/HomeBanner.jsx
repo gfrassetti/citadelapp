@@ -5,7 +5,7 @@ import clsx from "clsx";
 
 export default function HomeBanner() {
   return (
-    <section className="w-full bg-blue-medium py-12 text-white px-8 flex justify-between items-center">
+    <section className="w-full bg-blue-medium text-white px-8 flex justify-between items-center">
       <h2 className="text-2xl font-bold sm:text-3xl text-center capitalize">
         Abastécete rápido
       </h2>
@@ -13,9 +13,9 @@ export default function HomeBanner() {
         <Image
           src="/assets/banner-city.png"
           alt="Ciudad"
-          width={250}
-          height={60}
-          className="w-full top-0 bottom-0 right-0"
+          width={270}
+          height={80}
+          className="w-full"
         />
       </div>
     </section>
