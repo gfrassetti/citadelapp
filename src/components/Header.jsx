@@ -80,18 +80,8 @@ export default function Header() {
             >
               <ul className="flex flex-col gap-4 text-lg px-4">
                 <li>
-                  <Link href="/" onClick={() => setOpen(false)} className={clsx(textMain, navHover)}>
-                    Home
-                  </Link>
-                </li>
-                <li>
                   <Link href="#" onClick={() => setOpen(false)} className={clsx(textMain, navHover)}>
                     Quiénes somos
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" onClick={() => setOpen(false)} className={clsx(textMain, navHover)}>
-                    Novedades
                   </Link>
                 </li>
                 <li>
@@ -101,12 +91,7 @@ export default function Header() {
                 </li>
                 <li>
                   <Link href="#" onClick={() => setOpen(false)} className={clsx(textMain, navHover)}>
-                    Cómo comprar
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" onClick={() => setOpen(false)} className={clsx(textMain, navHover)}>
-                    Informar pago
+                    FAQs
                   </Link>
                 </li>
                 <li>
