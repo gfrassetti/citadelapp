@@ -33,13 +33,13 @@ export default function Header() {
         {/* Logo + claim */}
         <div className="flex flex-col items-start gap-0">
           <div className="flex items-center gap-4">
-            <Image
-              src="/assets/logo.png"
-              alt="Logo"
-              width={170}
-              height={85}
-              priority
-            />
+          <Image
+            src={theme === "dark" ? "/assets/logo-white.png" : "/assets/logo.png"}
+            alt="Logo"
+            width={170}
+            height={85}
+            priority
+          />
           </div>
           <span className={clsx("text-xs font-semibold mt-0 ml-2 tracking-wide", textSecondary)}>
             TODO LO QUE NECESITÁS, EN UN SOLO LUGAR.
@@ -121,9 +121,6 @@ export default function Header() {
           </li>
           <li>
             <Link className={clsx("transition-colors cursor-pointer font-medium", navHover, textMain)} href="#">Quiénes somos</Link>
-          </li>
-          <li>
-            <Link className={clsx("transition-colors cursor-pointer font-medium", navHover, textMain)} href="#">Novedades</Link>
           </li>
           <li>
             <Link className={clsx("transition-colors cursor-pointer font-medium", navHover, textMain)} href="#">Contacto</Link>

@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ResetPasswordForm from "@/components/ResetPasswordForm";
 import { CheckCircle2 } from "lucide-react";
+import clsx from "clsx";
 
 const schema = z.object({
   email: z.string().email("Email inválido").optional(),
@@ -110,11 +111,11 @@ export default function LoginForm() {
 
   return (
     <div className={`flex flex-col items-center h-screen w-full px-4 ${theme === "dark" ? "bg-gray-600" : "bg-gray-100"}`}>
-      <div className="bg-white p-6 my-auto text-center rounded-3xl shadow-md w-full max-w-md justify-center items-center mx-auto">
-        <h2 className="text-2xl font-semibold text-center text-gray-800 mb-2">
+      <div className={`${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-800"} p-6 my-auto text-center rounded-3xl shadow-md w-full max-w-md justify-center items-center mx-auto`}>
+        <h2 className={`text-2xl font-semibold text-center mb-2 ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
           {isResetPassword ? "Recuperar contraseña" : "Bienvenido de nuevo"}
         </h2>
-
+  
         {isResetPassword ? (
           <ResetPasswordForm onBack={() => setIsResetPassword(false)} />
         ) : (
@@ -139,33 +140,49 @@ export default function LoginForm() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <span className="py-2 block">Inicie sesión con su cuenta de Google</span>
+  
+            <span className={`py-2 block ${theme === "dark" ? "text-white" : ""}`}>
+              Inicie sesión con su cuenta de Google
+            </span>
             <button
               type="button"
               onClick={handleGoogleSignIn}
-              className="rounded-full mx-auto px-4 py-2 text-sm font-normal text-black border solid flex hover:bg-gray-300 transition-colors ease-in-out duration-150"
-            >
+              className={clsx(
+                "rounded-full mx-auto px-4 py-2 text-sm font-normal border solid flex transition-colors ease-in-out duration-150",
+                theme === "dark"
+                  ? "text-white bg-gray-700 hover:bg-gray-600"
+                  : "text-black hover:bg-gray-300"
+              )}            >
               <Image src="/assets/google-logo.png" alt="Google" width={20} height={20} className="mr-4" />
               Iniciar sesión con Google
             </button>
-
+  
             <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border py-4">
-              <span className="relative z-10 bg-background px-2 text-muted-foreground bg-white">Or continue with</span>
+              <span className={`relative z-10 px-2 ${theme === "dark" ? "bg-gray-800 text-gray-400" : "bg-white text-muted-foreground"}`}>
+                Or continue with
+              </span>
             </div>
-
+  
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col text-left gap-4">
-              <Label>Email</Label>
+              <Label className={theme === "dark" ? "text-white" : ""}>Email</Label>
               <Input {...register("email")} placeholder="Email" />
               {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
               <div className="flex items-center">
-                <Label>Password</Label>
-                <button type="button" onClick={() => setIsResetPassword(true)} className="ml-auto text-sm underline-offset-2 hover:underline">¿Olvidaste tu contraseña?</button>
+                <Label className={theme === "dark" ? "text-white" : ""}>Password</Label>
+                <button
+                  type="button"
+                  onClick={() => setIsResetPassword(true)}
+                  className="ml-auto text-sm underline-offset-2 hover:underline"
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
               </div>
               <Input {...register("password")} type="password" placeholder="Password" />
               {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
               <Button type="submit" className="btn">Acceso</Button>
-              <div className="text-sm text-center">
-                Don&apos;t have an account? <a href="/register" className="underline hover:text-blue-600">Sign up</a>
+              <div className={`text-sm text-center ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                Don&apos;t have an account?{" "}
+                <a href="/register" className="underline hover:text-blue-600">Sign up</a>
               </div>
             </form>
           </>

@@ -95,7 +95,7 @@ html, body {
 }
 
 .btn {
-  @apply bg-[#151515] hover:bg-gray-400 mx-auto hover:text-white transition-colors text-white w-48 px-4 py-2 border border-[#363636] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200;
+  @apply bg-[#151515] hover:bg-gray-400 mx-auto hover:text-black transition-colors text-white w-48 px-4 py-2 border border-[#363636] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200;
 }
 
 .btn-secondary {
