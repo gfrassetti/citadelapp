@@ -2,24 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTheme } from "next-themes";
 import clsx from "clsx";
 import Loader from "@/components/Loader";
 import Filters from "@/components/Filters";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
+import ContactVendorModal from "@/components/ContactVendorModal";
 import { getDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/db/db";
-import ContactVendorModal from "@/components/ContactVendorModal";
-
 
 export default function HomeSearch() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { theme } = useTheme();
 
   const [term, setTerm] = useState("");
   const [results, setResults] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState("all");
+  const [tagSearch, setTagSearch] = useState("");
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -94,10 +92,23 @@ export default function HomeSearch() {
     setSelectedProduct(null);
   };
 
+  const filteredResults = results.filter((item) => {
+    if (!tagSearch.trim()) return true;
+    const tags = item.tags || [];
+    return tags.some((tag) =>
+      tag.toLowerCase().includes(tagSearch.toLowerCase())
+    );
+  });
+
   return (
     <div className="w-full mx-auto p-4 h-max pt-[80px]">
       <div className="flex flex-col md:flex-row gap-6">
-        <Filters selectedFilter={selectedFilter} setSelectedFilter={setSelectedFilter} />
+        <Filters
+          selectedFilter={selectedFilter}
+          setSelectedFilter={setSelectedFilter}
+          tagSearch={tagSearch}
+          setTagSearch={setTagSearch}
+        />
         <div className="flex-1 bg-[#f4f4f4] p-4">
           <div className="flex gap-2 mb-6">
             <input
@@ -121,21 +132,23 @@ export default function HomeSearch() {
               <Loader text="Cargando..." />
             </div>
           ) : (
-            <div className={clsx(
-              "grid gap-6",
-              "grid-cols-1",
-              "sm:grid-cols-2",
-              "md:grid-cols-3",
-              "xl:grid-cols-4"
-            )}>
+            <div
+              className={clsx(
+                "grid gap-6",
+                "grid-cols-1",
+                "sm:grid-cols-2",
+                "md:grid-cols-3",
+                "xl:grid-cols-4"
+              )}
+            >
               {searched ? (
-                results.length > 0 ? (
-                  results.map((item) => (
+                filteredResults.length > 0 ? (
+                  filteredResults.map((item) => (
                     <div
                       key={item.id}
                       className={clsx(
                         "marketplace-card cursor-pointer",
-                        theme === "dark" ? "dark" : ""
+                        "dark"
                       )}
                       onClick={() => {
                         const base = item.type === "empresa" ? "company" : "product";
@@ -143,34 +156,32 @@ export default function HomeSearch() {
                       }}
                     >
                       {item.type === "empresa" ? (
-                        <>
-                          <div className="flex items-center gap-4 mb-3">
-                            {item.imageUrl ? (
-                              <img
-                                src={item.imageUrl}
-                                alt={item.companyName}
-                                className="h-12 w-12 rounded-full object-cover border"
-                              />
-                            ) : (
-                              <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center font-bold text-xl text-gray-600 dark:bg-gray-700 dark:text-white">
-                                {item.companyName?.[0]}
-                              </div>
-                            )}
-                            <div>
-                              <h3 className="font-bold text-lg">{item.companyName}</h3>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {(item.tags || []).map((tag, index) => (
-                                  <span
-                                    key={index}
-                                    className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-100 px-2 py-0.5 rounded-full"
-                                  >
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
+                        <div className="flex items-center gap-4 mb-3">
+                          {item.imageUrl ? (
+                            <img
+                              src={item.imageUrl}
+                              alt={item.companyName}
+                              className="h-12 w-12 rounded-full object-cover border"
+                            />
+                          ) : (
+                            <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center font-bold text-xl text-gray-600 dark:bg-gray-700 dark:text-white">
+                              {item.companyName?.[0]}
+                            </div>
+                          )}
+                          <div>
+                            <h3 className="font-bold text-lg">{item.companyName}</h3>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {(item.tags || []).map((tag, index) => (
+                                <span
+                                  key={index}
+                                  className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-100 px-2 py-0.5 rounded-full"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
                             </div>
                           </div>
-                        </>
+                        </div>
                       ) : (
                         <>
                           {item.imageUrl && (

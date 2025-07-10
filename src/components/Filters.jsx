@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { useTheme } from "next-themes";
 import clsx from "clsx";
 
-export default function Filters({ selectedFilter, setSelectedFilter }) {
+export default function Filters({ selectedFilter, setSelectedFilter, tagSearch, setTagSearch }) {
   const { theme } = useTheme();
 
   return (
@@ -28,7 +28,7 @@ export default function Filters({ selectedFilter, setSelectedFilter }) {
       <RadioGroup
         value={selectedFilter}
         onValueChange={setSelectedFilter}
-        className="space-y-3"
+        className="space-y-3 mb-4"
       >
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="all" id="all" />
@@ -43,6 +43,18 @@ export default function Filters({ selectedFilter, setSelectedFilter }) {
           <Label htmlFor="producto">Producto o servicio</Label>
         </div>
       </RadioGroup>
+
+      <div className="mt-4">
+        <Label htmlFor="tagSearch" className="block text-sm font-medium mb-1">Buscar por tag:</Label>
+        <input
+          id="tagSearch"
+          type="text"
+          value={tagSearch}
+          onChange={(e) => setTagSearch(e.target.value)}
+          className="w-full border px-3 py-2 rounded text-sm"
+          placeholder="Ej: gaming, madera..."
+        />
+      </div>
     </div>
   );
 }
