@@ -5,7 +5,7 @@ import clsx from "clsx";
 
 export default function HomeBanner() {
   return (
-    <section className="w-full bg-[#b131d4] text-white px-8 flex justify-between items-center">
+    <section className="w-full bg-blue-medium py-12 text-white px-8 flex justify-between items-center">
       <h2 className="text-2xl font-bold sm:text-3xl text-center capitalize">
         Abastécete rápido
       </h2>

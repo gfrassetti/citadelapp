@@ -36,9 +36,8 @@ export default function Header() {
             <Image
               src="/assets/logo.png"
               alt="Logo"
-              width={150}
+              width={170}
               height={85}
-              className="h-[100px] w-auto"
               priority
             />
           </div>

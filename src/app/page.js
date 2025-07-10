@@ -4,7 +4,7 @@ import HomeBanner from "@/components/HomeBanner";
 
 export default function Page() {
   return (
-    <main className="w-full mx-auto text-center py-8">
+    <main className="w-full mx-auto text-center pb-8">
       <Suspense fallback={<p>Cargando</p>}>
       <HomeBanner />
         <HomeSearch />
