@@ -25,7 +25,7 @@ export async function GET(req) {
     const subscriptions = await stripe.subscriptions.list({
       customer: customer.id,
       status: "all",
-      expand: ["data.items.data.price.product", "data.default_payment_method"],
+      expand: ["data.items", "data.default_payment_method"],
       limit: 1,
     });
 

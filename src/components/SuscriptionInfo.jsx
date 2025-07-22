@@ -106,12 +106,14 @@ export default function SubscriptionInfo() {
       </div>
     );
 
-  if (!subscription)
-    return (
-      <div className="flex flex-col items-center justify-center h-64 text-center">
-        <p className="text-gray-700 text-lg">No tenés una suscripción activa.</p>
-      </div>
-    );
+    if (!subscription || subscription.status !== "active") {
+      return (
+        <div className="flex flex-col items-center justify-center h-64 text-center">
+          <p className="text-gray-700 text-lg">No tenés una suscripción activa.</p>
+        </div>
+      );
+    }
+    
 
   const card = subscription?.default_payment_method?.card;
   const normalized = normalizeMethod(card?.brand);
@@ -136,7 +138,8 @@ export default function SubscriptionInfo() {
               {new Intl.NumberFormat("es-AR", {
                 style: "currency",
                 currency: subscription.currency?.toUpperCase() || "USD",
-              }).format((subscription.plan?.amount || 0) / 100)}
+              }).format((subscription.items?.[0]?.price?.unit_amount || 0) / 100
+            )}
             </TableCell>
           </TableRow>
           <TableRow>
