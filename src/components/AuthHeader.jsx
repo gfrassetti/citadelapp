@@ -36,6 +36,7 @@ export default function AuthHeader() {
           src={srcLogo}
           alt="Logo"
           width={130}
+          height={65}
           priority
         />
       </div>
