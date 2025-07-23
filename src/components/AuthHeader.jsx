@@ -35,7 +35,7 @@ export default function AuthHeader() {
         <Image
           src={srcLogo}
           alt="Logo"
-          width={130}
+          width={100}
           height={65}
           priority
         />
