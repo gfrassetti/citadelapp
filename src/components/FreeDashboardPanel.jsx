@@ -1,69 +1,85 @@
 "use client";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Loader2Icon } from "lucide-react";
 import { useHandleUpgrade } from "@/hooks/useHandleUpgrade";
 import { useUser } from "@/context/AuthContext";
+import { CheckCircle, XCircle } from "lucide-react";
 
 export default function FreeDashboardPanel() {
   const { user } = useUser();
+  const { theme } = useTheme();
   const handleUpgrade = useHandleUpgrade(user);
 
+  const isDark = theme === "dark";
+
+  const bg = "#8038e9";
+  const text = "#5deb5a";
+  const headerBg = "#292554";
+  const border = "#c646a2";
+
   return (
-    <div className="max-w-3xl mx-auto bg-white dark:bg-[#1f1b34] border border-gray-200 dark:border-gray-700 rounded-2xl shadow p-8 flex flex-col gap-6 mt-12">
-      <h2 className="text-2xl font-bold mb-2 text-center text-primary-dark dark:text-accent-cyan">
-        Panel Free
-      </h2>
-      <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
-        Bienvenido a La Citadel. Estás usando el plan <b>FREE</b>.
-      </p>
+    <div
+      className="max-w-3xl mx-auto rounded-2xl shadow p-8 flex flex-col gap-6 mt-12"
+      style={{
+        backgroundColor: isDark ? "#1f1b34" : bg,
+        color: isDark ? text : "white",
+        border: `2px solid ${border}`,
+      }}
+    >
+      <h2 className="text-3xl font-bold text-center">Comparativa de Planes</h2>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left border-collapse rounded-lg overflow-hidden">
-          <thead className="bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-white">
+        <table className="w-full text-sm text-left rounded-lg overflow-hidden">
+          <thead style={{ backgroundColor: headerBg }}>
             <tr>
-              <th className="py-2 px-4">Características</th>
-              <th className="py-2 px-4 text-center">Free</th>
-              <th className="py-2 px-4 text-center">PRO</th>
+              <th className="py-3 px-4 text-white">Características</th>
+              <th className="py-3 px-4 text-center text-white">Free</th>
+              <th className="py-3 px-4 text-center text-white">PRO</th>
             </tr>
           </thead>
-          <tbody className="text-gray-700 dark:text-gray-200">
-            <tr className="border-t dark:border-gray-700">
-              <td className="py-2 px-4">Editar perfil</td>
-              <td className="text-center">✅</td>
-              <td className="text-center">✅</td>
-            </tr>
-            <tr className="border-t dark:border-gray-700">
-              <td className="py-2 px-4">Ver empresas y productos</td>
-              <td className="text-center">✅</td>
-              <td className="text-center">✅</td>
-            </tr>
-            <tr className="border-t dark:border-gray-700">
-              <td className="py-2 px-4">Acceder a noticias</td>
-              <td className="text-center">✅</td>
-              <td className="text-center">✅</td>
-            </tr>
-            <tr className="border-t dark:border-gray-700">
-              <td className="py-2 px-4">Subir y editar productos</td>
-              <td className="text-center">❌</td>
-              <td className="text-center">✅</td>
-            </tr>
-            <tr className="border-t dark:border-gray-700">
-              <td className="py-2 px-4">Aparecer en búsquedas públicas</td>
-              <td className="text-center">❌</td>
-              <td className="text-center">✅</td>
-            </tr>
-            <tr className="border-t dark:border-gray-700">
-              <td className="py-2 px-4">Acceso a estadísticas</td>
-              <td className="text-center">❌</td>
-              <td className="text-center">✅</td>
-            </tr>
+          <tbody>
+            {[
+              ["Editar perfil", true, true],
+              ["Ver empresas y productos", true, true],
+              ["Acceder a noticias", true, true],
+              ["Subir y editar productos", false, true],
+              ["Aparecer en búsquedas públicas", false, true],
+              ["Acceso a estadísticas", false, true],
+            ].map(([title, free, pro], idx) => (
+              <tr
+                key={idx}
+                className="border-t"
+                style={{ borderColor: border }}
+              >
+                <td className="py-2 px-4">{title}</td>
+                <td className="text-center">
+                  {free ? (
+                    <CheckCircle size={20} color={text} />
+                  ) : (
+                    <XCircle size={20} color={border} />
+                  )}
+                </td>
+                <td className="text-center">
+                  {pro ? (
+                    <CheckCircle size={20} color={text} />
+                  ) : (
+                    <XCircle size={20} color={border} />
+                  )}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
 
       <Button
-        className="w-full bg-accent-blue hover:bg-primary-dark text-white font-bold rounded-lg mt-6"
-        onClick={() => handleUpgrade.mutate()}y
+        className="w-full font-bold rounded-lg mt-6"
+        style={{
+          backgroundColor: isDark ? text : "#c646a2",
+          color: isDark ? "#1f1b34" : "white",
+        }}
+        onClick={() => handleUpgrade.mutate()}
         disabled={handleUpgrade.isPending}
       >
         {handleUpgrade.isPending ? (
