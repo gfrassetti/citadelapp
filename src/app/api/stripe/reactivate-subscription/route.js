@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { sendEmail } from "@/lib/email/sendEmail";
+import { subscriptionReactivatedEmail } from "@/lib/email/templates";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-08-16",
@@ -7,7 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 export async function PUT(req) {
   try {
-    const { subscriptionId } = await req.json();
+    const { subscriptionId, user } = await req.json();
 
     if (!subscriptionId) {
       return NextResponse.json({ error: "Falta el ID de suscripción" }, { status: 400 });
@@ -15,6 +17,13 @@ export async function PUT(req) {
 
     const reactivated = await stripe.subscriptions.update(subscriptionId, {
       pause_collection: null,
+    });
+
+    const { subject, html } = subscriptionReactivatedEmail(user);
+    await sendEmail({
+      to: user.email,
+      subject,
+      html,
     });
 
     return NextResponse.json(reactivated);

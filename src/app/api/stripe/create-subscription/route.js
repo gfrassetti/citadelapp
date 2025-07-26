@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { admin } from "@/lib/db/firebaseAdmin";
+import { sendEmail } from "@/lib/email/sendEmail";
+import { subscriptionPaidEmail } from "@/lib/email/templates";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-08-16",
@@ -15,7 +17,7 @@ export async function POST(req) {
 
     const idToken = authHeader.split("Bearer ")[1];
     const decoded = await admin.auth().verifyIdToken(idToken);
-    const { uid, email } = decoded;
+    const { uid, email, name = "" } = decoded;
 
     if (!uid || !email) {
       return NextResponse.json({ error: "Token inválido" }, { status: 401 });
@@ -37,12 +39,11 @@ export async function POST(req) {
         },
       ],
       subscription_data: {
-        trial_period_days: 14, //free trial
+        trial_period_days: 60,
       },
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?canceled=true`,
     });
-    
 
     const subscriptionId = session.subscription;
 
@@ -53,6 +54,9 @@ export async function POST(req) {
       },
       { merge: true }
     );
+
+    const { subject, html } = subscriptionPaidEmail({ name });
+    await sendEmail({ to: email, subject, html });
 
     return NextResponse.json({ url: session.url });
   } catch (error) {

@@ -65,7 +65,7 @@ export default function Footer() {
                   isDark ? "text-gray-100" : "text-black"
                 )}
               >
-                Dashboard
+                Mi Panel
               </a>
             </li>
           </ul>

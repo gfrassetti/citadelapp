@@ -54,8 +54,8 @@ export default function ProDashboardPanel() {
 
   useEffect(() => {
     const monthsMap = {
-      0: "Jan", 1: "Feb", 2: "Mar", 3: "Apr", 4: "May", 5: "Jun",
-      6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec",
+      0: "Ene", 1: "Feb", 2: "Mar", 3: "Abr", 4: "May", 5: "Jun",
+      6: "Jul", 7: "Ago", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dic",
     };
 
     const countByMonth = {};
@@ -102,7 +102,7 @@ export default function ProDashboardPanel() {
     <div className="w-full px-4 md:px-8 py-6 space-y-8">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">
-          Welcome to your <Badge variant="secondary">PRO</Badge> account
+          Bienvenido a tu cuenta <Badge variant="secondary">PRO</Badge>
         </h2>
       </div>
 
@@ -111,8 +111,8 @@ export default function ProDashboardPanel() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Total Products</CardTitle>
-            <CardDescription>Uploaded by you</CardDescription>
+            <CardTitle>Total de productos</CardTitle>
+            <CardDescription>Subidos por ti</CardDescription>
           </CardHeader>
           <CardContent>
             <span className="text-3xl font-bold">{products.length}</span>
@@ -121,8 +121,8 @@ export default function ProDashboardPanel() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Subscription</CardTitle>
-            <CardDescription>Current status</CardDescription>
+            <CardTitle>Suscripción</CardTitle>
+            <CardDescription>Estado actual</CardDescription>
           </CardHeader>
           <CardContent>
             <Badge variant="default">{subscriptionStatus}</Badge>
@@ -131,18 +131,18 @@ export default function ProDashboardPanel() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Published</CardTitle>
-            <CardDescription>Visible to the public</CardDescription>
+            <CardTitle>Publicado</CardTitle>
+            <CardDescription>Visible al público</CardDescription>
           </CardHeader>
           <CardContent>
-            <span className="text-xl font-semibold">+{products.length} items</span>
+            <span className="text-xl font-semibold">+{products.length} productos</span>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Next Billing</CardTitle>
-            <CardDescription>Auto-renewal date</CardDescription>
+            <CardTitle>Próximo cobro</CardTitle>
+            <CardDescription>Fecha de renovación automática</CardDescription>
           </CardHeader>
           <CardContent>
             <span className="text-sm">{nextBilling}</span>
@@ -153,7 +153,7 @@ export default function ProDashboardPanel() {
       <Separator />
 
       <div>
-        <h3 className="text-lg font-bold mb-16">Monthly activity</h3>
+        <h3 className="text-lg font-bold mb-16">Actividad mensual</h3>
         <ChartContainer
           className="mx-auto w-3/4 aspect-[3/1]"
           config={{
@@ -179,7 +179,7 @@ export default function ProDashboardPanel() {
       <Separator />
 
       <div>
-        <h3 className="text-lg font-bold mb-4">Recently added products</h3>
+        <h3 className="text-lg font-bold mb-4">Productos agregados recientemente</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
             <Card key={product.id} className="relative">
@@ -187,7 +187,7 @@ export default function ProDashboardPanel() {
                 <CardTitle className="flex items-center justify-between">
                   {product.productName}
                   {isNewProduct(product.createdAt) && (
-                    <Badge variant="destructive">New</Badge>
+                    <Badge variant="destructive">Nuevo</Badge>
                   )}
                 </CardTitle>
                 <CardDescription>{product.description}</CardDescription>

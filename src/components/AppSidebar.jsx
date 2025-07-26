@@ -12,7 +12,7 @@ export function AppSidebar() {
 
   const projects = [
     {
-      name: "Dashboard",
+      name: "Mi Panel",
       icon: PieChart,
       href: "/dashboard",
       disabled: !isProUser,

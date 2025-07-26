@@ -20,37 +20,17 @@ export default function AuthHeader() {
     >
       <div className="flex flex-col-reverse items-center gap-4">
         <Link href="/">
-          <button
-            className={clsx(
-              "text-sm hover:underline",
-              theme === "dark" ? "text-white" : "text-black"
-            )}
-          >
-            ← Volver al inicio
-          </button>
+          <Image
+            src={srcLogo}
+            alt="Logo"
+            width={100}
+            height={65}
+            priority
+          />
         </Link>
-          <span className={clsx("text-xs font-semibold mt-0 ml-2 tracking-wide",textSecondary)}>
-            TODO LO QUE NECESITÁS, EN UN SOLO LUGAR.
-          </span>
-        <Image
-          src={srcLogo}
-          alt="Logo"
-          width={100}
-          height={65}
-          priority
-        />
-      </div>
-      <div className="hidden sm:flex items-center gap-6">
-        <Link href="/register">
-          <button
-            className={clsx(
-              "px-4 py-2 rounded transition",
-              theme === "dark" ? "btn-secondary" : "btn text-white"
-            )}
-          >
-            Registrarse
-          </button>
-        </Link>
+        <span className={clsx("text-xs font-semibold mt-0 ml-2 tracking-wide", textSecondary)}>
+          TODO LO QUE NECESITÁS, EN UN SOLO LUGAR.
+        </span>
       </div>
     </header>
   );

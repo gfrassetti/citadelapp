@@ -119,7 +119,7 @@ export default function Header() {
       <nav className={clsx("w-[90%] mx-auto bg-transparent justify-between mt-4 mb-0 hidden sm:flex desktop-menu", textMain)}>
         <ul className="flex flex-row gap-8 px-8 py-0 max-w-screen-xl font-semibold text-sm sm:text-base tracking-wide">
           <li>
-            <Link className={clsx("transition-colors cursor-pointer font-medium", navHover, textMain)} href="/">Home</Link>
+            <Link className={clsx("transition-colors cursor-pointer font-medium", navHover, textMain)} href="/">Inicio</Link>
           </li>
           <li>
             <Link className={clsx("transition-colors cursor-pointer font-medium", navHover, textMain)} href="#">Quiénes somos</Link>
@@ -128,7 +128,7 @@ export default function Header() {
             <Link className={clsx("transition-colors cursor-pointer font-medium", navHover, textMain)} href="#">Contacto</Link>
           </li>
           <li>
-            <Link className={clsx("transition-colors cursor-pointer font-medium", navHover, textMain)} href="#">FAQs</Link>
+            <Link className={clsx("transition-colors cursor-pointer font-medium", navHover, textMain)} href="#">Preguntas Frecuentes</Link>
           </li>
         </ul>
         <Link

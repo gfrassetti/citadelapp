@@ -159,7 +159,7 @@ export default function LoginForm() {
   
             <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border py-4">
               <span className={`relative z-10 px-2 ${theme === "dark" ? "bg-gray-800 text-gray-400" : "bg-white text-muted-foreground"}`}>
-                Or continue with
+                O continua con
               </span>
             </div>
   
@@ -168,7 +168,7 @@ export default function LoginForm() {
               <Input {...register("email")} placeholder="Email" />
               {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
               <div className="flex items-center">
-                <Label className={theme === "dark" ? "text-white" : ""}>Password</Label>
+                <Label className={theme === "dark" ? "text-white" : ""}>Contraseña</Label>
                 <button
                   type="button"
                   onClick={() => setIsResetPassword(true)}
@@ -177,12 +177,12 @@ export default function LoginForm() {
                   ¿Olvidaste tu contraseña?
                 </button>
               </div>
-              <Input {...register("password")} type="password" placeholder="Password" />
+              <Input {...register("password")} type="password" placeholder="Contraseña" />
               {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
               <Button type="submit" className="btn">Acceso</Button>
               <div className={`text-sm text-center ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
-                Don&apos;t have an account?{" "}
-                <a href="/register" className="underline hover:text-blue-600">Sign up</a>
+                No tenes una cuenta?{" "}
+                <a href="/register" className="underline hover:text-blue-600">Registrate</a>
               </div>
             </form>
           </>

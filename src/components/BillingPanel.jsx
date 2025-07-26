@@ -11,7 +11,7 @@ export default function BillingPanel() {
   if (!subscription) {
     return (
       <div className="text-sm text-muted-foreground">
-        No active subscription found.
+        No se encontró una suscripcion activa.
       </div>
     );
   }
@@ -54,13 +54,13 @@ export default function BillingPanel() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Billing Details</CardTitle>
-        <CardDescription>Stripe subscription info</CardDescription>
+        <CardTitle>Detalles de facturación</CardTitle>
+        <CardDescription>Informacion de suscripcion</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4 text-sm">
         <div className="flex justify-between">
-          <span>Status</span>
+          <span>Estado</span>
           <Badge variant={isCanceled ? "destructive" : "outline"}>{status}</Badge>
         </div>
         <Separator />
@@ -69,20 +69,20 @@ export default function BillingPanel() {
           <span>{plan}</span>
         </div>
         <div className="flex justify-between">
-          <span>Next billing</span>
+          <span>Proxima Factura</span>
           <span>{isExpired ? "-" : nextBilling}</span>
         </div>
         <div className="flex justify-between">
-          <span>Renewal</span>
+          <span>Renovación</span>
           <span>{renewal}</span>
         </div>
         <Separator />
         <div className="flex justify-between">
-          <span>Payment method</span>
+          <span>Método de pago</span>
           <span>{cardInfo}</span>
         </div>
         <div className="flex justify-between">
-          <span>Customer email</span>
+          <span>Email del cliente</span>
           <span>{customer?.email || "-"}</span>
         </div>
       </CardContent>

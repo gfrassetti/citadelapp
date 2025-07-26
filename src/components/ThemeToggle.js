@@ -16,7 +16,7 @@ export default function ThemeToggle() {
       >
       </Switch>
       </div>
-      <Label htmlFor="airplane-mode">Theme</Label>
+      <Label htmlFor="airplane-mode">Tema</Label>
       </>
   )
 }

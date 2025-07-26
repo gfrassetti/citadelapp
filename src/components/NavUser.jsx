@@ -126,7 +126,7 @@ export default function NavUser() {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push("/dashboard/billing")}>
                 <CreditCard className="mr-2 h-4 w-4" />
-                Billing
+                Facturación
               </DropdownMenuItem>
             </DropdownMenuGroup>
 

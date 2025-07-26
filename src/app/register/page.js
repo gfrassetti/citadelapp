@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import clsx from "clsx";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { sendEmail } from "@/lib/email/sendEmail";
+import { welcomeEmail } from "@/lib/email/templates";
 
 const db = getFirestore();
 
@@ -38,14 +40,21 @@ export default function RegisterPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       await updateProfile(user, { displayName: data.name });
-
+  
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         name: data.name,
         plan: "free",
         createdAt: new Date(),
       });
-
+  
+      const { subject, html } = welcomeEmail({ name: data.name });
+      await sendEmail({
+        to: user.email,
+        subject,
+        html,
+      });
+  
       await auth.signOut();
       localStorage.setItem("registerSuccess", "true");
       router.push("/login");
@@ -53,9 +62,10 @@ export default function RegisterPage() {
       console.error("❌ Error al registrar:", error.message);
     }
   };
+  
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-[calc(100vh-150px)] px-4 py-8">
+    <main className="flex flex-col items-center justify-center min-h-[calc(100vh+150px)] px-4 py-8">
       <div className={clsx(
         "w-full max-w-md p-6 rounded-3xl shadow-xl border",
         theme === "dark" ? "bg-gray-900 text-white border-[#06f388]" : "bg-white text-black border-gray-200"
