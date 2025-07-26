@@ -17,10 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 
 import {
   BarChart,
@@ -34,16 +31,23 @@ import {
 export default function ProDashboardPanel() {
   const { theme } = useTheme();
   const { empresaId } = useUserData() || {};
-  const { subscription } = useSubscription();
+  const { subscription, loading } = useSubscription();
   const [products, setProducts] = useState([]);
+
+  const isPaused = !!subscription?.pause_collection;
+  const isCanceled = subscription?.status === "canceled";
+  const isActive = subscription?.status === "active" && !isPaused;
 
   useEffect(() => {
     if (!empresaId) return;
 
     const fetchUserProducts = async () => {
-      const q = query(collection(db, "products"), where("empresaId", "==", empresaId));
+      const q = query(
+        collection(db, "products"),
+        where("empresaId", "==", empresaId)
+      );
       const snap = await getDocs(q);
-      const items = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const items = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setProducts(items);
     };
 
@@ -54,8 +58,18 @@ export default function ProDashboardPanel() {
 
   useEffect(() => {
     const monthsMap = {
-      0: "Ene", 1: "Feb", 2: "Mar", 3: "Abr", 4: "May", 5: "Jun",
-      6: "Jul", 7: "Ago", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dic",
+      0: "Ene",
+      1: "Feb",
+      2: "Mar",
+      3: "Abr",
+      4: "May",
+      5: "Jun",
+      6: "Jul",
+      7: "Ago",
+      8: "Sep",
+      9: "Oct",
+      10: "Nov",
+      11: "Dic",
     };
 
     const countByMonth = {};
@@ -90,13 +104,17 @@ export default function ProDashboardPanel() {
   };
 
   const subscriptionStatus = subscription?.status ?? "-";
-  const nextBilling = subscription?.current_period_end
-    ? new Date(subscription.current_period_end * 1000).toLocaleDateString("es-AR", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "-";
+  const nextBilling =
+    subscription?.status === "active" && subscription?.current_period_end
+      ? new Date(subscription.current_period_end * 1000).toLocaleDateString(
+          "es-AR",
+          {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }
+        )
+      : null;
 
   return (
     <div className="w-full px-4 md:px-8 py-6 space-y-8">
@@ -135,19 +153,57 @@ export default function ProDashboardPanel() {
             <CardDescription>Visible al público</CardDescription>
           </CardHeader>
           <CardContent>
-            <span className="text-xl font-semibold">+{products.length} productos</span>
+            <span className="text-xl font-semibold">
+              +{products.length} productos
+            </span>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Próximo cobro</CardTitle>
-            <CardDescription>Fecha de renovación automática</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <span className="text-sm">{nextBilling}</span>
-          </CardContent>
-        </Card>
+        {isPaused && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Suscripción pausada</CardTitle>
+              <CardDescription>Tu suscripción fue pausada</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="list-disc ml-4 text-sm space-y-1">
+                <li>La suscripción sigue existiendo y vigente.</li>
+                <li>Stripe no cobra al usuario mientras está pausada.</li>
+                <li>Podés reanudarla en cualquier momento.</li>
+                <li>No se pierde historial, ni datos de pago.</li>
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+
+        {isCanceled && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Suscripción cancelada</CardTitle>
+              <CardDescription>Tu suscripción está cancelada</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="list-disc ml-4 text-sm space-y-1">
+                <li>Seguís teniendo acceso hasta el final del ciclo actual.</li>
+                <li>Después de eso, la suscripción termina definitivamente.</li>
+                <li>No se puede reanudar automáticamente.</li>
+                <li>Debés crear una nueva si querés volver a PRO.</li>
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+
+        {nextBilling && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Próximo cobro</CardTitle>
+              <CardDescription>Fecha de renovación automática</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <span className="text-sm">{nextBilling}</span>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <Separator />
@@ -179,7 +235,9 @@ export default function ProDashboardPanel() {
       <Separator />
 
       <div>
-        <h3 className="text-lg font-bold mb-4">Productos agregados recientemente</h3>
+        <h3 className="text-lg font-bold mb-4">
+          Productos agregados recientemente
+        </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
             <Card key={product.id} className="relative">

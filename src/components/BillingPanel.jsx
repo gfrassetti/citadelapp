@@ -32,7 +32,7 @@ export default function BillingPanel() {
   const cancelAtPeriodEnd = subscription.cancel_at_period_end;
   const plan = subscription.items[0]?.price?.nickname ||
                subscription.items[0]?.price?.product?.name ||
-               "Plan name not available";
+               "No Disponible";
 
   const method = subscription.default_payment_method;
   const cardInfo = method?.card
