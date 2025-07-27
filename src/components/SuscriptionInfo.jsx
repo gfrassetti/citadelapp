@@ -9,6 +9,8 @@ import UpdatePaymentMethod from "@/components/UpdatePaymentMethod";
 import { toast } from "sonner";
 import { Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useHandleUpgrade } from "@/hooks/useHandleUpgrade";
+
 
 const paymentIcons = {
   visa: "/assets/visa-4.svg",
@@ -70,6 +72,7 @@ async function reactivateStripeSubscription(subscriptionId) {
 export default function SubscriptionInfo() {
   const { user } = useUser();
   const queryClient = useQueryClient();
+  const handleUpgrade = useHandleUpgrade();
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["stripeSubscription", user.uid],
