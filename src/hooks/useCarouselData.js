@@ -48,9 +48,12 @@ export function useCarouselData() {
         })),
       });
 
+      console.log("🔥 Productos recientes:", recent);
+      console.log("🔥 Productos negocios:", tagged);
+      console.log("🔥 Empresas vacaciones:", companies);
       setData(result);
     };
-
+    
     fetchCarousel();
   }, []);
 

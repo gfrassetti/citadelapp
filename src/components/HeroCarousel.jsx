@@ -6,16 +6,27 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+const fallbackCarousel = [
+  {
+    title: "Destacados",
+    products: [
+      { img: "/demo/fallback1.jpg", price: "US$ 9,99" },
+      { img: "/demo/fallback2.jpg", price: "US$ 19,99" },
+      { img: "/demo/fallback3.jpg", price: "US$ 29,99" },
+    ],
+  },
+];
+
 export default function HeroCarousel() {
   const carouselData = useCarouselData();
   const [index, setIndex] = useState(0);
 
-  const prev = () => setIndex((index - 1 + carouselData.length) % carouselData.length);
-  const next = () => setIndex((index + 1) % carouselData.length);
+  const data = carouselData.length ? carouselData : fallbackCarousel;
 
-  if (!carouselData.length) return null;
+  const prev = () => setIndex((index - 1 + data.length) % data.length);
+  const next = () => setIndex((index + 1) % data.length);
 
-  const { title, products } = carouselData[index];
+  const { title, products } = data[index];
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
