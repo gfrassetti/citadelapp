@@ -1,41 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { useCarouselData } from "@/hooks/useCarouselData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const carouselData = [
-  {
-    title: "Recien Añadidos", products: [
-      { img: "/demo/skull1.jpg", price: "US$ 0,45" },
-      { img: "/demo/mask1.jpg", price: "US$ 99,85" },
-      { img: "/demo/costume1.jpg", price: "US$ 5,95" },
-    ],
-  },
-  {
-    title: "Electronica",
-    products: [
-      { img: "/demo/violin.jpg", price: "US$ 589" },
-      { img: "/demo/red-dress.jpg", price: "US$ 188" },
-      { img: "/demo/pink-dress.jpg", price: "US$ 8,90" },
-    ],
-  },
-  {
-    title: "Para Negocios",
-    products: [
-      { img: "/demo/fan.jpg", price: "US$ 20,30" },
-      { img: "/demo/pool.jpg", price: "US$ 236,90" },
-      { img: "/demo/camera.jpg", price: "US$ 24,50" },
-    ],
-  },
-];
-
 export default function HeroCarousel() {
+  const carouselData = useCarouselData();
   const [index, setIndex] = useState(0);
 
   const prev = () => setIndex((index - 1 + carouselData.length) % carouselData.length);
   const next = () => setIndex((index + 1) % carouselData.length);
+
+  if (!carouselData.length) return null;
 
   const { title, products } = carouselData[index];
 
@@ -55,10 +33,14 @@ export default function HeroCarousel() {
 
       <Card className="bg-pink-medium p-4 text-white">
         <CardTitle className="mb-4">{title}</CardTitle>
-        <CardContent className="flex gap-4  justify-center overflow-x-auto">
+        <CardContent className="flex gap-4 justify-center overflow-x-auto">
           {products.map((product, idx) => (
-            <div key={idx} className="min-w-[100px] flex flex-col justify-center">
-              <img src={product.img} alt="" className="h-24 w-24 object-cover rounded mb-2" />
+            <div key={idx} className="min-w-[100px] flex flex-col items-center justify-center">
+              <img
+                src={product.img}
+                alt="Producto"
+                className="h-24 w-24 object-cover rounded mb-2"
+              />
               <p className="text-sm text-center">{product.price}</p>
             </div>
           ))}

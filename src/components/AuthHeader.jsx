@@ -18,7 +18,7 @@ export default function AuthHeader() {
         theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-800"
       )}
     >
-      <div className="flex flex-col-reverse items-center gap-4">
+      <div className="flex flex-col items-center gap-4">
         <Link href="/">
           <Image
             src={srcLogo}
