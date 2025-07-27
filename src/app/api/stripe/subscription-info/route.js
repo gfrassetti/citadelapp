@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { admin } from "@/lib/db/firebaseAdmin";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-08-16",
@@ -33,8 +34,22 @@ export async function GET(req) {
       return NextResponse.json({ subscription: null }, { status: 200 });
     }
 
+    const subscription = subscriptions.data[0];
+    const status = subscription.status;
+    const currentPeriodEnd = subscription.current_period_end;
+
+    // Si la suscripción está cancelada y ya venció
+    const now = Math.floor(Date.now() / 1000); // timestamp actual en segundos
+    const expired = status === "canceled" && currentPeriodEnd < now;
+
+    if (expired) {
+      await admin.firestore().collection("users").doc(uid).update({
+        plan: "free",
+      });
+    }
+
     return NextResponse.json({
-      subscription: subscriptions.data[0],
+      subscription,
       customer,
     });
   } catch (error) {
