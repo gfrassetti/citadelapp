@@ -3,17 +3,12 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/context/AuthContext";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import Loader from "@/components/Loader";
 import UpdatePaymentMethod from "@/components/UpdatePaymentMethod";
 import { toast } from "sonner";
 import { Loader2Icon } from "lucide-react";
-
+import { Button } from "@/components/ui/button";
 
 const paymentIcons = {
   visa: "/assets/visa-4.svg",
@@ -109,31 +104,29 @@ export default function SubscriptionInfo() {
       </div>
     );
 
-    if (!subscription || subscription.status === "canceled") {
-      return (
-        <div className="flex flex-col items-center justify-center h-64 text-center gap-4">
-          <p className="text-gray-700 text-lg dark:text-gray-200">
-            No tenés una suscripción activa.
-          </p>
-          <Button
-            onClick={() => handleUpgrade.mutate()}
-            className="bg-accent-blue hover:bg-primary-dark text-white font-semibold px-6 py-2 rounded"
-            disabled={handleUpgrade.isPending}
-          >
-            {handleUpgrade.isPending ? (
-              <>
-                <Loader2Icon className="animate-spin mr-2 h-4 w-4" />
-                Procesando...
-              </>
-            ) : (
-              "Actualizar a PRO"
-            )}
-          </Button>
-        </div>
-      );
-    }
-    
-    
+  if (!subscription || subscription.status === "canceled") {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-center gap-4">
+        <p className="text-gray-700 text-lg dark:text-gray-200">
+          No tenés una suscripción activa.
+        </p>
+        <Button
+          onClick={() => handleUpgrade.mutate()}
+          className="bg-accent-blue hover:bg-primary-dark text-white font-semibold px-6 py-2 rounded"
+          disabled={handleUpgrade.isPending}
+        >
+          {handleUpgrade.isPending ? (
+            <>
+              <Loader2Icon className="animate-spin mr-2 h-4 w-4" />
+              Procesando...
+            </>
+          ) : (
+            "Actualizar a PRO"
+          )}
+        </Button>
+      </div>
+    );
+  }
 
   const card = subscription?.default_payment_method?.card;
   const normalized = normalizeMethod(card?.brand);
@@ -158,14 +151,17 @@ export default function SubscriptionInfo() {
               {new Intl.NumberFormat("es-AR", {
                 style: "currency",
                 currency: subscription.currency?.toUpperCase() || "USD",
-              }).format((subscription.items?.[0]?.price?.unit_amount || 0) / 100
-            )}
+              }).format(
+                (subscription.items?.[0]?.price?.unit_amount || 0) / 100
+              )}
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell className="font-semibold">Renovación</TableCell>
             <TableCell>
-              {new Date(subscription.current_period_end * 1000).toLocaleDateString()}
+              {new Date(
+                subscription.current_period_end * 1000
+              ).toLocaleDateString()}
             </TableCell>
           </TableRow>
           <TableRow>
@@ -201,31 +197,31 @@ export default function SubscriptionInfo() {
           </button>
         )}
 
-{subscription.status !== "canceled" && (
-  <button
-    onClick={() =>
-      mutationCancel.mutate(subscription.id, {
-        onSuccess: () => {
-          toast.success("Suscripción cancelada correctamente");
-        },
-        onError: () => {
-          toast.error("Error al cancelar suscripción");
-        },
-      })
-    }
-    disabled={mutationCancel.isPending}
-    className="btn-secondary flex items-center justify-center gap-2 px-4 py-2 rounded"
-  >
-    {mutationCancel.isPending ? (
-      <>
-        <Loader2Icon className="animate-spin w-4 h-4" />
-        Cancelando...
-      </>
-    ) : (
-      "Cancelar Suscripción"
-    )}
-  </button>
-)}
+        {subscription.status !== "canceled" && (
+          <button
+            onClick={() =>
+              mutationCancel.mutate(subscription.id, {
+                onSuccess: () => {
+                  toast.success("Suscripción cancelada correctamente");
+                },
+                onError: () => {
+                  toast.error("Error al cancelar suscripción");
+                },
+              })
+            }
+            disabled={mutationCancel.isPending}
+            className="btn-secondary flex items-center justify-center gap-2 px-4 py-2 rounded"
+          >
+            {mutationCancel.isPending ? (
+              <>
+                <Loader2Icon className="animate-spin w-4 h-4" />
+                Cancelando...
+              </>
+            ) : (
+              "Cancelar Suscripción"
+            )}
+          </button>
+        )}
       </div>
 
       <UpdatePaymentMethod />
