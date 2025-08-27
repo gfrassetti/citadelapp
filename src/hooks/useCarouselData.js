@@ -1,59 +1,43 @@
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, orderBy, where, limit } from "firebase/firestore";
-import { db } from "@/lib/db/db";
+import { db } from "../lib/db/db";
+import { collection, getDocs, orderBy, limit, query } from "firebase/firestore";
 
 export function useCarouselData() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
     const fetchCarousel = async () => {
-      const result = [];
+      const productosRef = collection(db, "products");
 
-      // Slide 1: últimos productos
-      const recentSnap = await getDocs(
-        query(collection(db, "products"), orderBy("createdAt", "desc"), limit(6))
+      const recientesSnap = await getDocs(
+        query(productosRef, orderBy("createdAt", "desc"), limit(10))
       );
-      const recentProducts = recentSnap.docs.map(doc => doc.data()).slice(0, 3);
-      result.push({
-        title: "Recientemente Añadidos",
-        products: recentProducts.map(p => ({
-          img: p.images?.[0] || "/fallback.jpg",
-          price: `US$ ${p.price?.toFixed(2) || "--"}`,
-        })),
+
+      const masAñadidosSnap = await getDocs(
+        query(productosRef, orderBy("price", "desc"), limit(10))
+      );
+
+      const aleatoriosSnap = await getDocs(query(productosRef, limit(10)));
+
+      const mapDocs = (snap, title) => ({
+        title,
+        products: snap.docs.map((doc) => {
+          const d = doc.data();
+          return {
+            img: d.imageUrl,
+            price: d.price,
+            name: d.productName || "Producto",
+          };
+        }),
       });
 
-      // Slide 2: productos por tag
-      const taggedSnap = await getDocs(
-        query(collection(db, "products"), where("tags", "array-contains", "negocios"), limit(6))
-      );
-      const taggedProducts = taggedSnap.docs.map(doc => doc.data()).slice(0, 3);
-      result.push({
-        title: "Para Negocios",
-        products: taggedProducts.map(p => ({
-          img: p.images?.[0] || "/fallback.jpg",
-          price: `US$ ${p.price?.toFixed(2) || "--"}`,
-        })),
-      });
-
-      // Slide 3: empresas por tag
-      const companySnap = await getDocs(
-        query(collection(db, "users"), where("tags", "array-contains", "vacaciones"), limit(6))
-      );
-      const companies = companySnap.docs.map(doc => doc.data()).slice(0, 3);
-      result.push({
-        title: "Empresas destacadas",
-        products: companies.map(c => ({
-          img: c.avatarUrl || "/fallback-company.jpg",
-          price: c.website || "Ver más",
-        })),
-      });
-
-      console.log("🔥 Productos recientes:", recent);
-      console.log("🔥 Productos negocios:", tagged);
-      console.log("🔥 Empresas vacaciones:", companies);
-      setData(result);
+      setData([
+        mapDocs(recientesSnap, "Recientes"),
+        mapDocs(masAñadidosSnap, "Más añadidos"),
+        mapDocs(aleatoriosSnap, "Sugerencias"),
+      ]);
     };
-    
+
     fetchCarousel();
   }, []);
 

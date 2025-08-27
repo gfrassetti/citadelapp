@@ -31,7 +31,9 @@ export default function HeroCarousel() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold">Esenciales para las vacaciones</h2>
+        <h2 className="text-xl font-semibold">
+          Esenciales para las vacaciones
+        </h2>
         <div className="flex gap-2">
           <Button variant="outline" size="icon" onClick={prev}>
             <ChevronLeft />
@@ -46,13 +48,24 @@ export default function HeroCarousel() {
         <CardTitle className="mb-4">{title}</CardTitle>
         <CardContent className="flex gap-4 justify-center overflow-x-auto">
           {products.map((product, idx) => (
-            <div key={idx} className="min-w-[100px] flex flex-col items-center justify-center">
-              <img
-                src={product.img}
-                alt="Producto"
-                className="h-24 w-24 object-cover rounded mb-2"
-              />
-              <p className="text-sm text-center">{product.price}</p>
+            <div className="flex flex-col items-center gap-2 min-w-[160px]">
+              <a
+                href={`/product/${product.id}`}
+                className="w-40 h-40 rounded overflow-hidden cursor-pointer bg-white hover:border-solid hover:border-2 hover:border-pink-medium hover:scale-102 transition-transform"
+              >
+                <div
+                  key={idx}
+                  className="w-40 h-40 rounded overflow-hidden bg-white p-4"
+                >
+                  <img
+                    src={product.img}
+                    alt={product.name}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <p className="text-sm text-center">{product.name}</p>
+                <p className="text-sm text-center">$ {product.price}</p>
+              </a>
             </div>
           ))}
         </CardContent>
