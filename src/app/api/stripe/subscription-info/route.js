@@ -45,6 +45,14 @@ export async function GET(req) {
     if (expired) {
       await admin.firestore().collection("users").doc(uid).update({
         plan: "free",
+        subscription: "", // ← AÑADÍ ESTO
+      });
+    }
+    
+    if (status === "active") {
+      await admin.firestore().collection("users").doc(uid).update({
+        plan: "pro",
+        subscription: subscription.id,
       });
     }
 

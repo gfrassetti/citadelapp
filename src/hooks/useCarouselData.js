@@ -13,17 +13,16 @@ export function useCarouselData() {
         query(productosRef, orderBy("createdAt", "desc"), limit(10))
       );
 
-      const masAñadidosSnap = await getDocs(
+      const masBuscadosSnap = await getDocs(
         query(productosRef, orderBy("price", "desc"), limit(10))
       );
-
-      const aleatoriosSnap = await getDocs(query(productosRef, limit(10)));
 
       const mapDocs = (snap, title) => ({
         title,
         products: snap.docs.map((doc) => {
           const d = doc.data();
           return {
+            id: doc.id,
             img: d.imageUrl,
             price: d.price,
             name: d.productName || "Producto",
@@ -33,8 +32,7 @@ export function useCarouselData() {
 
       setData([
         mapDocs(recientesSnap, "Recientes"),
-        mapDocs(masAñadidosSnap, "Más añadidos"),
-        mapDocs(aleatoriosSnap, "Sugerencias"),
+        mapDocs(masBuscadosSnap, "Más buscados"),
       ]);
     };
 
