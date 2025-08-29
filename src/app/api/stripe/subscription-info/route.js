@@ -18,6 +18,10 @@ export async function GET(req) {
     });
 
     if (!customers.data.length) {
+      await admin.firestore().collection("users").doc(uid).update({
+        plan: "free",
+        subscription: "",
+      });
       return NextResponse.json({ subscription: null }, { status: 200 });
     }
 
@@ -27,29 +31,36 @@ export async function GET(req) {
       customer: customer.id,
       status: "all",
       expand: ["data.items", "data.default_payment_method"],
-      limit: 1,
     });
 
-    if (!subscriptions.data.length) {
+    const validSubscription = subscriptions.data.find(
+      (sub) => sub.status === "active" || sub.status === "paused"
+    );
+
+    if (!validSubscription) {
+      await admin.firestore().collection("users").doc(uid).update({
+        plan: "free",
+        subscription: "",
+      });
       return NextResponse.json({ subscription: null }, { status: 200 });
     }
 
-    const subscription = subscriptions.data[0];
+    const subscription = validSubscription;
     const status = subscription.status;
+    console.log('status:', status);
     const currentPeriodEnd = subscription.current_period_end;
-
-    // Si la suscripción está cancelada y ya venció
-    const now = Math.floor(Date.now() / 1000); // timestamp actual en segundos
+    const now = Math.floor(Date.now() / 1000);
     const expired = status === "canceled" && currentPeriodEnd < now;
 
     if (expired) {
       await admin.firestore().collection("users").doc(uid).update({
         plan: "free",
-        subscription: "", // ← AÑADÍ ESTO
+        subscription: "",
       });
+      return NextResponse.json({ subscription: null }, { status: 200 });
     }
-    
-    if (status === "active") {
+
+    if (status === "active" || status === "paused") {
       await admin.firestore().collection("users").doc(uid).update({
         plan: "pro",
         subscription: subscription.id,
@@ -65,3 +76,4 @@ export async function GET(req) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
