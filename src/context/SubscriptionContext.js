@@ -11,35 +11,36 @@ export function SubscriptionProvider({ children }) {
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchSubscription = async () => {
     if (!user?.uid) return;
 
-    const fetchSubscription = async () => {
-      try {
-        const res = await fetch("/api/stripe/subscription-info", {
-          headers: {
-            "x-user-id": user.uid,
-          },
-        });
+    setLoading(true);
+    try {
+      const res = await fetch("/api/stripe/subscription-info", {
+        headers: {
+          "x-user-id": user.uid,
+        },
+      });
 
-        if (res.ok) {
-          const data = await res.json();
-          setSubscription(data.subscription || null);
-          setCustomer(data.customer || null);
-        }
-      } catch (err) {
-        console.error("Error al cargar subscripción", err);
-      } finally {
-        setLoading(false);
+      if (res.ok) {
+        const data = await res.json();
+        setSubscription(data.subscription || null);
+        setCustomer(data.customer || null);
       }
-    };
+    } catch (err) {
+      console.error("Error al cargar subscripción", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchSubscription();
   }, [user?.uid]);
 
   return (
     <SubscriptionContext.Provider
-      value={{ subscription, customer, loading }}
+      value={{ subscription, customer, loading, refetch: fetchSubscription }}
     >
       {children}
     </SubscriptionContext.Provider>
@@ -49,3 +50,4 @@ export function SubscriptionProvider({ children }) {
 export function useSubscription() {
   return useContext(SubscriptionContext);
 }
+
