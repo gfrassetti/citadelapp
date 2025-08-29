@@ -23,9 +23,9 @@ export async function POST(req) {
       return NextResponse.json({ error: "Token inválido" }, { status: 401 });
     }
 
-    const customer = await stripe.customers.create({
+    await stripe.customers.create({
       email,
-      metadata: { uid },
+      metadata: { uid: user.uid },
     });
 
     const session = await stripe.checkout.sessions.create({
