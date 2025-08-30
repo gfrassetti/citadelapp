@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { admin } from "@/lib/db/firebaseAdmin";
+import { db } from "@/lib/db/firebaseAdmin";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-08-16",
@@ -8,55 +8,63 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 export async function POST(req) {
   const rawBody = await req.text();
-  const signature = req.headers.get("stripe-signature");
+  const sig = req.headers.get("stripe-signature");
 
   let event;
 
   try {
-    console.log("🎯 Evento:", event.type);
-    console.log("🔥 Subscription ID:", subscription.id);
-    console.log("👤 Customer metadata.uid:", customer.metadata?.uid);
-
     event = stripe.webhooks.constructEvent(
       rawBody,
-      signature,
+      sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
-    console.error("❌ Error verificando firma del webhook:", err.message);
-    return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+    console.error("❌ Error verificando webhook:", err.message);
+    return NextResponse.json({ error: "Webhook inválido" }, { status: 400 });
   }
 
-  const handleSubscriptionUpdate = async (subscription) => {
-    const customerId = subscription.customer;
-    const customer = await stripe.customers.retrieve(customerId);
-    const uid = customer.metadata?.uid;
+  try {
+    switch (event.type) {
+      case "customer.subscription.created":
+      case "customer.subscription.updated": {
+        const subscription = event.data.object;
+        const customerId = subscription.customer;
 
-    if (!uid) {
-      console.error("❌ UID no encontrado en metadata del customer.");
-      return NextResponse.json({ error: "UID no encontrado" }, { status: 400 });
+        const customer = await stripe.customers.retrieve(customerId);
+        const uid = customer.metadata?.uid;
+
+        if (uid) {
+          await db.collection("users").doc(uid).update({
+            plan: subscription.status === "active" ? "pro" : "free",
+            subscriptionId: subscription.id,
+          });
+        }
+
+        break;
+      }
+
+      case "customer.subscription.deleted": {
+        const subscription = event.data.object;
+        const customer = await stripe.customers.retrieve(subscription.customer);
+        const uid = customer.metadata?.uid;
+
+        if (uid) {
+          await db.collection("users").doc(uid).update({
+            plan: "free",
+            subscriptionId: subscription.id,
+          });
+        }
+
+        break;
+      }
+
+      default:
+        console.log(`🔹 Evento ignorado: ${event.type}`);
     }
 
-    const userRef = admin.firestore().collection("users").doc(uid);
-
-    await userRef.update({
-      plan: "pro",
-      subscriptionId: subscription.id,
-    });
-
-    console.log(`✅ Plan actualizado a PRO para UID: ${uid}`);
-    return NextResponse.json({ received: true }, { status: 200 });
-  };
-
-  if (event.type === "customer.subscription.created") {
-    const subscription = event.data.object;
-    return await handleSubscriptionUpdate(subscription);
+    return NextResponse.json({ received: true });
+  } catch (error) {
+    console.error("❌ Error al procesar webhook:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
-
-  if (event.type.startsWith("customer.subscription")) {
-    const subscription = event.data.object;
-    return await handleSubscriptionUpdate(subscription);
-  }
-
-  return NextResponse.json({ received: true });
 }
