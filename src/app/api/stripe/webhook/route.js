@@ -41,7 +41,7 @@ export async function POST(req) {
 
       if (uid) {
         await db.collection("users").doc(uid).update({
-          plan: subscription.status === "active" ? "pro" : "free",
+          plan: "pro",
           subscriptionId: subscription.id,
         });
         console.log(`✅ Plan actualizado a ${subscription.status} para UID: ${uid}`);
