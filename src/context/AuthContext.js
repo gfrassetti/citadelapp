@@ -37,11 +37,15 @@ export const AuthProvider = ({ children }) => {
         ? new Date(subscription.cancel_at * 1000)
         : null;
 
-      if (subscription.status === "canceled" && endDate && now >= endDate) {
-        const userRef = doc(db, "users", uid);
-        await updateDoc(userRef, { plan: "free" });
-        setUser((prev) => ({ ...prev, plan: "free" }));
-      }
+        if (
+          subscription.status === "canceled" &&
+          subscription.cancel_at &&
+          now >= new Date(subscription.cancel_at * 1000)
+        ) {
+          await updateDoc(userRef, { plan: "free" });
+          setUser((prev) => ({ ...prev, plan: "free" }));
+        }
+        
     } catch (error) {
       console.error("Error al verificar la suscripción de Stripe:", error);
     }
