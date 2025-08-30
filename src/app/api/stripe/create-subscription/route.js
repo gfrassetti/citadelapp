@@ -50,7 +50,6 @@ export async function POST(req) {
     await admin.firestore().collection("users").doc(uid).set(
       {
         stripeCustomerId: customer.id,
-        subscriptionId: subscriptionId || null,
       },
       { merge: true }
     );
