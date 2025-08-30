@@ -37,6 +37,8 @@ export default function ProDashboardPanel() {
   const isPaused = !!subscription?.pause_collection;
   const isCanceled = subscription?.status === "canceled";
   const isActive = subscription?.status === "active" && !isPaused;
+  const isTrialing = subscription?.status === "trialing" && !isPaused;
+  const isPro = (subscription?.status === "active" || subscription?.status === "trialing") && !subscription?.pause_collection;
 
   useEffect(() => {
     if (!empresaId) return;
@@ -105,22 +107,21 @@ export default function ProDashboardPanel() {
 
   const subscriptionStatus = subscription?.status ?? "-";
   const nextBilling =
-    subscription?.status === "active" && subscription?.current_period_end
-      ? new Date(subscription.current_period_end * 1000).toLocaleDateString(
-          "es-AR",
-          {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          }
-        )
+    (subscription?.status === "active" || subscription?.status === "trialing") &&
+    subscription?.current_period_end
+      ? new Date(subscription.current_period_end * 1000).toLocaleDateString("es-AR", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
       : null;
 
   return (
     <div className="w-full px-4 md:px-8 py-6 space-y-8">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">
-          Bienvenido a tu cuenta <Badge variant="secondary">PRO</Badge>
+          Bienvenido a tu cuenta{" "}
+          {isPro && <Badge variant="secondary">PRO</Badge>}
         </h2>
       </div>
 
@@ -264,3 +265,4 @@ export default function ProDashboardPanel() {
     </div>
   );
 }
+
