@@ -13,6 +13,10 @@ export async function POST(req) {
   let event;
 
   try {
+    console.log("🎯 Evento:", event.type);
+    console.log("🔥 Subscription ID:", subscription.id);
+    console.log("👤 Customer metadata.uid:", customer.metadata?.uid);
+
     event = stripe.webhooks.constructEvent(
       rawBody,
       signature,
@@ -49,7 +53,7 @@ export async function POST(req) {
     return await handleSubscriptionUpdate(subscription);
   }
 
-  if (event.type === "customer.subscription.updated") {
+  if (event.type.startsWith("customer.subscription")) {
     const subscription = event.data.object;
     return await handleSubscriptionUpdate(subscription);
   }
