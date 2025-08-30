@@ -1,48 +1,58 @@
-// context/SubscriptionContext.jsx
-"use client";
+import { NextResponse } from "next/server";
+import Stripe from "stripe";
+import { admin } from "@/lib/db/firebaseAdmin";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { useUser } from "@/context/AuthContext";
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-08-16",
+});
 
-const SubscriptionContext = createContext();
+export async function POST(req) {
+  const rawBody = await req.text();
+  const signature = req.headers.get("stripe-signature");
 
-export const SubscriptionProvider = ({ children }) => {
-  const { user } = useUser();
-  const [subscription, setSubscription] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  let event;
 
-  const fetchSubscription = useCallback(async () => {
-    if (!user?.uid) return;
-    setLoading(true);
-    try {
-      const res = await fetch("/api/stripe/subscription-info", {
-        headers: { "x-user-id": user.uid },
-      });
-      if (!res.ok) throw new Error("Error al obtener la suscripción");
-      const data = await res.json();
-      setSubscription(data.subscription || null);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
+  try {
+    event = stripe.webhooks.constructEvent(
+      rawBody,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    console.error("❌ Error verificando firma del webhook:", err.message);
+    return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+  }
+
+  const handleSubscriptionUpdate = async (subscription) => {
+    const customerId = subscription.customer;
+    const customer = await stripe.customers.retrieve(customerId);
+    const uid = customer.metadata?.uid;
+
+    if (!uid) {
+      console.error("❌ UID no encontrado en metadata del customer.");
+      return NextResponse.json({ error: "UID no encontrado" }, { status: 400 });
     }
-  }, [user?.uid]);
 
-  useEffect(() => {
-    fetchSubscription();
-  }, [fetchSubscription]);
+    const userRef = admin.firestore().collection("users").doc(uid);
 
-  const isPaused = subscription?.pause_collection?.behavior === "mark_uncollectible";
-  const isActive = subscription?.status === "active";
+    await userRef.update({
+      plan: "pro",
+      subscriptionId: subscription.id,
+    });
 
-  return (
-    <SubscriptionContext.Provider
-      value={{ subscription, isPaused, isActive, loading, error, refetch: fetchSubscription }}
-    >
-      {children}
-    </SubscriptionContext.Provider>
-  );
-};
+    console.log(`✅ Plan actualizado a PRO para UID: ${uid}`);
+    return NextResponse.json({ received: true }, { status: 200 });
+  };
 
-export const useSubscription = () => useContext(SubscriptionContext);
+  if (event.type === "customer.subscription.created") {
+    const subscription = event.data.object;
+    return await handleSubscriptionUpdate(subscription);
+  }
+
+  if (event.type === "customer.subscription.updated") {
+    const subscription = event.data.object;
+    return await handleSubscriptionUpdate(subscription);
+  }
+
+  return NextResponse.json({ received: true });
+}
