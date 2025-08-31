@@ -24,32 +24,53 @@ export const AuthProvider = ({ children }) => {
       const response = await fetch("/api/stripe/subscription-info", {
         headers: { "x-user-id": uid },
       });
-
+  
       if (!response.ok) return;
-
+  
       const data = await response.json();
       const subscription = data.subscription;
-
+  
       if (!subscription) return;
-
+  
+      const userRef = doc(db, "users", uid);
       const now = new Date();
-      const endDate = subscription.cancel_at
-        ? new Date(subscription.cancel_at * 1000)
-        : null;
-
-        if (
-          subscription.status === "canceled" &&
-          subscription.cancel_at &&
-          now >= new Date(subscription.cancel_at * 1000)
-        ) {
-          await updateDoc(userRef, { plan: "free" });
-          setUser((prev) => ({ ...prev, plan: "free" }));
-        }
-        
+  
+      if (
+        subscription.status === "active" ||
+        subscription.status === "trialing"
+      ) {
+        await updateDoc(userRef, {
+          plan: "pro",
+          subscriptionId: subscription.id,
+        });
+        setUser((prev) => ({
+          ...prev,
+          plan: "pro",
+          subscriptionId: subscription.id,
+        }));
+        return;
+      }
+  
+      if (
+        subscription.status === "canceled" &&
+        subscription.cancel_at &&
+        now >= new Date(subscription.cancel_at * 1000)
+      ) {
+        await updateDoc(userRef, {
+          plan: "free",
+          subscriptionId: subscription.id,
+        });
+        setUser((prev) => ({
+          ...prev,
+          plan: "free",
+          subscriptionId: subscription.id,
+        }));
+      }
     } catch (error) {
       console.error("Error al verificar la suscripción de Stripe:", error);
     }
   };
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
