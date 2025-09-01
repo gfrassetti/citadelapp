@@ -23,7 +23,7 @@ function Arrow({ dir, onClick }) {
 export default function HeroCarousel() {
   const slides = [
     {
-      src: "/assets/slider_1.png",
+      src: "/assets/slide_1.webp",
       alt: "Esenciales para las vacaciones",
       title: "Esenciales para las vacaciones",
       subtitle: "Tecnología y accesorios para tu viaje",
@@ -31,7 +31,7 @@ export default function HeroCarousel() {
       cta: "Explorar",
     },
     {
-      src: "/assets/slider_2.png",
+      src: "/assets/slide_2.webp",
       alt: "Hogar y muebles",
       title: "Hogar y muebles",
       subtitle: "Renová tus espacios",

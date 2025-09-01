@@ -5,8 +5,8 @@ import clsx from "clsx";
 
 export default function HomeBanner() {
   return (
-    <section className="w-full bg-blue-medium text-white px-8 flex justify-between items-center">
-      <h2 className="text-2xl font-medium sm:text-3xl text-left sm:text-center capitalize pl-8">
+    <section className="w-full bg-blue-medium text-white px-8 flex justify-between items-center sm:h-[10rem]">
+      <h2 className="text-xl font-medium sm:text-3xl text-left sm:text-center capitalize pl-8">
         Abastécete rápido
       </h2>
       <div className="block relative">
