@@ -10,7 +10,7 @@ export default function ThemeToggle() {
 
   return (
     <>
-    <div className="border border-1 border-solid border-white rounded-3xl p-0 box-content h-[20px]">
+    <div className="border sm:ml-4 border-1 border-solid border-white rounded-3xl p-0 box-content h-[20px]">
       <Switch
         onClick={() => setTheme(theme === "light" ? "dark" : "light")}
       >

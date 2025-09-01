@@ -16,10 +16,10 @@ export default {
 			"accent-blue": "#8038e9",
 			"background-light": "#eeedf8",
 			"teal-bright": "#0d0a8a",
-			"mint": "#5deb5a",
+			"mint": "#5deb5a", //mint
 			"pink-medium": "#c646a2",
-			"blue-medium": "#664acb",
-			"accent-cyan": "#06f388",
+			"blue-medium": "#664acb", //blue-medium
+			"accent-cyan": "#06f388", //accent-cyan
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
