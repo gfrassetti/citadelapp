@@ -20,7 +20,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const checkStripeSubscriptionStatus = async (uid) => {
-    console.log("🔍 Revisando suscripción Stripe:", subscription.id, subscription.status, subscription.cancel_at);
     try {
       const response = await fetch("/api/stripe/subscription-info", {
         headers: { "x-user-id": uid },

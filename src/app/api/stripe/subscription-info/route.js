@@ -34,8 +34,14 @@ export async function GET(req) {
     });
 
     const validSubscription = subscriptions.data.find(
-      (sub) => sub.status === "active" || sub.status === "paused"
+      (sub) =>
+        sub.status === "active" ||
+        sub.status === "trialing" ||
+        (sub.status === "canceled" &&
+          sub.cancel_at &&
+          sub.current_period_end * 1000 > Date.now())
     );
+    
 
     if (!validSubscription) {
       await admin.firestore().collection("users").doc(uid).update({
@@ -64,7 +70,7 @@ export async function GET(req) {
       await admin.firestore().collection("users").doc(uid).update({
         plan: "pro",
         subscription: subscription.id,
-      });
+      });      
     }
 
     return NextResponse.json({
