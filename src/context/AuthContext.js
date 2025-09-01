@@ -20,6 +20,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const checkStripeSubscriptionStatus = async (uid) => {
+    console.log("🔍 Revisando suscripción Stripe:", subscription.id, subscription.status, subscription.cancel_at);
     try {
       const response = await fetch("/api/stripe/subscription-info", {
         headers: { "x-user-id": uid },
@@ -56,6 +57,7 @@ export const AuthProvider = ({ children }) => {
         subscription.cancel_at &&
         now >= new Date(subscription.cancel_at * 1000)
       ) {
+        console.log("⚠️ Forzando plan a free por suscripción cancelada vencida", subscription.id);
         await updateDoc(userRef, {
           plan: "free",
           subscriptionId: subscription.id,
