@@ -7,6 +7,7 @@ import { db } from "@/lib/db/db";
 import { useUserData } from "@/context/UserDataContext";
 import { useSubscription } from "@/context/SubscriptionContext";
 import BillingPanel from "@/components/BillingPanel";
+import { getSubscriptionLabel } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -144,7 +145,7 @@ export default function ProDashboardPanel() {
             <CardDescription>Estado actual</CardDescription>
           </CardHeader>
           <CardContent>
-            <Badge variant="default">{subscriptionStatus}</Badge>
+          <Badge variant="default">{getSubscriptionLabel(subscription)}</Badge>
           </CardContent>
         </Card>
 

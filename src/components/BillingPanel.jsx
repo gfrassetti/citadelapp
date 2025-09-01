@@ -1,9 +1,16 @@
 "use client";
 
 import { useSubscription } from "@/context/SubscriptionContext";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { getSubscriptionLabel } from "@/lib/utils";
 
 export default function BillingPanel() {
   const { subscription, customer } = useSubscription();
@@ -21,18 +28,20 @@ export default function BillingPanel() {
   const currentPeriodEndMs = subscription.current_period_end * 1000;
   const isExpired = isCanceled && currentPeriodEndMs < Date.now();
 
-  const nextBilling = !isExpired && subscription.current_period_end
-    ? new Date(currentPeriodEndMs).toLocaleDateString("es-AR", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "-";
+  const nextBilling =
+    !isExpired && subscription.current_period_end
+      ? new Date(currentPeriodEndMs).toLocaleDateString("es-AR", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      : "-";
 
   const cancelAtPeriodEnd = subscription.cancel_at_period_end;
-  const plan = subscription.items[0]?.price?.nickname ||
-               subscription.items[0]?.price?.product?.name ||
-               "No Disponible";
+  const plan =
+    subscription.items[0]?.price?.nickname ||
+    subscription.items[0]?.price?.product?.name ||
+    "No Disponible";
 
   const method = subscription.default_payment_method;
   const cardInfo = method?.card
@@ -61,7 +70,9 @@ export default function BillingPanel() {
       <CardContent className="space-y-4 text-sm">
         <div className="flex justify-between">
           <span>Estado</span>
-          <Badge variant={isCanceled ? "destructive" : "outline"}>{status}</Badge>
+          <Badge variant={isCanceled ? "destructive" : "outline"}>
+            {getSubscriptionLabel(subscription)}
+          </Badge>
         </div>
         <Separator />
         <div className="flex justify-between">

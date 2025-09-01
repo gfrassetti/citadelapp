@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHandleUpgrade } from "@/hooks/useHandleUpgrade";
-
+import { getSubscriptionLabel } from "@/lib/utils";
 
 const paymentIcons = {
   visa: "/assets/visa-4.svg",
@@ -98,7 +98,7 @@ export default function SubscriptionInfo() {
   const subscription = data?.subscription;
   const customer = data?.customer;
 
-  /* if (isLoading) return <Loader text="Cargando Suscripción..." />; */
+  if (isLoading || !data) return <Loader text="Cargando Suscripción..." />;
 
   if (isError)
     return (
@@ -146,7 +146,7 @@ export default function SubscriptionInfo() {
           </TableRow>
           <TableRow>
             <TableCell className="font-semibold">Estado</TableCell>
-            <TableCell>{isPaused ? "paused" : subscription.status}</TableCell>
+            <TableCell>{getSubscriptionLabel(subscription)}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell className="font-semibold">Monto</TableCell>
