@@ -21,7 +21,7 @@ export default function CategoriesCarousel({ onCategoryClick, onShowAll }) {
   return (
     <div
       className={clsx(
-        "rounded-lg p-4",
+        "w-full max-w-5xl mx-auto rounded-lg p-8 mt-8",
         theme === "dark" ? "bg-gray-800" : "bg-white"
       )}
     >
