@@ -14,14 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/AuthContext";
-import {
-  doc,
-  setDoc,
-  updateDoc,
-  getDoc,
-  collection,
-  getDocs,
-} from "firebase/firestore";
+import { doc, setDoc, updateDoc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/db/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -42,15 +35,17 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
       price: "",
       image: null,
       tags: "",
-      category: "",
+      categoryId: "",
     },
   });
 
-  // Traer categorías de Firestore
   useEffect(() => {
     const fetchCategories = async () => {
-      const res = await fetch("/api/categories", { cache: "no-store" });
-      const cats = await res.json();
+      const snapshot = await getDocs(collection(db, "categories"));
+      const cats = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       setCategories(cats);
     };
     fetchCategories();
@@ -92,14 +87,17 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
 
     setUploading(true);
     try {
+      const cat = categories.find((c) => c.id === data.categoryId) || {};
       const formattedData = {
         ...data,
+        categoryId: data.categoryId || "",
+        categoryName: cat.name || "",
         tags:
           typeof data.tags === "string"
             ? data.tags.split(",").map((tag) => tag.trim())
             : Array.isArray(data.tags)
-              ? data.tags
-              : [],
+            ? data.tags
+            : [],
       };
 
       await uploadProductData(formattedData, empresaId);
@@ -121,9 +119,7 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
       <Card className="border border-gray-200 shadow-sm">
         <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <CardTitle className="text-xl font-bold">
-              Sube un producto
-            </CardTitle>
+            <CardTitle className="text-xl font-bold">Sube un producto</CardTitle>
             <p className="text-muted-foreground text-sm">
               Publica tu producto para que sea visible
             </p>
@@ -147,7 +143,6 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
               onSubmit={form.handleSubmit(onSubmit)}
               className="grid grid-cols-1 md:grid-cols-2 gap-6"
             >
-              {/* Nombre */}
               <FormField
                 name="productName"
                 control={form.control}
@@ -162,7 +157,6 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
                 )}
               />
 
-              {/* Descripción */}
               <FormField
                 name="description"
                 control={form.control}
@@ -177,7 +171,6 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
                 )}
               />
 
-              {/* Precio */}
               <FormField
                 name="price"
                 control={form.control}
@@ -192,9 +185,8 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
                 )}
               />
 
-              {/* Categoría */}
               <FormField
-                name="category"
+                name="categoryId"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
@@ -202,9 +194,9 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
                     <FormControl>
                       <select {...field} className="w-full border rounded p-2">
                         <option value="">Selecciona una categoría</option>
-                        {categories.map((cat) => (
-                          <option key={cat.id} value={cat.name}>
-                            {cat.name}
+                        {categories.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
                           </option>
                         ))}
                       </select>
@@ -214,7 +206,6 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
                 )}
               />
 
-              {/* Tags */}
               <FormField
                 name="tags"
                 control={form.control}
@@ -233,7 +224,6 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
                 )}
               />
 
-              {/* Imagen */}
               <div className="md:col-span-2">
                 <FormField
                   name="image"
@@ -249,8 +239,7 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
                             if (file) {
                               field.onChange(file);
                               const reader = new FileReader();
-                              reader.onloadend = () =>
-                                setPreview(reader.result);
+                              reader.onloadend = () => setPreview(reader.result);
                               reader.readAsDataURL(file);
                             }
                           }}
@@ -277,9 +266,7 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
           {successMessage && (
             <Alert variant="success" className="mt-6">
               <AlertTitle>{successMessage}</AlertTitle>
-              <AlertDescription>
-                Tu producto ya está disponible.
-              </AlertDescription>
+              <AlertDescription>Tu producto ya está disponible.</AlertDescription>
             </Alert>
           )}
         </CardContent>
@@ -287,3 +274,4 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
     </div>
   );
 }
+
