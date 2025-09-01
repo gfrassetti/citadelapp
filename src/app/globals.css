@@ -1,6 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
+
+.slick-dots li button:before { font-size: 10px; opacity: .35 }
+.slick-dots li.slick-active button:before { opacity: 1 }
+.slick-prev:before,.slick-next:before{font-size:24px}
+
 
 body {
   font-family: var(--font-inter), sans-serif;

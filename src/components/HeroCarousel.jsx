@@ -1,20 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useRef } from "react";
+import Slider from "react-slick";
 import { useCarouselData } from "@/hooks/useCarouselData";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
+function Arrow({ onClick, dir }) {
+  return (
+    <button
+      onClick={onClick}
+      className="absolute z-20 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white shadow rounded-full p-2"
+      style={dir === "prev" ? { left: 16 } : { right: 16 }}
+      aria-label={dir === "prev" ? "Anterior" : "Siguiente"}
+    >
+      {dir === "prev" ? <ChevronLeft /> : <ChevronRight />}
+    </button>
+  );
+}
+
 export default function HeroCarousel() {
-  const carouselData = useCarouselData();
-  const [index, setIndex] = useState(0);
+  const data = useCarouselData();
+  const sliderRef = useRef(null);
 
-  const prev = () => setIndex((index - 1 + carouselData.length) % carouselData.length);
-  const next = () => setIndex((index + 1) % carouselData.length);
-
-  if (!carouselData.length) {
+  if (!data.length) {
     return (
       <div className="text-center text-sm text-muted-foreground py-10">
         Cargando elementos del carousel...
@@ -22,38 +32,63 @@ export default function HeroCarousel() {
     );
   }
 
-  const { title, products } = carouselData[index];
+  const settings = {
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    dots: true,
+    arrows: true,
+    prevArrow: <Arrow dir="prev" />,
+    nextArrow: <Arrow dir="next" />,
+    autoplay: true,
+    autoplaySpeed: 5000,
+    adaptiveHeight: false,
+    pauseOnHover: true,
+  };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold">Esenciales para las vacaciones</h2>
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={prev}>
-            <ChevronLeft />
-          </Button>
-          <Button variant="outline" size="icon" onClick={next}>
-            <ChevronRight />
-          </Button>
-        </div>
-      </div>
+    <div className="w-full">
+      <div className="relative w-full">
+        <Slider ref={sliderRef} {...settings}>
+          {data.map((item, i) => {
+            const bg =
+              item.banner ||
+              item.image ||
+              item.img ||
+              item.collage ||
+              item.products?.[0]?.img ||
+              "/placeholder-hero.jpg";
 
-      <Card className="bg-pink-medium p-4 text-white">
-        <CardTitle className="mb-4 text-center">{title}</CardTitle>
-        <CardContent className="flex gap-6 justify-center overflow-x-auto">
-          {products.map((product, idx) => (
-            <Link key={idx} href={`/product/${product.id}`} className="min-w-[120px] flex flex-col items-center justify-center">
-              <img
-                src={product.img}
-                alt={product.name}
-                className="h-32 w-32 object-cover rounded mb-2"
-              />
-              <p className="text-sm text-center">{product.name}</p>
-              <p className="text-sm text-center">${product.price}</p>
-            </Link>
-          ))}
-        </CardContent>
-      </Card>
+            return (
+              <div key={i}>
+                <div
+                  className="relative w-full h-[42vw] max-h-[520px] min-h-[280px]"
+                  style={{
+                    backgroundImage: `url(${bg})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }}
+                >
+                  <div className="absolute inset-0 bg-black/30" />
+                  <div className="relative h-full max-w-7xl mx-auto px-4 flex items-center">
+                    <div className="text-white">
+                      <h2 className="text-3xl sm:text-5xl font-bold mb-4">{item.title || "Descubrí más"}</h2>
+                      {item.subtitle && <p className="text-base sm:text-lg mb-6">{item.subtitle}</p>}
+                      {item.cta?.href && (
+                        <Link href={item.cta.href}>
+                          <Button size="lg">{item.cta.label || "Ver más"}</Button>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </Slider>
+      </div>
     </div>
   );
 }
+
