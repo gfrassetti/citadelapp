@@ -34,7 +34,7 @@ const slug = (s) =>
 
 async function ensureSeed() {
   const snap = await getDocs(collection(db, "categories"));
-  if (snap.size > 0) return; // ya hay datos
+  if (snap.size > 0) return;
 
   await Promise.all(
     SEED_CATEGORIES.map(async (name) => {

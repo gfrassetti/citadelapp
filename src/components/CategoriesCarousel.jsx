@@ -1,16 +1,27 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import clsx from "clsx";
 import { ChevronRight } from "lucide-react";
 
-export default function CategoriesCarousel({ categories = [], onCategoryClick, onShowAll }) {
+export default function CategoriesCarousel({ onCategoryClick, onShowAll }) {
   const { theme } = useTheme();
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const res = await fetch("/api/categories", { cache: "no-store" });
+      const data = await res.json();
+      setCategories(data);
+    };
+    fetchCategories();
+  }, []);
 
   return (
     <div
       className={clsx(
-        "rounded-lg p-4 max-w-5xl mx-auto mt-8",
+        "rounded-lg p-4",
         theme === "dark" ? "bg-gray-800" : "bg-white"
       )}
     >
@@ -46,13 +57,6 @@ export default function CategoriesCarousel({ categories = [], onCategoryClick, o
                 : "border-gray-200 text-gray-900 hover:bg-gray-50"
             )}
           >
-            {cat.icon && (
-              <img
-                src={cat.icon}
-                alt={cat.name}
-                className="w-8 h-8 object-contain"
-              />
-            )}
             <span className="text-sm font-medium">{cat.name}</span>
             <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
           </button>

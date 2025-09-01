@@ -14,7 +14,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/AuthContext";
-import { doc, setDoc, updateDoc, getDoc, collection, getDocs } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  updateDoc,
+  getDoc,
+  collection,
+  getDocs,
+} from "firebase/firestore";
 import { db } from "@/lib/db/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -41,12 +48,13 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const snapshot = await getDocs(collection(db, "categories"));
-      const cats = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setCategories(cats);
+      try {
+        const res = await fetch("/api/categories", { cache: "no-store" });
+        const data = await res.json();
+        setCategories(data);
+      } catch (err) {
+        console.error("Error cargando categorías:", err);
+      }
     };
     fetchCategories();
   }, []);
@@ -96,8 +104,8 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
           typeof data.tags === "string"
             ? data.tags.split(",").map((tag) => tag.trim())
             : Array.isArray(data.tags)
-            ? data.tags
-            : [],
+              ? data.tags
+              : [],
       };
 
       await uploadProductData(formattedData, empresaId);
@@ -111,6 +119,7 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
       setUploading(false);
     }
   };
+  console.log("CATEGORIES EN ESTADO:", categories);
 
   if (!empresaId) return <p className="text-center">Cargando...</p>;
 
@@ -119,7 +128,9 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
       <Card className="border border-gray-200 shadow-sm">
         <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <CardTitle className="text-xl font-bold">Sube un producto</CardTitle>
+            <CardTitle className="text-xl font-bold">
+              Sube un producto
+            </CardTitle>
             <p className="text-muted-foreground text-sm">
               Publica tu producto para que sea visible
             </p>
@@ -239,7 +250,8 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
                             if (file) {
                               field.onChange(file);
                               const reader = new FileReader();
-                              reader.onloadend = () => setPreview(reader.result);
+                              reader.onloadend = () =>
+                                setPreview(reader.result);
                               reader.readAsDataURL(file);
                             }
                           }}
@@ -266,7 +278,9 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
           {successMessage && (
             <Alert variant="success" className="mt-6">
               <AlertTitle>{successMessage}</AlertTitle>
-              <AlertDescription>Tu producto ya está disponible.</AlertDescription>
+              <AlertDescription>
+                Tu producto ya está disponible.
+              </AlertDescription>
             </Alert>
           )}
         </CardContent>
@@ -274,4 +288,3 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
     </div>
   );
 }
-
