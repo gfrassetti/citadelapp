@@ -14,7 +14,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/AuthContext";
-import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  updateDoc,
+  getDoc,
+  collection,
+  getDocs,
+} from "firebase/firestore";
 import { db } from "@/lib/db/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -25,6 +32,7 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
   const [successMessage, setSuccessMessage] = useState("");
   const [empresaId, setEmpresaId] = useState(initialEmpresaId || null);
   const [preview, setPreview] = useState(null);
+  const [categories, setCategories] = useState([]);
   const { user } = useUser();
 
   const form = useForm({
@@ -34,8 +42,19 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
       price: "",
       image: null,
       tags: "",
+      category: "",
     },
   });
+
+  // Traer categorías de Firestore
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const res = await fetch("/api/categories", { cache: "no-store" });
+      const cats = await res.json();
+      setCategories(cats);
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     if (!user?.uid || empresaId) return;
@@ -75,11 +94,12 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
     try {
       const formattedData = {
         ...data,
-        tags: typeof data.tags === "string"
-          ? data.tags.split(",").map(tag => tag.trim())
-          : Array.isArray(data.tags)
-            ? data.tags
-            : [],
+        tags:
+          typeof data.tags === "string"
+            ? data.tags.split(",").map((tag) => tag.trim())
+            : Array.isArray(data.tags)
+              ? data.tags
+              : [],
       };
 
       await uploadProductData(formattedData, empresaId);
@@ -101,19 +121,33 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
       <Card className="border border-gray-200 shadow-sm">
         <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <CardTitle className="text-xl font-bold">Sube un producto</CardTitle>
-            <p className="text-muted-foreground text-sm">Publica tu producto para que sea visible</p>
+            <CardTitle className="text-xl font-bold">
+              Sube un producto
+            </CardTitle>
+            <p className="text-muted-foreground text-sm">
+              Publica tu producto para que sea visible
+            </p>
           </div>
           {preview && (
             <div className="w-20 h-20 rounded overflow-hidden border">
-              <Image src={preview} alt="Preview" width={80} height={80} className="object-cover" />
+              <Image
+                src={preview}
+                alt="Preview"
+                width={80}
+                height={80}
+                className="object-cover"
+              />
             </div>
           )}
         </CardHeader>
 
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            >
+              {/* Nombre */}
               <FormField
                 name="productName"
                 control={form.control}
@@ -128,6 +162,7 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
                 )}
               />
 
+              {/* Descripción */}
               <FormField
                 name="description"
                 control={form.control}
@@ -142,6 +177,7 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
                 )}
               />
 
+              {/* Precio */}
               <FormField
                 name="price"
                 control={form.control}
@@ -156,6 +192,29 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
                 )}
               />
 
+              {/* Categoría */}
+              <FormField
+                name="category"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Categoría</FormLabel>
+                    <FormControl>
+                      <select {...field} className="w-full border rounded p-2">
+                        <option value="">Selecciona una categoría</option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.name}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Tags */}
               <FormField
                 name="tags"
                 control={form.control}
@@ -174,6 +233,7 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
                 )}
               />
 
+              {/* Imagen */}
               <div className="md:col-span-2">
                 <FormField
                   name="image"
@@ -189,7 +249,8 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
                             if (file) {
                               field.onChange(file);
                               const reader = new FileReader();
-                              reader.onloadend = () => setPreview(reader.result);
+                              reader.onloadend = () =>
+                                setPreview(reader.result);
                               reader.readAsDataURL(file);
                             }
                           }}
@@ -202,7 +263,11 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
               </div>
 
               <div className="md:col-span-2">
-                <Button type="submit" className="w-full bg-blue-600" disabled={uploading}>
+                <Button
+                  type="submit"
+                  className="w-full bg-blue-600"
+                  disabled={uploading}
+                >
                   {uploading ? "Subiendo..." : "Subir Producto"}
                 </Button>
               </div>
@@ -212,7 +277,9 @@ export default function UploadProduct({ empresaId: initialEmpresaId }) {
           {successMessage && (
             <Alert variant="success" className="mt-6">
               <AlertTitle>{successMessage}</AlertTitle>
-              <AlertDescription>Tu producto ya está disponible.</AlertDescription>
+              <AlertDescription>
+                Tu producto ya está disponible.
+              </AlertDescription>
             </Alert>
           )}
         </CardContent>

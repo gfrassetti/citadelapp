@@ -10,7 +10,7 @@ export default function CategoriesCarousel({ categories = [], onCategoryClick, o
   return (
     <div
       className={clsx(
-        "rounded-lg p-4",
+        "rounded-lg p-4 max-w-5xl mx-auto mt-8",
         theme === "dark" ? "bg-gray-800" : "bg-white"
       )}
     >

@@ -9,6 +9,14 @@ import { Dialog } from "@/components/ui/dialog";
 import ContactVendorModal from "@/components/ContactVendorModal";
 import { getDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/db/db";
+import  CategoriesCarousel from  '@/components/CategoriesCarousel'
+
+const categoriesMock = [
+  { id: 1, name: "Autos, Motos y Otros", icon: "/assets/icons/car.svg" },
+  { id: 2, name: "Celulares y Teléfonos", icon: "/assets/icons/phone.svg" },
+  { id: 3, name: "Electrodomésticos", icon: "/assets/icons/appliances.svg" },
+  { id: 4, name: "Herramientas", icon: "/assets/icons/tools.svg" },
+];
 
 export default function HomeSearch() {
   const router = useRouter();
@@ -226,6 +234,11 @@ export default function HomeSearch() {
           )}
         </div>
       </div>
+      
+      <CategoriesCarousel
+        categories={categoriesMock}
+        onCategoryClick={(cat) => console.log("Click:", cat)}
+      />
 
       {showModal && selectedProduct && (
         <ContactVendorModal

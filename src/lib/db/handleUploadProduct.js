@@ -22,11 +22,13 @@ export async function uploadProductData(data, empresaId) {
       productName: data.productName,
       description: data.description,
       price: data.price,
+      category: data.category,   // 👈 aquí guardás la categoría seleccionada
       imageUrl,
-      empresaId, // Referencia a la empresa a la que pertenece el producto
+      empresaId, // empresa propietaria del producto
       createdAt: serverTimestamp(),
       tags: data.tags || [],
     });
+    
 
     console.log("Producto subido con éxito:", imageUrl);
   } catch (error) {
