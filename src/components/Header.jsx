@@ -49,7 +49,7 @@ export default function Header() {
         </div>
 
         {/* Botón INGRESAR solo escritorio */}
-        <div className="block justify-items-center">
+        <div className="flex">
           <div className="hidden sm:flex flex-col items-end gap-2 mt-2">
             <Link href="/login" className="flex flex-col items-center">
               <div className="bg-[#c646a2] hover:bg-[#131029] transition-colors px-4 py-3 rounded-lg flex flex-col items-center gap-3 shadow font-bold text-white text-[1.05rem] relative">

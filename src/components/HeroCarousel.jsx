@@ -1,19 +1,19 @@
 "use client";
 
-import { useRef } from "react";
 import Slider from "react-slick";
-import { useCarouselData } from "@/hooks/useCarouselData";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-function Arrow({ onClick, dir }) {
+function Arrow({ dir, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="absolute z-20 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white shadow rounded-full p-2"
-      style={dir === "prev" ? { left: 16 } : { right: 16 }}
       aria-label={dir === "prev" ? "Anterior" : "Siguiente"}
+      className={`absolute top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white shadow rounded-full p-2 ${
+        dir === "prev" ? "left-4" : "right-4"
+      }`}
     >
       {dir === "prev" ? <ChevronLeft /> : <ChevronRight />}
     </button>
@@ -21,16 +21,24 @@ function Arrow({ onClick, dir }) {
 }
 
 export default function HeroCarousel() {
-  const data = useCarouselData();
-  const sliderRef = useRef(null);
-
-  if (!data.length) {
-    return (
-      <div className="text-center text-sm text-muted-foreground py-10">
-        Cargando elementos del carousel...
-      </div>
-    );
-  }
+  const slides = [
+    {
+      src: "/assets/slider_1.png",
+      alt: "Esenciales para las vacaciones",
+      title: "Esenciales para las vacaciones",
+      subtitle: "Tecnología y accesorios para tu viaje",
+      href: "/buscar?vacaciones",
+      cta: "Explorar",
+    },
+    {
+      src: "/assets/slider_2.png",
+      alt: "Hogar y muebles",
+      title: "Hogar y muebles",
+      subtitle: "Renová tus espacios",
+      href: "/hogar",
+      cta: "Ver ahora",
+    }
+  ];
 
   const settings = {
     infinite: true,
@@ -39,56 +47,31 @@ export default function HeroCarousel() {
     slidesToScroll: 1,
     dots: true,
     arrows: true,
-    prevArrow: <Arrow dir="prev" />,
-    nextArrow: <Arrow dir="next" />,
     autoplay: true,
     autoplaySpeed: 5000,
-    adaptiveHeight: false,
     pauseOnHover: true,
+    prevArrow: <Arrow dir="prev" />,
+    nextArrow: <Arrow dir="next" />,
   };
 
   return (
     <div className="w-full">
       <div className="relative w-full">
-        <Slider ref={sliderRef} {...settings}>
-          {data.map((item, i) => {
-            const bg =
-              item.banner ||
-              item.image ||
-              item.img ||
-              item.collage ||
-              item.products?.[0]?.img ||
-              "/placeholder-hero.jpg";
-
-            return (
-              <div key={i}>
-                <div
-                  className="relative w-full h-[42vw] max-h-[520px] min-h-[280px]"
-                  style={{
-                    backgroundImage: `url(${bg})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                >
-                  <div className="absolute inset-0 bg-black/30" />
-                  <div className="relative h-full max-w-7xl mx-auto px-4 flex items-center">
-                    <div className="text-white">
-                      <h2 className="text-3xl sm:text-5xl font-bold mb-4">{item.title || "Descubrí más"}</h2>
-                      {item.subtitle && <p className="text-base sm:text-lg mb-6">{item.subtitle}</p>}
-                      {item.cta?.href && (
-                        <Link href={item.cta.href}>
-                          <Button size="lg">{item.cta.label || "Ver más"}</Button>
-                        </Link>
-                      )}
-                    </div>
-                  </div>
+        <Slider {...settings}>
+          {slides.map((s, i) => (
+            <div key={i}>
+              <div className="relative w-full h-[42vw] max-h-[520px] min-h-[280px]">
+                <Image src={s.src} alt={s.alt} fill priority={i === 0} className="object-cover" />
+                <div className="absolute inset-0" />
+                <div className="relative h-full max-w-7xl mx-auto px-4 flex items-center">
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </Slider>
       </div>
     </div>
   );
 }
+
 
