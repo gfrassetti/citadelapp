@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import clsx from "clsx";
 import { ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 export default function CategoriesCarousel({ onCategoryClick, onShowAll }) {
   const { theme } = useTheme();
@@ -21,7 +22,7 @@ export default function CategoriesCarousel({ onCategoryClick, onShowAll }) {
   return (
     <div
       className={clsx(
-        "w-full max-w-5xl mx-auto rounded-lg p-8 mt-8",
+        "rounded-lg p-4",
         theme === "dark" ? "bg-gray-800" : "bg-white"
       )}
     >
@@ -57,6 +58,15 @@ export default function CategoriesCarousel({ onCategoryClick, onShowAll }) {
                 : "border-gray-200 text-gray-900 hover:bg-gray-50"
             )}
           >
+            {cat.iconUrl && (
+              <Image
+                src={cat.iconUrl}
+                alt={cat.name}
+                width={32}
+                height={32}
+                className="rounded object-contain object-position-center bg-[#f5f5f5]"
+              />
+            )}
             <span className="text-sm font-medium">{cat.name}</span>
             <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
           </button>
